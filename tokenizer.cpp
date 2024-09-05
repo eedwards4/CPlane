@@ -12,7 +12,7 @@ void tokenizer::tokenize(std::ifstream& in, std::vector<std::string>& tokens){
     std::string str;
 
     while (!in.eof()){
-        in >> curr;
+        in.get(curr);
         if (ignore_line){ // Ignore characters until the end of the line (for single line comments)
             if (curr == '\n'){
                 ignore_line = false;
