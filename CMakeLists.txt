@@ -4,4 +4,6 @@ project(CPlane)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(CPlane
-        main.cpp)
+        main.cpp
+        tokenizer.h
+        tokenizer.cpp)
