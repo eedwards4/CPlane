@@ -48,7 +48,18 @@ void tokenizer::tokenize(std::ifstream& in, std::vector<std::string>& tokens){
                 if (curr == '(' || curr == ')' || curr == '{' || curr == '}' || curr == '[' || curr == ']' || curr == ';' || curr == '%') {
                     tokens.push_back(std::string(1, curr));
                 }
-                else if (curr == '=' || curr == '<' || curr == '>' || curr == '*') {
+                else if (curr == '=' || curr == '<' || curr == '>') {
+                    if (in.peek() == '=') {
+                        str = curr;
+                        in >> curr; // Remove the next character from the stream
+                        str += curr;
+                        tokens.push_back(str);
+                        str = "";
+                    } else {
+                        tokens.push_back(std::string(1, curr));
+                    }
+                }
+                else if (curr == '*') {
                     if (in.peek() == '=') {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
@@ -127,6 +138,16 @@ void tokenizer::tokenize(std::ifstream& in, std::vector<std::string>& tokens){
                 }
             }
         }
+    }
+    // Error checking
+    if (ignore_line){
+        std::cerr << "Error: Reached EOF while ignoring a line comment" << std::endl;
+    }
+    if (ignore_multiline){
+        std::cerr << "Error: Reached EOF while ignoring a multi-line comment" << std::endl;
+    }
+    if (string_handling){
+        std::cerr << "Error: Reached EOF while parsing a string" << std::endl;
     }
 }
 
