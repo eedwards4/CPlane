@@ -5,14 +5,21 @@
 #ifndef CPLANE_CTOKENIZER_H
 #define CPLANE_CTOKENIZER_H
 
-#include "ctoken.h"
+#include "ctokens.h"
 
 #include <vector>
 #include <fstream>
+#include <iostream>
 
 class ctokenizer {
 public:
-    std::vector<ctoken> tokenize(std::ifstream& in);
+    ctokenizer() = default;
+    ~ctokenizer() = default;
+
+    std::vector<ctoken> tokenize(std::string filename);
+
+private:
+
 };
 
 
