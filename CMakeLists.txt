@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 14)
 add_executable(CPlane
         main.cpp
         tokenizer.h
-        tokenizer.cpp
         ctokens.h
         ctokens.cpp
         ctokenizer.h
