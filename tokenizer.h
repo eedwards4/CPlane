@@ -5,13 +5,23 @@
 #ifndef CPLANE_TOKENIZER_H
 #define CPLANE_TOKENIZER_H
 
-#include <iostream>
-#include <fstream>
+#include "tokens.h"
+
 #include <vector>
+#include <fstream>
+#include <iostream>
 
 class tokenizer {
 public:
-    void tokenize(std::ifstream& in, std::vector<std::string>& tokens);
+    tokenizer() {
+        this->out.open("output.txt"); // TEMPORARY FOR ASSIGNMENT ONE
+    };
+    ~tokenizer() = default;
+
+    std::vector<token> tokenize(std::string filename);
+
+private:
+    std::ofstream out; // TEMPORARY FOR ASSIGNMENT ONE
 };
 
 

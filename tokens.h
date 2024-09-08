@@ -2,14 +2,14 @@
 // Created by Ethan Edwards on 9/4/24.
 //
 
-#ifndef CPLANE_CTOKENS_H
-#define CPLANE_CTOKENS_H
+#ifndef CPLANE_TOKENS_H
+#define CPLANE_TOKENS_H
 
 #include <string>
 
-class ctoken {
+class token {
 public:
-    ctoken(std::string value){
+    token(std::string value){
         if (value.size() == 1){
             this->type = 0;
             this->char_value = value[0];
@@ -19,10 +19,10 @@ public:
             this->str_value = value;
         }
     }
-    ~ctoken() = default;
+    ~token() = default;
 
-    int get_type() {return this->type;}
-    char get_char_value() {return this->char_value;}
+    int get_type() const {return this->type;}
+    char get_char_value() const {return this->char_value;}
     std::string get_str_value() {return this->str_value;}
 
 private:
@@ -37,4 +37,4 @@ private:
     std::string str_value;
 };
 
-#endif //CPLANE_CTOKENS_H
+#endif //CPLANE_TOKENS_H

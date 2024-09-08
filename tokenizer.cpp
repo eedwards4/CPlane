@@ -2,10 +2,10 @@
 // Created by Ethan Edwards on 9/4/24.
 //
 
-#include "ctokenizer.h"
+#include "tokenizer.h"
 
-std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
-    std::vector<ctoken> tokens;
+std::vector<token> tokenizer::tokenize(std::string filename) {
+    std::vector<token> tokens;
     std::ifstream in(filename);
     std::string str;
     char curr;
@@ -41,7 +41,7 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
         } else if (string_handling) {
             if (curr == '"') {
                 string_handling = false;
-                tokens.push_back(ctoken(str));
+                tokens.push_back(token(str));
                 str = "";
             } else {
                 str += curr;
@@ -67,7 +67,7 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
 
                 // END IGNORED CHARACTERS
                 case '{': case '}': case '[': case ']': case '(': case ')': case ';':
-                    tokens.push_back(ctoken(std::string(1, curr)));
+                    tokens.push_back(token(std::string(1, curr)));
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
@@ -77,11 +77,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -91,11 +91,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -105,11 +105,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -119,11 +119,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -134,11 +134,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -148,11 +148,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -162,11 +162,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -176,11 +176,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -190,11 +190,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -204,11 +204,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -219,7 +219,7 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     } else if (in.peek() == '>'){
                         str = curr;
@@ -229,11 +229,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                             in >> curr; // Remove the next character from the stream
                             str += curr;
                         }
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -243,7 +243,7 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     } else if (in.peek() == '<'){
                         str = curr;
@@ -253,11 +253,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                             in >> curr; // Remove the next character from the stream
                             str += curr;
                         }
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -276,11 +276,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     break;
 
@@ -292,12 +292,12 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         if (in.peek() == '.'){
                             in >> curr; // Remove the next character from the stream
                             str += curr;
-                            tokens.push_back(ctoken(str));
+                            tokens.push_back(token(str));
                             str = "";
                         }
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -307,11 +307,11 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
-                        tokens.push_back(ctoken(str));
+                        tokens.push_back(token(str));
                         str = "";
                     }
                     else{
-                        tokens.push_back(ctoken(std::string(1, curr)));
+                        tokens.push_back(token(std::string(1, curr)));
                     }
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -340,7 +340,7 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         in >> curr; // Remove the next character from the stream
                         str += curr;
                     }
-                    tokens.push_back(ctoken(str));
+                    tokens.push_back(token(str));
                     this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
                     str = "";
                     break;
@@ -353,7 +353,7 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                     }
                     in >> curr; // Remove the next character from the stream
                     str += curr;
-                    tokens.push_back(ctoken(str));
+                    tokens.push_back(token(str));
                     this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
                     str = "";
                     break;
@@ -365,13 +365,13 @@ std::vector<ctoken> ctokenizer::tokenize(std::string filename) {
                         in >> curr; // Remove the next character from the stream
                         str += curr;
                     }
-                    tokens.push_back(ctoken(str));
+                    tokens.push_back(token(str));
                     str = "";
                     this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 default:
-                    tokens.push_back(ctoken(std::string(1, curr)));
+                    tokens.push_back(token(std::string(1, curr)));
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
             }

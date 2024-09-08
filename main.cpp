@@ -6,15 +6,15 @@
 #include <string>
 #include <vector>
 
-#include "ctokens.h"
-#include "ctokenizer.h"
+#include "tokens.h"
+#include "tokenizer.h"
 
 using namespace std;
 
 int main(){
     string filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\test.txt";
-    ctokenizer t;
-    vector<ctoken> tokens;
+    tokenizer t;
+    vector<token> tokens;
     tokens = t.tokenize(filename);
     for (auto & token : tokens){
         if (token.get_type() == 0){
