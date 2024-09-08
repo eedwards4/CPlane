@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(CPlane
         main.cpp
-        tokens.h
-        tokens.cpp
-        tokenizer.h
-        tokenizer.cpp)
+        tokens.h tokens.cpp
+        tokenizer.h tokenizer.cpp
+        errors.h errors.cpp
+)

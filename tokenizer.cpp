@@ -32,6 +32,7 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                 ignore_multiline = false;
             }
             else if (curr == '\n'){
+                tokens.push_back(token(std::string(1, curr)));
                 this->out << "\n"; // TEMPORARY FOR ASSIGNMENT ONE
                 line++;
             }
