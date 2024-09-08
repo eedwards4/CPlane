@@ -27,6 +27,12 @@ public:
 
 private:
     int type = -1;
+    /* Type States
+     * -1: Error/Unknown
+     * 0: Character
+     * 1: String
+     * TODO: TOKENIZE INTS, FLOATS, ETC AS THEIR OWN TYPES INSTEAD OF STRINGS
+    */
     char char_value;
     std::string str_value;
 };

@@ -1,11 +1,15 @@
 function int sum_of_first_n_squares (int n)
 {
   int sum;
-
+    /*
+    testing
+    multi-line
+    comment
+    */
   sum = 0;
   if (n >= 1)
   {
-    sum = n * (n + 1) * (2 * n + 1) / 6;
+    sum = n * (n + 1) * (2 * n + 1) / 6; // Testing single line comment
   }
   return sum;
 }

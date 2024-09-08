@@ -13,13 +13,15 @@
 
 class ctokenizer {
 public:
-    ctokenizer() = default;
+    ctokenizer() {
+        this->out.open("output.txt"); // TEMPORARY FOR ASSIGNMENT ONE
+    };
     ~ctokenizer() = default;
 
     std::vector<ctoken> tokenize(std::string filename);
 
 private:
-
+    std::ofstream out; // TEMPORARY FOR ASSIGNMENT ONE
 };
 
 
