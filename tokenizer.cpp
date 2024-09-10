@@ -28,7 +28,7 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
         } else if (ignore_multiline){
             if (curr == '*' && in.peek() == '/'){
                 in >> curr; // Remove the next character from the stream
-                this->out << " "; // TEMPORARY FOR ASSIGNMENT ONE. Output an extra space
+                this->out << "  "; // TEMPORARY FOR ASSIGNMENT ONE. Output an extra space
                 ignore_multiline = false;
             }
             else if (curr == '\n'){
@@ -58,6 +58,7 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
 
                 // BEGIN IGNORED CHARACTERS
                 case '\n':
+                    tokens.push_back(token(std::string(1, curr)));
                     this->out << "\n"; // TEMPORARY FOR ASSIGNMENT ONE
                     line++;
                     break;
@@ -268,20 +269,24 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                     if (in.peek() == '/'){
                         in >> curr; // Remove the next character from the stream
                         ignore_line = true;
+                        this->out << "  "; // TEMPORARY FOR ASSIGNMENT ONE. Output an extra space
                     }
                     else if (in.peek() == '*'){
                         in >> curr; // Remove the next character from the stream
                         ignore_multiline = true;
+                        this->out << "  "; // TEMPORARY FOR ASSIGNMENT ONE. Output an extra space
                     }
                     else if (in.peek() == '='){
                         str = curr;
                         in >> curr; // Remove the next character from the stream
                         str += curr;
                         tokens.push_back(token(str));
+                        this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
                         str = "";
                     }
                     else{
                         tokens.push_back(token(std::string(1, curr)));
+                        this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     }
                     break;
 
@@ -367,16 +372,15 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                         str += curr;
                     }
                     tokens.push_back(token(str));
-                    str = "";
                     this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
+                    str = "";
                     break;
 
                 default:
-                    tokens.push_back(token(std::string(1, curr)));
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
             }
         }
+        curr = '\0';
     }
     in.close();
     return tokens;

@@ -13,7 +13,7 @@
 using namespace std;
 
 int main(){
-    string filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\test.txt";
+    string filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\programming_assignment_1-test_file_6.c";
     tokenizer t;
     errors e;
     vector<token> tokens;
