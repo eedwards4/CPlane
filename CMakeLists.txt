@@ -8,4 +8,5 @@ add_executable(CPlane
         tokens.h tokens.cpp
         tokenizer.h tokenizer.cpp
         errors.h errors.cpp
+        exec_path.h exec_path.cpp
 )

@@ -9,6 +9,7 @@
 
 class token {
 public:
+    token() = default;
     token(std::string value){
         if (value.size() == 1){
             this->type = 0;
@@ -23,7 +24,18 @@ public:
 
     int get_type() const {return this->type;}
     char get_char_value() const {return this->char_value;}
-    std::string get_str_value() {return this->str_value;}
+    std::string get_str_value() const {return this->str_value;}
+
+    token operator = (const token& t){
+        this->type = t.get_type();
+        if (this->type == 0){
+            this->char_value = t.get_char_value();
+        }
+        else if (this->type == 1){
+            this->str_value = t.get_str_value();
+        }
+        return *this;
+    }
 
 private:
     int type = -1;

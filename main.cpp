@@ -9,11 +9,12 @@
 #include "tokens.h"
 #include "errors.h"
 #include "tokenizer.h"
+#include "exec_path.h"
 
 using namespace std;
 
 int main(){
-    string filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\programming_assignment_1-test_file_6.c";
+    string filename = "/Users/ethan/CLionProjects/CPlane/tests/programming_assignment_1-test_file_2.c";
     tokenizer t;
     errors e;
     vector<token> tokens;
@@ -28,6 +29,11 @@ int main(){
         }
     }
     e.check_syntax(tokens);
+    exec_path pth;
+    for (auto & token : tokens){
+        pth.add_node(token);
+    }
+    pth.print_path();
 
     return 0;
 }
