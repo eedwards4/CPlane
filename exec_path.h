@@ -30,6 +30,10 @@ public:
         return next;
     }
 
+    exec_node* get_fold(){
+        return fold;
+    }
+
     void set_next(exec_node* next){
         this->next = next;
     }
@@ -65,14 +69,25 @@ public:
 
     void print_path(){
         exec_node* temp = head;
+        std::vector<exec_node> printstructure;
         while (temp != nullptr){
             if (temp->get_token().get_type() == 0){
-                std::cout << temp->get_token().get_char_value() << std::endl;
+                std::cout << temp->get_token().get_char_value();
+                if (temp->get_token().get_char_value() == '{' || temp->get_token().get_char_value() == '[' || temp->get_token().get_char_value() == '('){
+                    printstructure.push_back(*temp);
+                    temp = temp->get_fold();
+                } else if (temp->get_token().get_char_value() == '}' || temp->get_token().get_char_value() == ']' || temp->get_token().get_char_value() == ')'){
+                    temp = printstructure.back().get_next();
+                    printstructure.pop_back();
+                }
+                else{
+                    temp = temp->get_next();
+                }
             }
             else if (temp->get_token().get_type() == 1){
-                std::cout << temp->get_token().get_str_value() << std::endl;
+                std::cout << temp->get_token().get_str_value();
+                temp = temp->get_next();
             }
-            temp = temp->get_next();
         }
     }
 

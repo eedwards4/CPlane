@@ -6,9 +6,12 @@
 
 void exec_path::add_node(token t) {
     auto* tmp = new exec_node(t, nullptr, nullptr);
-    token prevtoken = current->get_token();
-    if (prevtoken.get_type() == 0){
-        char prevchar = prevtoken.get_char_value();
+    if (head == nullptr){
+        head = tmp;
+        current = tmp;
+    }
+    else if (current->get_token().get_type() == 0){
+        char prevchar = current->get_token().get_char_value();
         if (prevchar == '{' || prevchar == '[' || prevchar == '('){
             structure.push_back(current);
             current->set_fold(tmp);
@@ -25,7 +28,7 @@ void exec_path::add_node(token t) {
             current = tmp;
         }
     }
-    else if (prevtoken.get_type() == 1){
+    else if (current->get_token().get_type() == 1){
         current->set_next(tmp);
         current = tmp;
     }

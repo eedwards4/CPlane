@@ -22,20 +22,9 @@ public:
     }
     ~token() = default;
 
-    int get_type() const {return this->type;}
-    char get_char_value() const {return this->char_value;}
-    std::string get_str_value() const {return this->str_value;}
-
-    token operator = (const token& t){
-        this->type = t.get_type();
-        if (this->type == 0){
-            this->char_value = t.get_char_value();
-        }
-        else if (this->type == 1){
-            this->str_value = t.get_str_value();
-        }
-        return *this;
-    }
+    int get_type() {return this->type;}
+    char get_char_value() {return this->char_value;}
+    std::string get_str_value() {return this->str_value;}
 
 private:
     int type = -1;

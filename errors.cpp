@@ -44,7 +44,7 @@ void errors::check_syntax(std::vector<token> tokens) {
                         num_deep++;
                         break;
                     case '}': case ']': case ')':
-                        if (c == '}' && structure.back() != '{') {
+                        if (c == '}' && structure.back() != '{'){
                             errors::UNEXPECTED_TOKEN(line, c);
                         } else if (c == ']' && structure.back() != '[') {
                             errors::UNEXPECTED_TOKEN(line, c);

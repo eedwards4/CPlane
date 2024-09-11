@@ -14,7 +14,7 @@
 using namespace std;
 
 int main(){
-    string filename = "/Users/ethan/CLionProjects/CPlane/tests/programming_assignment_1-test_file_2.c";
+    string filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\programming_assignment_1-test_file_2.c";
     tokenizer t;
     errors e;
     vector<token> tokens;
