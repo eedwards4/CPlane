@@ -13,7 +13,7 @@
 using namespace std;
 
 // Precompile options
-#define SKIP_ARGS 1
+#define SKIP_ARGS 0
 
 int main(int argc, char* argv[]) {
     string filename;
