@@ -97,9 +97,6 @@ void errors::check_syntax(std::vector<token> tokens) {
     if (in_char){
         errors::UNTERM_CHAR(entered_at, c);
     }
-    if (num_deep != 0 || !structure.empty()){
-        errors::EXPECTED_END_OF_FILE(line, c);
-    }
 }
 
 // Helper functions
@@ -203,7 +200,8 @@ void errors::UNTERM_STRING(int line, char c) {
 }
 
 void errors::UNTERM_COMMENT(int line, char c) {
-    std::cerr << "Error: Unterminated multiline comment at line " << line << ", character " << c << std::endl;
+    // std::cerr << "Error: Unterminated multiline comment at line " << line << ", character " << c << std::endl;
+    std::cerr << "ERROR: Program contains C-style, unterminated comment on line " << line << std::endl;
     exit(19);
 }
 
