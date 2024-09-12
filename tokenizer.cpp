@@ -9,10 +9,11 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
     std::ifstream in(filename);
     std::string str;
     char curr;
-    int line = 0;
+    int line = 1;
     bool ignore_line = false;
     bool string_handling = false;
     bool ignore_multiline = false;
+    int entered = 0; // Tracks where we entered a string or comment
 
     while (!in.eof()) {
         in.get(curr);
@@ -53,6 +54,7 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                 // String literals
                 case '"':
                     string_handling = true;
+                    entered = line;
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
@@ -274,6 +276,7 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                     else if (in.peek() == '*'){
                         in >> curr; // Remove the next character from the stream
                         ignore_multiline = true;
+                        entered = line;
                         this->out << "  "; // TEMPORARY FOR ASSIGNMENT ONE. Output an extra space
                     }
                     else if (in.peek() == '='){
@@ -385,5 +388,14 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
         curr = NULL; // This should be \0 or NULL but for some reason the program outputs those as [NUL] in the output file
     }
     in.close();
+    if (string_handling){
+        errors::UNTERM_STRING(entered, curr);
+    }
+    if (ignore_multiline){
+        errors::UNTERM_COMMENT(entered, curr);
+    }
+    if (ignore_line){
+        errors::UNEXPECTED_END_OF_FILE(line, curr);
+    }
     return tokens;
 }

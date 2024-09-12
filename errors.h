@@ -16,11 +16,6 @@ public:
     ~errors() = default;
 
     void check_syntax(std::vector<token> tokens); // Checks for syntax errors
-
-private:
-    // Helpers
-    bool is_num(char c); // Checks if a character is a number
-    static bool is_alpha(char c); // Checks if a character is a letter
     // Error handlers
     static void EXPECTED_EXPRESSION(int line, char c); // Expected an expression
     static void EXPECTED_STATEMENT(int line, char c); // Expected a statement
@@ -43,6 +38,11 @@ private:
     static void UNTERM_COMMENT(int line, char c); // Unterminated multiline comment
     static void UNTERM_CHAR(int line, char c); // Unterminated character
     static void UNKNOWN_TOKEN(int line, char c); // Unknown token
+
+private:
+    // Helpers
+    bool is_num(char c); // Checks if a character is a number
+    static bool is_alpha(char c); // Checks if a character is a letter
 
 };
 

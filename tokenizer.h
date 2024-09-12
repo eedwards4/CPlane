@@ -6,6 +6,7 @@
 #define CPLANE_TOKENIZER_H
 
 #include "tokens.h"
+#include "errors.h"
 
 #include <vector>
 #include <fstream>
