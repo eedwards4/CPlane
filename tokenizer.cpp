@@ -380,8 +380,6 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                     break;
 
                 default:
-                    tokens.push_back(token(std::string(1, curr)));
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
             }
         }
