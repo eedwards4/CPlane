@@ -11,6 +11,7 @@ void errors::check_syntax(std::vector<token> tokens) {
     int num_deep = 0; // Tracks current depth in nested statements. MUST BE ZERO AT END OF FILE
     std::vector<char> structure; // Tracks the structure of the current nest (e.g. {, [, (, etc). MUST BE EMPTY AT END OF FILE
     int line = 1; // Tracks current line number
+    int entered_at = 0; // Tracks the line where we entered a char, string, or comment
     char c; // Tracks the current character
 
     for (int i = 0; i < tokens.size(); i++){
@@ -56,9 +57,11 @@ void errors::check_syntax(std::vector<token> tokens) {
                         break;
                     case '"':
                         in_string = true;
+                        entered_at = line;
                         break;
                     case '\'':
                         in_char = true;
+                        entered_at = line;
                         break;
                     case '/':
                         if (i + 1 < tokens.size()) {
@@ -66,6 +69,7 @@ void errors::check_syntax(std::vector<token> tokens) {
                                 char c1 = tokens.at(i + 1).get_char_value();
                                 if (c1 == '*') {
                                     in_comment = true;
+                                    entered_at = line;
                                 } else if (c1 == '(') {
                                     break;
                                 } else if (!is_num(c1) && !is_alpha(c1)) {
@@ -85,13 +89,13 @@ void errors::check_syntax(std::vector<token> tokens) {
         }
     }
     if (in_comment){
-        errors::UNTERM_COMMENT(line, c);
+        errors::UNTERM_COMMENT(entered_at, c);
     }
     if (in_string){
-        errors::UNTERM_STRING(line, c);
+        errors::UNTERM_STRING(entered_at, c);
     }
     if (in_char){
-        errors::UNTERM_CHAR(line, c);
+        errors::UNTERM_CHAR(entered_at, c);
     }
     if (num_deep != 0 || !structure.empty()){
         errors::EXPECTED_END_OF_FILE(line, c);

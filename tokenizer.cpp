@@ -382,7 +382,7 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                     break;
             }
         }
-        curr = '\0';
+        curr = NULL; // This should be \0 or NULL but for some reason the program outputs those as [NUL] in the output file
     }
     in.close();
     return tokens;

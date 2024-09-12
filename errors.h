@@ -1,5 +1,5 @@
 //
-// Created by evane on 9/8/2024.
+// Created by Ethan Edwards on 9/8/2024.
 //
 
 #ifndef CPLANE_ERRORS_H
