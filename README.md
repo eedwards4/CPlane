@@ -3,4 +3,4 @@ A C interpreter
 <h2>To compile</h2>
 (in source directory) make
 <h2>To run</h2>
-./cplane (c file).c
+./cplane (path/to/c_file.c)
