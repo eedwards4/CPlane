@@ -69,8 +69,11 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
+                case '\0':
+                    break;
+
                 // END IGNORED CHARACTERS
-                case '{': case '}': case '[': case ']': case '(': case ')': case ';':
+                case '{': case '}': case '[': case ']': case '(': case ')': case ';': case ',': case ':': case '?': case '~':
                     tokens.push_back(token(std::string(1, curr)));
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
@@ -383,7 +386,7 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                     break;
             }
         }
-        curr = '\n'; // This should be \0 or NULL but for some reason the program outputs those as [NUL] in the output file
+        curr = '\0'; // This should be \0 or NULL but for some reason the program outputs those as [NUL] in the output file
     }
     in.close();
     if (string_handling){
