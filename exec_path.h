@@ -85,7 +85,7 @@ public:
                     temp = temp->get_next();
                 }
             }
-            else if (temp->get_token().get_type() == 1){
+            else if (temp->get_token().get_type() == 1 || temp->get_token().get_type() == 2){
                 std::cout << temp->get_token().get_str_value();
                 temp = temp->get_next();
             }

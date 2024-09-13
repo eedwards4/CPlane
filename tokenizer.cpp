@@ -70,7 +70,7 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                     break;
 
                 // END IGNORED CHARACTERS
-                case '{': case '}': case '[': case ']': case '(': case ')': case ';':
+                case '{': case '}': case '[': case ']': case '(': case ')': case ';': case ',': case '?': case ':': case '~':
                     tokens.push_back(token(std::string(1, curr)));
                     this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;

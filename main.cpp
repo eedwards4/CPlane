@@ -9,6 +9,7 @@
 #include "tokens.h"
 #include "errors.h"
 #include "tokenizer.h"
+#include "tokenizer_new.h"
 
 using namespace std;
 
@@ -26,13 +27,17 @@ int main(int argc, char* argv[]) {
         }
         filename = argv[1];
     }
-
+/*
     tokenizer t;
     errors e;
     vector<token> tokens;
     // Execution
     tokens = t.tokenize(filename);
     e.check_syntax(tokens);
-
+*/
+    exec_path path;
+    tokenizer_new t(&path);
+    t.tokenize(filename);
+    path.print_path();
     return 0;
 }

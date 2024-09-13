@@ -29,7 +29,7 @@ void exec_path::add_node(token t) {
             current = tmp;
         }
     }
-    else if (current->get_token().get_type() == 1){
+    else if (current->get_token().get_type() == 1 || current->get_token().get_type() == 2){
         current->set_next(tmp);
         current = tmp;
     }
