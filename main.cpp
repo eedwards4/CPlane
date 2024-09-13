@@ -18,7 +18,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
     string filename;
     if (SKIP_ARGS){
-        filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\programming_assignment_1-test_file_4.c";
+        filename = "test.c";
     } else{
         if (argc < 2){
             cout << "Please provide a file to tokenize." << endl;

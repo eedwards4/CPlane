@@ -7,7 +7,7 @@ LFLAGS  =
 SOURCE  = main.cpp tokens.cpp tokenizer.cpp exec_path.cpp errors.cpp
 OBJS    = $(SOURCE:.cpp=.o)
 HEADER  = tokens.h tokenizer.h exec_path.h errors.h
-OUT     = output
+OUT     = cplane
 
 # Default target
 all: $(OUT)
