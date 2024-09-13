@@ -7,8 +7,8 @@
 
 // Internal
 #include "errors.h"
-#include "tokens.h"
 #include "exec_path.h"
+#include "new_token.h"
 // Standard
 #include <string>
 #include <vector>

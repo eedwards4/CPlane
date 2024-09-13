@@ -6,7 +6,7 @@
 #ifndef CPLANE_EXEC_PATH_H
 #define CPLANE_EXEC_PATH_H
 
-#include "tokens.h"
+#include "new_token.h"
 
 #include <string>
 #include <vector>
@@ -17,34 +17,35 @@ public:
     exec_node() = default;
     ~exec_node() = default;
 
-    exec_node (token t, exec_node* next, exec_node* fold){
-        this->t = t;
+    exec_node (int type, std::string value, exec_node* next, exec_node* fold){
+        this->type = type;
+        this->value = value;
         this->next = next;
         this->fold = fold;
     }
 
-    token get_token(){
-        return t;
+    int get_type() const{
+        return type;
     }
-
+    std::string get_value() const{
+        return value;
+    }
     exec_node* get_next(){
         return next;
     }
-
     exec_node* get_fold(){
         return fold;
     }
-
     void set_next(exec_node* next){
         this->next = next;
     }
-
     void set_fold(exec_node* fold){
         this->fold = fold;
     }
 
 private:
-    token t;
+    int type;
+    std::string value;
     exec_node* next;
     exec_node* fold;
 
@@ -66,28 +67,47 @@ public:
         }
     }
 
-    void add_node(token t);
+    void add_node(int type, std::string value = "");
 
     void print_path(){
         exec_node* temp = head;
-        std::vector<exec_node> printstructure;
+        std::vector<exec_node*> printstructure;
         while (temp != nullptr){
-            if (temp->get_token().get_type() == 0){
-                std::cout << temp->get_token().get_char_value();
-                if (temp->get_token().get_char_value() == '{' || temp->get_token().get_char_value() == '[' || temp->get_token().get_char_value() == '('){
-                    printstructure.push_back(*temp);
-                    temp = temp->get_fold();
-                } else if (temp->get_token().get_char_value() == '}' || temp->get_token().get_char_value() == ']' || temp->get_token().get_char_value() == ')'){
-                    temp = printstructure.back().get_next();
-                    printstructure.pop_back();
-                }
-                else{
-                    temp = temp->get_next();
-                }
-            }
-            else if (temp->get_token().get_type() == 1 || temp->get_token().get_type() == 2){
-                std::cout << temp->get_token().get_str_value();
+            if (temp->get_type() == new_token::TOKEN_AS_STRING || temp->get_type() == new_token::STRING_LITERAL || temp->get_type() == new_token::CHAR_LITERAL ||
+                temp->get_type() == new_token::INT_AS_STRING || temp->get_type() == new_token::FLOAT_AS_STRING){
+                std::cout << temp->get_value();
                 temp = temp->get_next();
+            }
+            else{
+                if (temp->get_type() == new_token::NEWLINE){
+                    std::cout << std::endl;
+                    temp = temp->get_next();
+                } else{
+                    if (temp->get_type() == new_token::OPEN_BRACE || temp->get_type() == new_token::OPEN_BRACKET || temp->get_type() == new_token::OPEN_PAREN){
+                        if (temp->get_type() == new_token::OPEN_BRACE){
+                            std::cout << "{";
+                        } else if (temp->get_type() == new_token::OPEN_BRACKET){
+                            std::cout << "[";
+                        } else{
+                            std::cout << "(";
+                        }
+                        printstructure.push_back(temp);
+                        temp = temp->get_fold();
+                    } else if (temp->get_type() == new_token::CLOSE_BRACE || temp->get_type() == new_token::CLOSE_BRACKET || temp->get_type() == new_token::CLOSE_PAREN){
+                        if (temp->get_type() == new_token::CLOSE_BRACE){
+                            std::cout << "}";
+                        } else if (temp->get_type() == new_token::CLOSE_BRACKET){
+                            std::cout << "]";
+                        } else{
+                            std::cout << ")";
+                        }
+                        temp = printstructure.back()->get_next();
+                        printstructure.pop_back();
+                    } else{
+                        std::cout << char(temp->get_type());
+                        temp = temp->get_next();
+                    }
+                }
             }
         }
     }

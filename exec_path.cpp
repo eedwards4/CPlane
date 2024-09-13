@@ -5,20 +5,20 @@
 
 #include "exec_path.h"
 
-void exec_path::add_node(token t) {
-    auto* tmp = new exec_node(t, nullptr, nullptr);
+void exec_path::add_node(int type, std::string value) {
+    auto* tmp = new exec_node(type, value, nullptr, nullptr);
     if (head == nullptr){
         head = tmp;
         current = tmp;
     }
-    else if (current->get_token().get_type() == 0){
-        char prevchar = current->get_token().get_char_value();
-        if (prevchar == '{' || prevchar == '[' || prevchar == '('){
+    else{
+        int last_type = current->get_type();
+        if (last_type == new_token::OPEN_BRACE || last_type == new_token::OPEN_BRACKET || last_type == new_token::OPEN_PAREN){
             structure.push_back(current);
             current->set_fold(tmp);
             current = tmp;
         }
-        else if (prevchar == '}' || prevchar == ']' || prevchar == ')'){
+        else if (last_type == new_token::CLOSE_BRACE || last_type == new_token::CLOSE_BRACKET || last_type == new_token::CLOSE_PAREN){
             current = structure.back(); // Return to outside of fold
             structure.pop_back();
             current->set_next(tmp);
@@ -28,10 +28,6 @@ void exec_path::add_node(token t) {
             current->set_next(tmp);
             current = tmp;
         }
-    }
-    else if (current->get_token().get_type() == 1 || current->get_token().get_type() == 2){
-        current->set_next(tmp);
-        current = tmp;
     }
     tail = current;
 }
