@@ -1,0 +1,25 @@
+Step by step to get ur blue to talk to Our Github CPlane on Terminal, Ubuntu
+
+1) generate a SSH key authentication (make sure you are on blue)
+
+$ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+2) Use SSH agent to make connecting to our git EZ
+
+$ eval "$(ssh-agent -s)"
+$ ssh-add ~/.ssh/id_rsa
+
+3) Now that your public key is generated use this command,  it outputs ur public key make sure to copy it
+
+$ cat ~/.ssh/id_rsa.pub
+
+4) GOTO github, GOTO settings, GOTO SSH keys, Paste ur public key into key section remember to put the title as Blue server
+
+5)Verify your connection to Github
+
+$ ssh -T git@github.com
+
+Hi your-username! You've successfully authenticated, but GitHub does not provide shell access.
+
+
+6) Repeat these steps on your local machine (not connected to blue) if you want to connect to github as well
