@@ -6,10 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "tokens.h"
 #include "errors.h"
 #include "tokenizer.h"
-#include "tokenizer_new.h"
 
 using namespace std;
 
@@ -19,7 +17,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
     string filename;
     if (SKIP_ARGS){
-        filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\programming_assignment_1-test_file_4.c";
+        filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\programming_assignment_1-test_file_6.c";
     } else{
         if (argc < 2){
             cout << "Please provide a file to tokenize." << endl;
@@ -27,17 +25,12 @@ int main(int argc, char* argv[]) {
         }
         filename = argv[1];
     }
-/*
-    tokenizer t;
-    errors e;
-    vector<token> tokens;
-    // Execution
-    tokens = t.tokenize(filename);
-    e.check_syntax(tokens);
-*/
+
     exec_path path;
-    tokenizer_new t(&path);
+    tokenizer t(&path);
     t.tokenize(filename);
     path.print_path();
+    errors e;
+    e.check_syntax(&path);
     return 0;
 }

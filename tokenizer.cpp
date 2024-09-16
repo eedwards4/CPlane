@@ -1,328 +1,454 @@
 //
-// Created by Ethan Edwards on 9/4/24.
+// Created by Ethan Edwards on 9/12/2024.
 //
 
 #include "tokenizer.h"
 
-std::vector<token> tokenizer::tokenize(std::string filename) {
-    std::vector<token> tokens;
-    std::ifstream in(filename);
+void tokenizer::tokenize(std::string filename){
+    // Input
+    std::ifstream in(filename, std::ios::binary);
     std::string str;
     char curr;
+    // Tracking
     int line = 1;
-    bool ignore_line = false;
-    bool string_handling = false;
-    bool ignore_multiline = false;
-    int entered = 0; // Tracks where we entered a string or comment
+    int col = 1;
+    int entered_at = 0;
+    bool handle_str = false; // Handle string literals
+    bool handle_chr = false; // Handle character literals
+    bool ignore_slc = false; // Single line comment
+    bool ignore_mlc = false; // Multi line comment
+    bool is_float = false; // Floats
+    std::vector<char> structure; // Nesting structures
 
-    while (!in.eof()) {
+    while (!in.eof()){
         in.get(curr);
-        if (ignore_line){
+        if (ignore_slc){
             if (curr == '\n'){
-                ignore_line = false;
-                this->out << "\n"; // TEMPORARY FOR ASSIGNMENT ONE
+                ignore_slc = false;
+                this->out << "\n"; // OUTPUT TAG
                 line++;
             }
             else{
-                this->out << " "; // TEMPORARY FOR ASSIGNMENT ONE. Output a space to preserve original file formatting
+                this->out << " "; // OUTPUT TAG
             }
-        } else if (ignore_multiline){
+        }
+        else if (ignore_mlc){
             if (curr == '*' && in.peek() == '/'){
-                in >> curr; // Remove the next character from the stream
-                this->out << "  "; // TEMPORARY FOR ASSIGNMENT ONE. Output an extra space
-                ignore_multiline = false;
+                ignore_mlc = false;
+                in.get(curr); // Consume '/'
+                this->out << "  "; // OUTPUT TAG
             }
             else if (curr == '\n'){
-                tokens.push_back(token(std::string(1, curr)));
-                this->out << "\n"; // TEMPORARY FOR ASSIGNMENT ONE
                 line++;
+                this->out << "\n"; // OUTPUT TAG
+                this->path->add_node(tokens::NEWLINE);
             }
             else{
-                this->out << " "; // TEMPORARY FOR ASSIGNMENT ONE. Output a space to preserve original file formatting
+                this->out << " "; // OUTPUT TAG
             }
-        } else if (string_handling) {
-            if (curr == '"') {
-                string_handling = false;
-                tokens.push_back(token(str));
+        }
+        else if (handle_str){
+            if (curr == '"'){
+                handle_str = false;
+                this->out << curr; // OUTPUT TAG
+                this->path->add_node(tokens::STRING_LITERAL, str);
                 str = "";
-            } else {
+            }
+            else{
+                this->out << curr; // OUTPUT TAG
                 str += curr;
             }
-            this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE. Output the character to the output file
-        } else{
+        }
+        else if (handle_chr){
+            if (curr == '\''){
+                handle_chr = false;
+                this->out << curr; // OUTPUT TAG
+                this->path->add_node(tokens::CHAR_LITERAL, str);
+                str = "";
+            }
+            else{
+                this->out << curr; // OUTPUT TAG
+                str += curr;
+            }
+        }
+        else{
             switch(curr){
                 // String literals
                 case '"':
-                    string_handling = true;
-                    entered = line;
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
+                    handle_str = true;
+                    entered_at = line;
+                    this->out << curr; // OUTPUT TAG
                     break;
 
-                // BEGIN IGNORED CHARACTERS
-                case '\n':
-                    tokens.push_back(token(std::string(1, curr)));
-                    this->out << "\n"; // TEMPORARY FOR ASSIGNMENT ONE
+                // Character literals
+                case '\'':
+                    handle_chr = true;
+                    entered_at = line;
+                    this->out << curr; // OUTPUT TAG
+                    break;
+
+                // Ignored characters
+                case '\n': // Newline
+                    this->out << "\n"; // OUTPUT TAG
+                    this->path->add_node(tokens::NEWLINE);
                     line++;
+                    col = 0;
                     break;
 
-                case ' ': case '\t': case '\r': case '\f': case '\v': // Whitespace
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
+                    case ' ': case '\t': case '\f': case '\r': case '\v': // Whitespace
+                    this->out << curr; // OUTPUT TAG
                     break;
 
-                // END IGNORED CHARACTERS
-                case '{': case '}': case '[': case ']': case '(': case ')': case ';': case ',': case '?': case ':': case '~':
-                    tokens.push_back(token(std::string(1, curr)));
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
+                // Nesting structures
+                case '{':
+                    this->out << curr; // OUTPUT TAG
+                    this->path->add_node(tokens::OPEN_BRACE);
+                    structure.push_back(curr);
+                    break;
+
+                case '[':
+                    this->out << curr; // OUTPUT TAG
+                    this->path->add_node(tokens::OPEN_BRACKET);
+                    structure.push_back(curr);
+                    break;
+
+                case '(':
+                    this->out << curr; // OUTPUT TAG
+                    this->path->add_node(tokens::OPEN_PAREN);
+                    structure.push_back(curr);
+                    break;
+
+                case '}':
+                    if (structure.back() != '{'){
+                        errors::EXPECTED_END(line, curr);
+                    }
+                    structure.pop_back();
+                    this->out << curr; // OUTPUT TAG
+                    this->path->add_node(tokens::CLOSE_BRACE);
+                    break;
+
+                case ']':
+                    if (structure.back() != '['){
+                        errors::EXPECTED_END(line, curr);
+                    }
+                    structure.pop_back();
+                    this->out << curr; // OUTPUT TAG
+                    this->path->add_node(tokens::CLOSE_BRACKET);
+                    break;
+
+                case ')':
+                    if (structure.back() != '('){
+                        errors::EXPECTED_END(line, curr);
+                    }
+                    structure.pop_back();
+                    this->out << curr; // OUTPUT TAG
+                    this->path->add_node(tokens::CLOSE_PAREN);
                     break;
 
                 // Characters with 2+ secondaries
                 case '+':
-                    if (in.peek() == '+' || in.peek() == '='){
+                    if (in.peek() == '+'){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::PLUS_PLUS);
                         str = "";
+                    } else if (in.peek() == '='){
+                        str = curr;
+                        in.get(curr); // Consume secondary
+                        str += curr;
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::PLUS_EQUALS);
+                        str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '-':
-                    if (in.peek() == '-' || in.peek() == '=' || in.peek() == '>'){
+                    if (in.peek() == '-'){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::MINUS_MINUS);
                         str = "";
+                    } else if (in.peek() == '='){
+                        str = curr;
+                        in.get(curr); // Consume secondary
+                        str += curr;
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::MINUS_EQUALS);
+                        str = "";
+                    } else if (in.peek() == '>'){
+                        str = curr;
+                        in.get(curr); // Consume secondary
+                        str += curr;
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::RIGHT_SLIM_ARROW);
+                        str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '&':
-                    if (in.peek() == '&' || in.peek() == '='){
+                    if (in.peek() == '&'){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::BOOLEAN_AND);
                         str = "";
+                    } else if (in.peek() == '='){
+                        str = curr;
+                        in.get(curr); // Consume secondary
+                        str += curr;
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::AND_EQUALS);
+                        str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '|':
-                    if (in.peek() == '|' || in.peek() == '='){
+                    if (in.peek() == '|'){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::BOOLEAN_OR);
                         str = "";
+                    } else if (in.peek() == '='){
+                        str = curr;
+                        in.get(curr); // Consume secondary
+                        str += curr;
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::OR_EQUALS);
+                        str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 // Characters with 1 secondary
                 case '!':
                     if (in.peek() == '='){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::NOT_EQUALS);
                         str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '%':
                     if (in.peek() == '='){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::MOD_EQUALS);
                         str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '*':
                     if (in.peek() == '='){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::TIMES_EQUALS);
                         str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '=':
                     if (in.peek() == '='){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::EQUALS_EQUALS);
                         str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '^':
                     if (in.peek() == '='){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::XOR_EQUALS);
                         str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '#':
                     if (in.peek() == '#'){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::TOKEN_PASTE);
                         str = "";
+                    } else{
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 // Arrow operators
                 case '>':
-                    if (in.peek() == '='){
+                    if (in.peek() == '=') {
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::GREATER_EQUALS);
                         str = "";
-                    } else if (in.peek() == '>'){
+                    } else if (in.peek() == '>') {
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        if (in.peek() == '='){
-                            in >> curr; // Remove the next character from the stream
+                        if (in.peek() == '=') {
+                            in.get(curr); // Consume secondary
                             str += curr;
+                            this->out << str; // OUTPUT TAG
+                            this->path->add_node(tokens::RIGHT_SHIFT_EQUALS);
+                            str = "";
+                            break;
                         }
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::RIGHT_SHIFT);
                         str = "";
+                    } else {
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '<':
-                    if (in.peek() == '='){
+                    if (in.peek() == '=') {
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::LESS_EQUALS);
                         str = "";
-                    } else if (in.peek() == '<'){
+                    } else if (in.peek() == '<') {
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        if (in.peek() == '='){
-                            in >> curr; // Remove the next character from the stream
+                        if (in.peek() == '=') {
+                            in.get(curr); // Consume secondary
                             str += curr;
+                            this->out << str; // OUTPUT TAG
+                            this->path->add_node(tokens::LEFT_SHIFT_EQUALS);
+                            str = "";
+                            break;
                         }
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::LEFT_SHIFT);
                         str = "";
+                    } else {
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                    }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
                 case '/':
-                    // Check for comments
-                    if (in.peek() == '/'){
-                        in >> curr; // Remove the next character from the stream
-                        ignore_line = true;
-                        this->out << "  "; // TEMPORARY FOR ASSIGNMENT ONE. Output an extra space
-                    }
-                    else if (in.peek() == '*'){
-                        in >> curr; // Remove the next character from the stream
-                        ignore_multiline = true;
-                        entered = line;
-                        this->out << "  "; // TEMPORARY FOR ASSIGNMENT ONE. Output an extra space
-                    }
-                    else if (in.peek() == '='){
-                        str = curr;
-                        in >> curr; // Remove the next character from the stream
-                        str += curr;
-                        tokens.push_back(token(str));
-                        this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
-                        str = "";
-                    }
-                    else{
-                        tokens.push_back(token(std::string(1, curr)));
-                        this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
+                    if (in.peek() == '/') {
+                        in.get(curr); // Consume secondary
+                        ignore_slc = true;
+                        entered_at = line;
+                        this->out << "  "; // OUTPUT TAG
+                    } else if (in.peek() == '*') {
+                        in.get(curr); // Consume secondary
+                        ignore_mlc = true;
+                        entered_at = line;
+                        this->out << "  "; // OUTPUT TAG
+                    } else {
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
                     break;
 
                 case '.':
-                    if (in.peek() == '.'){
+                    if (is_num(in.peek())){
+                        errors::UNEXPECTED_VALUE(line, curr);
+                    }
+                    else if (in.peek() == '.'){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
                         if (in.peek() == '.'){
-                            in >> curr; // Remove the next character from the stream
+                            in.get(curr); // Consume tertiary
                             str += curr;
-                            tokens.push_back(token(str));
+                            if (in.peek() == '.'){
+                                errors::UNEXPECTED_TOKEN(line, curr);
+                            }
+                            this->out << str; // OUTPUT TAG
+                            this->path->add_node(tokens::ELLIPSIS);
                             str = "";
+                            break;
+                        } else{
+                            errors::UNEXPECTED_TOKEN(line, curr);
                         }
                     }
                     else{
-                        tokens.push_back(token(std::string(1, curr)));
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
                     break;
 
-                case 'L':
-                    if (in.peek() == '\'' || in.peek() == '"'){
+                case ':':
+                    if (in.peek() == ':'){
                         str = curr;
-                        in >> curr; // Remove the next character from the stream
+                        in.get(curr); // Consume secondary
                         str += curr;
-                        tokens.push_back(token(str));
+                        this->out << str; // OUTPUT TAG
+                        this->path->add_node(tokens::SCOPE);
                         str = "";
                     }
                     else{
-                        tokens.push_back(token(std::string(1, curr)));
+                        this->out << curr; // OUTPUT TAG
+                        this->path->add_node(tokens::single_char(curr));
                     }
-                    this->out << curr; // TEMPORARY FOR ASSIGNMENT ONE
+                    break;
+
+                case ',': case ';': case '?': case '~': case '`':
+                    this->out << curr; // OUTPUT TAG
+                    this->path->add_node(tokens::single_char(curr));
+                    break;
+
+                case 'L': // Can be used as an identifier or as a prefix for a string literal
+                    this->out << curr; // OUTPUT TAG
+                    this->path->add_node(tokens::LITERAL_DEF);
                     break;
 
                 case '_': case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -335,65 +461,65 @@ std::vector<token> tokenizer::tokenize(std::string filename) {
                 case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V':
                 case 'W': case 'X': case 'Y': case 'Z':
                     str = curr;
-                    while (in.peek() == '_' || in.peek() == 'a' || in.peek() == 'b' || in.peek() == 'c' || in.peek() == 'd' || in.peek() == 'e'
-                           || in.peek() == 'f' || in.peek() == 'g' || in.peek() == 'h' || in.peek() == 'i' || in.peek() == 'j' || in.peek() == 'k'
-                           || in.peek() == 'l' || in.peek() == 'm' || in.peek() == 'n' || in.peek() == 'o' || in.peek() == 'p' || in.peek() == 'q'
-                           || in.peek() == 'r' || in.peek() == 's' || in.peek() == 't' || in.peek() == 'u' || in.peek() == 'v' || in.peek() == 'w'
-                           || in.peek() == 'x' || in.peek() == 'y' || in.peek() == 'z' || in.peek() == 'A' || in.peek() == 'B' || in.peek() == 'C'
-                           || in.peek() == 'D' || in.peek() == 'E' || in.peek() == 'F' || in.peek() == 'G' || in.peek() == 'H' || in.peek() == 'I'
-                           || in.peek() == 'J' || in.peek() == 'K' || in.peek() == 'M' || in.peek() == 'N' || in.peek() == 'O' || in.peek() == 'P'
-                           || in.peek() == 'Q' || in.peek() == 'R' || in.peek() == 'S' || in.peek() == 'T' || in.peek() == 'U' || in.peek() == 'V'
-                           || in.peek() == 'W' || in.peek() == 'X' || in.peek() == 'Y' || in.peek() == 'Z' || in.peek() == '0' || in.peek() == '1'
-                           || in.peek() == '2' || in.peek() == '3' || in.peek() == '4' || in.peek() == '5' || in.peek() == '6' || in.peek() == '7'
-                           || in.peek() == '8' || in.peek() == '9'){ // Yucky
-                        in >> curr; // Remove the next character from the stream
+                    while (is_alpha(in.peek()) || is_num(in.peek()) || in.peek() == '_'){
+                        in.get(curr);
                         str += curr;
                     }
-                    tokens.push_back(token(str));
-                    this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
-                    str = "";
-                    break;
-
-                case '\'':
-                    str = curr;
-                    while (in.peek() != '\''){
-                        in >> curr; // Remove the next character from the stream
-                        str += curr;
-                    }
-                    in >> curr; // Remove the next character from the stream
-                    str += curr;
-                    tokens.push_back(token(str));
-                    this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
+                    this->out << str; // OUTPUT TAG
+                    this->path->add_node(tokens::TOKEN_AS_STRING, str);
                     str = "";
                     break;
 
                 case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
                     str = curr;
-                    while (in.peek() == '0' || in.peek() == '1' || in.peek() == '2' || in.peek() == '3' || in.peek() == '4' || in.peek() == '5'
-                           || in.peek() == '6' || in.peek() == '7' || in.peek() == '8' || in.peek() == '9'){
-                        in >> curr; // Remove the next character from the stream
+                    is_float = false;
+                    while (is_num(in.peek()) || in.peek() == '.'){
+                        in.get(curr);
+                        if (curr == '.'){
+                            is_float = true;
+                        }
+                        if ((curr == '.' && !is_num(in.peek())) || (curr == '.' && is_float)){
+                            errors::EXPECTED_VALUE(line, curr);
+                        }
                         str += curr;
                     }
-                    tokens.push_back(token(str));
-                    this->out << str; // TEMPORARY FOR ASSIGNMENT ONE
+                    this->out << str; // OUTPUT TAG
+                    if (is_float){
+                        this->path->add_node(tokens::FLOAT_AS_STRING, str);
+                    }
+                    else {
+                        this->path->add_node(tokens::INT_AS_STRING, str);
+                    }
                     str = "";
+                    is_float = false;
                     break;
 
                 default:
                     break;
             }
         }
-        curr = NULL; // This should be \0 or NULL but for some reason the program outputs those as [NUL] in the output file
+    }
+    if (handle_str){
+        errors::UNTERM_STRING(entered_at, curr);
+    }
+    if (handle_chr){
+        errors::UNTERM_CHAR(entered_at, curr);
+    }
+    if (ignore_mlc){
+        errors::UNTERM_COMMENT(entered_at, curr);
+    }
+    if (ignore_slc){
+        errors::UNEXPECTED_END_OF_FILE(entered_at, curr);
     }
     in.close();
-    if (string_handling){
-        errors::UNTERM_STRING(entered, curr);
-    }
-    if (ignore_multiline){
-        errors::UNTERM_COMMENT(entered, curr);
-    }
-    if (ignore_line){
-        errors::UNEXPECTED_END_OF_FILE(line, curr);
-    }
-    return tokens;
+    out.close();
+}
+
+// Helpers
+bool tokenizer::is_num(char c){
+    return c >= '0' && c <= '9';
+}
+
+bool tokenizer::is_alpha(char c){
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }

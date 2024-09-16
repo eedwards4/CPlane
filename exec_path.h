@@ -6,7 +6,7 @@
 #ifndef CPLANE_EXEC_PATH_H
 #define CPLANE_EXEC_PATH_H
 
-#include "new_token.h"
+#include "tokens.h"
 
 #include <string>
 #include <vector>
@@ -67,50 +67,12 @@ public:
         }
     }
 
+    exec_node* get_head(){ return head; }
+    exec_node* get_tail(){ return tail; }
+
     void add_node(int type, std::string value = "");
 
-    void print_path(){
-        exec_node* temp = head;
-        std::vector<exec_node*> printstructure;
-        while (temp != nullptr){
-            if (temp->get_type() == new_token::TOKEN_AS_STRING || temp->get_type() == new_token::STRING_LITERAL || temp->get_type() == new_token::CHAR_LITERAL ||
-                temp->get_type() == new_token::INT_AS_STRING || temp->get_type() == new_token::FLOAT_AS_STRING){
-                std::cout << temp->get_value();
-                temp = temp->get_next();
-            }
-            else{
-                if (temp->get_type() == new_token::NEWLINE){
-                    std::cout << std::endl;
-                    temp = temp->get_next();
-                } else{
-                    if (temp->get_type() == new_token::OPEN_BRACE || temp->get_type() == new_token::OPEN_BRACKET || temp->get_type() == new_token::OPEN_PAREN){
-                        if (temp->get_type() == new_token::OPEN_BRACE){
-                            std::cout << "{";
-                        } else if (temp->get_type() == new_token::OPEN_BRACKET){
-                            std::cout << "[";
-                        } else{
-                            std::cout << "(";
-                        }
-                        printstructure.push_back(temp);
-                        temp = temp->get_fold();
-                    } else if (temp->get_type() == new_token::CLOSE_BRACE || temp->get_type() == new_token::CLOSE_BRACKET || temp->get_type() == new_token::CLOSE_PAREN){
-                        if (temp->get_type() == new_token::CLOSE_BRACE){
-                            std::cout << "}";
-                        } else if (temp->get_type() == new_token::CLOSE_BRACKET){
-                            std::cout << "]";
-                        } else{
-                            std::cout << ")";
-                        }
-                        temp = printstructure.back()->get_next();
-                        printstructure.pop_back();
-                    } else{
-                        std::cout << char(temp->get_type());
-                        temp = temp->get_next();
-                    }
-                }
-            }
-        }
-    }
+    void print_path();
 
 private:
     // Abs. head/tail

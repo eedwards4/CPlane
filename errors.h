@@ -5,7 +5,7 @@
 #ifndef CPLANE_ERRORS_H
 #define CPLANE_ERRORS_H
 
-#include "tokens.h"
+#include "exec_path.h"
 
 #include <vector>
 #include <iostream>
@@ -15,7 +15,7 @@ public:
     errors() = default;
     ~errors() = default;
 
-    void check_syntax(std::vector<token> tokens); // Checks for syntax errors
+    void check_syntax(exec_path* path); // Checks for syntax errors
     // Error handlers
     static void EXPECTED_EXPRESSION(int line, char c); // Expected an expression
     static void EXPECTED_STATEMENT(int line, char c); // Expected a statement
