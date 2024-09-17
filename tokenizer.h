@@ -1,28 +1,37 @@
 //
-// Created by Ethan Edwards on 9/4/24.
+// Created by Ethan Edwards on 9/12/2024.
 //
 
 #ifndef CPLANE_TOKENIZER_H
 #define CPLANE_TOKENIZER_H
 
-#include "tokens.h"
+// Internal
 #include "errors.h"
-
+#include "exec_path.h"
+#include "tokens.h"
+// Standard
+#include <string>
 #include <vector>
 #include <fstream>
 #include <iostream>
 
 class tokenizer {
 public:
-    tokenizer() {
+    tokenizer(exec_path* path){
         this->out.open("output.txt"); // TEMPORARY FOR ASSIGNMENT ONE
+        this->path = path;
     };
     ~tokenizer() = default;
 
-    std::vector<token> tokenize(std::string filename);
+    void tokenize(std::string filename);
 
 private:
-    std::ofstream out; // TEMPORARY FOR ASSIGNMENT ONE
+    std::ofstream out; // Output file
+    exec_path* path; // Execution path
+
+    // Helpers
+    static bool is_num(char c); // Checks if a character is a number
+    static bool is_alpha(char c); // Checks if a character is a letter
 };
 
 

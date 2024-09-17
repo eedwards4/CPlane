@@ -4,98 +4,80 @@
 
 #include "errors.h"
 
-void errors::check_syntax(std::vector<token> tokens) {
-    bool in_string = false; // This essentially only triggers on an error (string not terminated)
-    bool in_char = false; // Tracks if we are currently inside a character literal
-    bool in_comment = false; // This essentially only triggers on an error (comment not terminated)
+void errors::check_syntax(exec_path *path) {
+    exec_node* current = path->get_head();
     int num_deep = 0; // Tracks current depth in nested statements. MUST BE ZERO AT END OF FILE
-    std::vector<char> structure; // Tracks the structure of the current nest (e.g. {, [, (, etc). MUST BE EMPTY AT END OF FILE
+    std::vector<exec_node*> structure; // Tracks the structure of the current nest (e.g. {, [, (, etc). MUST BE EMPTY AT END OF FILE
     int line = 1; // Tracks current line number
+    int tok = 1; // Tracks current token number
     int entered_at = 0; // Tracks the line where we entered a char, string, or comment
-    char c; // Tracks the current character
-
-    for (int i = 0; i < tokens.size(); i++){
-        if (tokens.at(i).get_type() == -1) {
-            errors::UNKNOWN_TOKEN(line, c);
-        }
-        else if (tokens.at(i).get_type() == 0) {
-            c = tokens.at(i).get_char_value();
-            if (in_string){
-                if (c == '"'){
-                    in_string = false; // We should never encounter this condition if the tokenizer is working properly
-                }
-            }
-            else if (in_comment){
-                if (c == '*' && i + 1 < tokens.size()){
-                    if (tokens.at(i + 1).get_type() == 0 && tokens.at(i + 1).get_char_value() == '/'){
-                        in_comment = false;
-                        i++;
-                    }
-                }
-            }
-            else if (in_char){
-                if (c == '\''){
-                    in_char = false; // We should never encounter this condition if the tokenizer is working properly
-                }
-            }
-            else{
-                switch(c){
-                    case '{': case '[': case '(':
-                        structure.push_back(c);
+    
+    while (current != nullptr){
+        if (current->get_type() == tokens::TOKEN_AS_STRING || current->get_type() == tokens::STRING_LITERAL || current->get_type() == tokens::CHAR_LITERAL ||
+            current->get_type() == tokens::INT_AS_STRING || current->get_type() == tokens::FLOAT_AS_STRING){ // Non singletons
+            current = current->get_next();
+            tok++;
+        } else{
+            if (current->get_type() == tokens::NEWLINE){
+                current = current->get_next();
+                line++;
+                tok = 1;
+            } else{
+                switch(current->get_type()){
+                    // Nesting
+                    case tokens::OPEN_BRACE: case tokens::OPEN_BRACKET: case tokens::OPEN_PAREN:
+                        structure.push_back(current);
+                        current = current->get_fold();
                         num_deep++;
                         break;
-                    case '}': case ']': case ')':
-                        if (c == '}' && structure.back() != '{'){
-                            errors::UNEXPECTED_TOKEN(line, c);
-                        } else if (c == ']' && structure.back() != '[') {
-                            errors::UNEXPECTED_TOKEN(line, c);
-                        } else if (c == ')' && structure.back() != '(') {
-                            errors::UNEXPECTED_TOKEN(line, c);
+
+                    case tokens::CLOSE_BRACE: case tokens::CLOSE_BRACKET: case tokens::CLOSE_PAREN:
+                        if (current->get_type() == tokens::CLOSE_BRACE && structure.back()->get_type() != tokens::OPEN_BRACE){
+                            errors::UNEXPECTED_TOKEN(line, '}');
+                        } else if (current->get_type() == tokens::CLOSE_BRACKET && structure.back()->get_type() != tokens::OPEN_BRACKET) {
+                            errors::UNEXPECTED_TOKEN(line, ']');
+                        } else if (current->get_type() == tokens::CLOSE_PAREN && structure.back()->get_type() != tokens::OPEN_PAREN) {
+                            errors::UNEXPECTED_TOKEN(line, ')');
                         }
+                        current = structure.back()->get_next(); // Return to outside of fold
                         structure.pop_back();
                         num_deep--;
                         break;
-                    case '"':
-                        in_string = true;
-                        entered_at = line;
-                        break;
-                    case '\'':
-                        in_char = true;
-                        entered_at = line;
-                        break;
-                    case '/':
-                        if (i + 1 < tokens.size()) {
-                            if (tokens.at(i + 1).get_type() == 0) {
-                                char c1 = tokens.at(i + 1).get_char_value();
-                                if (c1 == '*') {
-                                    in_comment = true;
-                                    entered_at = line;
-                                } else if (c1 == '(') {
-                                    break;
-                                } else if (!is_num(c1) && !is_alpha(c1)) {
-                                    errors::UNEXPECTED_TOKEN(line, c);
-                                }
-                            }
+
+                    // Multi char operators
+                    case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS:
+                    case tokens::MINUS_EQUALS: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
+                    case tokens::MOD_EQUALS: case tokens::EQUALS_EQUALS: case tokens::NOT_EQUALS:
+                    case tokens::LESS_EQUALS: case tokens::GREATER_EQUALS: case tokens::LEFT_SHIFT:
+                    case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
+                    case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
+                    case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::RIGHT_SLIM_ARROW:
+                        if (current->get_next() == nullptr || (current->get_next()->get_type() != tokens::TOKEN_AS_STRING
+                                                              && current->get_next()->get_type() != tokens::INT_AS_STRING
+                                                              && current->get_next()->get_type() != tokens::FLOAT_AS_STRING)){
+                            errors::EXPECTED_EXPRESSION(line, char(current->get_type()));
                         }
+                        current = current->get_next();
                         break;
-                    case '\n':
-                        if (!in_string && !in_char) { // Ignore newlines inside strings or characters
-                            line++;
-                            c = 1;
+
+                    // Single char operators
+                    case '+': case '-': case '*': case '%': case '=': case '<': case '>': case '!': case '/':
+                        if (current->get_next() == nullptr || !is_num(char(current->get_next()->get_type())) || !is_alpha(char(current->get_next()->get_type()))){
+                            errors::EXPECTED_EXPRESSION(line, char(current->get_type()));
                         }
+                        current = current->get_next();
+                        break;
+
+                    default:
+                        current = current->get_next();
                         break;
                 }
+                tok++;
             }
         }
     }
-    if (in_comment){
-        errors::UNTERM_COMMENT(entered_at, c);
-    }
-    if (in_string){
-        errors::UNTERM_STRING(entered_at, c);
-    }
-    if (in_char){
-        errors::UNTERM_CHAR(entered_at, c);
+    if (num_deep != 0){
+        errors::EXPECTED_END_OF_FILE(line, '\0');
     }
 }
 
