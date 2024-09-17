@@ -1,25 +1,12 @@
-function int sum_of_first_n_squares (int n)
+// ***************************************************
+// * CS460: Programming Assignment 1: Test Program 4 *
+// ***************************************************
+procedure main (void)//)
 {
-  int sum;
-    /*
-    testing
-    multi-line
-    comment
-    */
-  sum = 0;
-  if (n >= 1)
-  {
-    sum = n * (n + 1) * (2 * n + 1) / 6; // Testing single line comment
-  }
-  return sum;
-}
+/**/int counter;
 
-procedure main (void)
-{
-  int n;
-  int sum;
-
-  n = 100;
-  sum = sum_of_first_n_squares (n);
-  printf ("sum of the squares of the first %d numbers = %d\n", n, sum);
+/**/counter = 100 / 2;
+/**/printf ("counter = %d\n", counter);
+/**/printf ("/* Will this string be displayed? */\n");
+/**/printf ("// Will this string be displayed?\n");
 }
