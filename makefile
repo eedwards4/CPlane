@@ -10,11 +10,12 @@ HEADER  = tokens.h tokenizer.h exec_path.h errors.h
 OUT     = cplane
 
 # Default target
-all: clean 
+all: $(OUT)
 
 # Link object files to create the output binary
 $(OUT): $(OBJS)
 	$(CC) $(OBJS) -o $(OUT) $(LFLAGS)
+	@rm -f $(OBJS)
 
 # Compile source files into object files
 %.o: %.cpp $(HEADER)
