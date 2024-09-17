@@ -5,7 +5,7 @@ procedure main (void)//)
 {
 /**/int counter;
 
-/**/counter = 100 / 2;
+/**/counter = 0;
 /**/printf ("counter = %d\n", counter);
 /**/printf ("/* Will this string be displayed? */\n");
 /**/printf ("// Will this string be displayed?\n");

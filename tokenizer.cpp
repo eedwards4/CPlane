@@ -26,6 +26,7 @@ void tokenizer::tokenize(std::string filename){
             if (curr == '\n'){
                 ignore_slc = false;
                 this->out << "\n"; // OUTPUT TAG
+                this->path->add_node(tokens::NEWLINE);
                 line++;
             }
             else{

@@ -52,26 +52,37 @@ void errors::check_syntax(exec_path *path) {
                     case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
                     case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
                     case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::RIGHT_SLIM_ARROW:
-                        if (current->get_next() == nullptr || (current->get_next()->get_type() != tokens::TOKEN_AS_STRING
-                                                              && current->get_next()->get_type() != tokens::INT_AS_STRING
-                                                              && current->get_next()->get_type() != tokens::FLOAT_AS_STRING
-                                                              || current->get_next()->get_type() != tokens::STRING_LITERAL
-                                                              || current->get_next()->get_type() != tokens::CHAR_LITERAL)){
-                            errors::EXPECTED_EXPRESSION(line, char(current->get_next()->get_type()));
+                        if (current->get_next()->get_next() == nullptr){
+                            errors::EXPECTED_END(line, '\0');
+                        } else{
+                            switch(current->get_next()->get_type()){
+                                case tokens::FLOAT_AS_STRING: case tokens::INT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL: case tokens::TOKEN_AS_STRING:
+                                    current = current->get_next()->get_next();
+                                    break;
+
+                                default:
+                                    errors::EXPECTED_EXPRESSION(line, current->get_next()->get_next()->get_type());
+                                    break;
+                            }
                         }
-                        current = current->get_next();
-                        break;
 
                     // Single char operators
                     case '+': case '-': case '*': case '%': case '=': case '<': case '>': case '!': case '/':
-                        if (current->get_next() == nullptr || !is_num(char(current->get_next()->get_type())) ||
-                        !is_alpha(char(current->get_next()->get_type())) || (current->get_next()->get_type() != tokens::TOKEN_AS_STRING
-                        && current->get_next()->get_type() != tokens::INT_AS_STRING && current->get_next()->get_type() != tokens::FLOAT_AS_STRING
-                        && current->get_next()->get_type() != tokens::STRING_LITERAL && current->get_next()->get_type() != tokens::CHAR_LITERAL)){
-                            errors::EXPECTED_EXPRESSION(line, char(current->get_next()->get_type()));
+                        if (current->get_next() == nullptr){
+                            errors::EXPECTED_EXPRESSION(line, '\0');
+                            break;
+                        } else{
+                            switch (current->get_next()->get_type()){
+                                case tokens::FLOAT_AS_STRING: case tokens::INT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL: case tokens::TOKEN_AS_STRING:
+                                    current = current->get_next();
+                                    break;
+
+                                default:
+                                    errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type());
+                                    break;
+                            }
                         }
-                        current = current->get_next();
-                        break;
+
 
                     default:
                         current = current->get_next();
@@ -97,7 +108,7 @@ bool errors::is_alpha(char c) {
 
 std::string errors::print_custom(int chr, std::string val = ""){
     if (chr < 9000){
-        return std::to_string(chr);
+        return std::string(1, static_cast<char>(chr));
     } else{
         switch(chr){
             case 9999: case 9998: case 9997: case 9996: case 9995: // Literals/tokens
@@ -144,106 +155,106 @@ std::string errors::print_custom(int chr, std::string val = ""){
 
 // Error handlers
 void errors::EXPECTED_EXPRESSION(int line, int c, std::string val) {
-    std::cout << "Expected an expression at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Expected an expression at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(1);
 }
 
 void errors::EXPECTED_STATEMENT(int line, int c, std::string val) {
-    std::cout << "Expected a statement at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Expected a statement at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(2);
 }
 
 void errors::EXPECTED_IDENTIFIER(int line, int c, std::string val) {
-    std::cout << "Expected an identifier at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Expected an identifier at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(3);
 }
 
 void errors::EXPECTED_OPERATOR(int line, int c, std::string val) {
-    std::cout << "Expected an operator at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Expected an operator at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(4);
 }
 
 void errors::EXPECTED_TYPE(int line, int c, std::string val) {
-    std::cout << "Expected a type at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Expected a type at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(5);
 }
 
 void errors::EXPECTED_VALUE(int line, int c, std::string val) {
-    std::cout << "Expected a value at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Expected a value at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(6);
 }
 
 void errors::EXPECTED_END(int line, int c, std::string val) {
-    std::cout << "Expected end of statement at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Expected end of statement at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(7);
 }
 
 void errors::EXPECTED_END_OF_FILE(int line, int c, std::string val) {
-    std::cout << "Expected end of file at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Expected end of file at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(8);
 }
 
 void errors::UNEXPECTED_TOKEN(int line, int c, std::string val) {
-    std::cout << "Unexpected token at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected token at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(9);
 }
 
 void errors::UNEXPECTED_END_OF_FILE(int line, int c, std::string val) {
-    std::cout << "Unexpected end of file at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected end of file at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(10);
 }
 
 void errors::UNEXPECTED_END(int line, int c, std::string val) {
-    std::cout << "Unexpected end of statement at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected end of statement at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(11);
 }
 
 void errors::UNEXPECTED_EXPRESSION(int line, int c, std::string val) {
-    std::cout << "Unexpected expression at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected expression at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(12);
 }
 
 void errors::UNEXPECTED_STATEMENT(int line, int c, std::string val) {
-    std::cout << "Unexpected statement at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected statement at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(13);
 }
 
 void errors::UNEXPECTED_IDENTIFIER(int line, int c, std::string val) {
-    std::cout << "Unexpected identifier at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected identifier at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(14);
 }
 
 void errors::UNEXPECTED_OPERATOR(int line, int c, std::string val) {
-    std::cout << "Unexpected operator at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected operator at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(15);
 }
 
 void errors::UNEXPECTED_TYPE(int line, int c, std::string val) {
-    std::cout << "Unexpected type at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected type at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(16);
 }
 
 void errors::UNEXPECTED_VALUE(int line, int c, std::string val) {
-    std::cout << "Unexpected value at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unexpected value at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
     exit(17);
 }
 
 void errors::UNTERM_STRING(int line, int c, std::string val) {
-    std::cout << "Unterminated string at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unterminated string at line " << line << std::endl;
     exit(18);
 }
 
 void errors::UNTERM_COMMENT(int line, int c, std::string val) {
-    std::cout << "Unterminated multiline comment at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unterminated multiline comment on line " << line << std::endl;
     exit(19);
 }
 
 void errors::UNTERM_CHAR(int line, int c, std::string val) {
-    std::cout << "Unterminated character at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unterminated char literal at line " << line << std::endl;
     exit(20);
 }
 
 void errors::UNKNOWN_TOKEN(int line, int c, std::string val) {
-    std::cout << "Unknown token at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << "Unknown token at line " << line << std::endl;
     exit(21);
 }
