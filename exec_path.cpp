@@ -1,6 +1,5 @@
 //
 // Created by Ethan Edwards on 9/10/24.
-// CURRENTLY UNUSED UNTIL POST-ASSIGNMENT ONE (TOO CLOSE TO DEADLINE TO SAFELY REFACTOR)
 //
 
 #include "exec_path.h"
@@ -75,9 +74,20 @@ void exec_path::print_path() {
     }
 }
 
-void exec_path::print_tokens_to_file() {
-    std::ofstream out;
-    out.open("output_assignment_2.txt");
+void exec_path::print_tokens_to_file(std::string filename) {
+
+    std::string out_filename = "./output_files/" + filename.substr(6, filename.size() - 2) + "_tokenized.txt";
+    
+
+    std::ofstream out(out_filename);
+    if (!out) {
+      std::cerr << "Error opening output file: " << out_filename << std::endl;
+      exit(1);
+    }
+
+    std::cout << "Generated file: " + out_filename << std::endl;
+
+    
     exec_node* temp = head;
     out << "\nToken list:\n\n";
     std::vector<exec_node*> printstructure;
@@ -344,4 +354,6 @@ void exec_path::print_tokens_to_file() {
     }
     out << std::endl;
     out.close();
+
+    std::cout << "Finished writing to file." << std::endl;
 }

@@ -4,3 +4,6 @@ A C interpreter
 (in source directory) make
 <h2>To run</h2>
 ./cplane (path/to/c_file.c)
+
+
+<h2>The generated files are deployed in output_files/</h2>

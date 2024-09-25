@@ -77,7 +77,7 @@ public:
 
     void print_tokens();
 
-    void print_tokens_to_file();
+    void print_tokens_to_file(std::string filename);
 
 private:
     // Abs. head/tail
