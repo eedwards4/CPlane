@@ -13,85 +13,121 @@ void errors::check_syntax(exec_path *path) {
     int entered_at = 0; // Tracks the line where we entered a char, string, or comment
     
     while (current != nullptr){
-        if (current->get_type() == tokens::TOKEN_AS_STRING || current->get_type() == tokens::STRING_LITERAL || current->get_type() == tokens::CHAR_LITERAL ||
-            current->get_type() == tokens::INT_AS_STRING || current->get_type() == tokens::FLOAT_AS_STRING){ // Non singletons
+        if (current->get_type() == tokens::NEWLINE){
             current = current->get_next();
-            tok++;
+            line++;
+            tok = 1;
         } else{
-            if (current->get_type() == tokens::NEWLINE){
-                current = current->get_next();
-                line++;
-                tok = 1;
-            } else{
-                switch(current->get_type()){
-                    // Nesting
-                    case tokens::OPEN_BRACE: case tokens::OPEN_BRACKET: case tokens::OPEN_PAREN:
-                        structure.push_back(current);
-                        current = current->get_fold();
-                        num_deep++;
-                        break;
+            switch(current->get_type()){
+                // Nesting
+                case tokens::OPEN_BRACE: case tokens::OPEN_BRACKET: case tokens::OPEN_PAREN:
+                    structure.push_back(current);
+                    current = current->get_fold();
+                    num_deep++;
+                    break;
 
-                    case tokens::CLOSE_BRACE: case tokens::CLOSE_BRACKET: case tokens::CLOSE_PAREN:
-                        if (current->get_type() == tokens::CLOSE_BRACE && structure.back()->get_type() != tokens::OPEN_BRACE){
-                            errors::UNEXPECTED_TOKEN(line, '}');
-                        } else if (current->get_type() == tokens::CLOSE_BRACKET && structure.back()->get_type() != tokens::OPEN_BRACKET) {
-                            errors::UNEXPECTED_TOKEN(line, ']');
-                        } else if (current->get_type() == tokens::CLOSE_PAREN && structure.back()->get_type() != tokens::OPEN_PAREN) {
-                            errors::UNEXPECTED_TOKEN(line, ')');
+                case tokens::CLOSE_BRACE: case tokens::CLOSE_BRACKET: case tokens::CLOSE_PAREN:
+                    if (current->get_type() == tokens::CLOSE_BRACE && structure.back()->get_type() != tokens::OPEN_BRACE){
+                        errors::UNEXPECTED_TOKEN(line, '}');
+                    } else if (current->get_type() == tokens::CLOSE_BRACKET && structure.back()->get_type() != tokens::OPEN_BRACKET) {
+                        errors::UNEXPECTED_TOKEN(line, ']');
+                    } else if (current->get_type() == tokens::CLOSE_PAREN && structure.back()->get_type() != tokens::OPEN_PAREN) {
+                        errors::UNEXPECTED_TOKEN(line, ')');
+                    }
+                    current = structure.back()->get_next(); // Return to outside of fold
+                    structure.pop_back();
+                    num_deep--;
+                    break;
+
+                // Multi char operators
+                case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS:
+                case tokens::MINUS_EQUALS: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
+                case tokens::MOD_EQUALS: case tokens::EQUALS_EQUALS: case tokens::NOT_EQUALS:
+                case tokens::LESS_EQUALS: case tokens::GREATER_EQUALS: case tokens::LEFT_SHIFT:
+                case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
+                case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
+                case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::RIGHT_SLIM_ARROW:
+                    if (current->get_next() == nullptr){
+                        errors::EXPECTED_END(line, '\0');
+                    } else{
+                        switch(current->get_next()->get_type()){
+                            case tokens::FLOAT_AS_STRING: case tokens::INT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL: case tokens::TOKEN_AS_STRING:
+                                current = current->get_next();
+                                break;
+
+                            case '\'': case '"':
+                                current = current->get_next();
+                                break;
+
+                            case tokens::OPEN_BRACE: case tokens::OPEN_BRACKET: case tokens::OPEN_PAREN:
+                                current = current->get_next();
+                                break;
+
+                            default:
+                                errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
+                                break;
                         }
-                        current = structure.back()->get_next(); // Return to outside of fold
-                        structure.pop_back();
-                        num_deep--;
-                        break;
-
-                    // Multi char operators
-                    case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS:
-                    case tokens::MINUS_EQUALS: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
-                    case tokens::MOD_EQUALS: case tokens::EQUALS_EQUALS: case tokens::NOT_EQUALS:
-                    case tokens::LESS_EQUALS: case tokens::GREATER_EQUALS: case tokens::LEFT_SHIFT:
-                    case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
-                    case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
-                    case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::RIGHT_SLIM_ARROW:
-                        if (current->get_next()->get_next() == nullptr){
-                            errors::EXPECTED_END(line, '\0');
-                        } else{
-                            switch(current->get_next()->get_type()){
-                                case tokens::FLOAT_AS_STRING: case tokens::INT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL: case tokens::TOKEN_AS_STRING:
-                                    current = current->get_next()->get_next();
-                                    break;
-
-                                default:
-                                    errors::EXPECTED_EXPRESSION(line, current->get_next()->get_next()->get_type());
-                                    break;
-                            }
-                        }
+                    }
+                    break;
 
                     // Single char operators
-                    case '+': case '-': case '*': case '%': case '=': case '<': case '>': case '!': case '/':
-                        if (current->get_next() == nullptr){
-                            errors::EXPECTED_EXPRESSION(line, '\0');
-                            break;
-                        } else{
-                            switch (current->get_next()->get_type()){
-                                case tokens::FLOAT_AS_STRING: case tokens::INT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL: case tokens::TOKEN_AS_STRING:
-                                    current = current->get_next();
-                                    break;
-
-                                default:
-                                    errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type());
-                                    break;
-                            }
-                        }
-
-
-                    default:
-                        current = current->get_next();
+                case '+': case '-': case '*': case '%': case '=': case '<': case '>': case '!': case '/':
+                    if (current->get_next() == nullptr){
+                        errors::EXPECTED_EXPRESSION(line, '\0');
                         break;
-                }
-                tok++;
+                    } else{
+                        switch (current->get_next()->get_type()){
+                            case tokens::FLOAT_AS_STRING: case tokens::INT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL: case tokens::TOKEN_AS_STRING:
+                                current = current->get_next();
+                                break;
+
+                            case '\'': case '"':
+                                current = current->get_next();
+                                break;
+
+                            case tokens::OPEN_BRACE: case tokens::OPEN_BRACKET: case tokens::OPEN_PAREN:
+                                current = current->get_next();
+                                break;
+
+                            default:
+                                errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
+                                break;
+                        }
+                    }
+                    break;
+
+                    // Variables/statics
+                case tokens::INT_AS_STRING: case tokens::FLOAT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL:
+                    if (current->get_next() == nullptr){
+                        errors::EXPECTED_END(line, '\0');
+                    } else{
+                        switch(current->get_next()->get_type()){
+                            case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS:
+                            case tokens::MINUS_EQUALS: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
+                            case tokens::MOD_EQUALS: case tokens::EQUALS_EQUALS: case tokens::NOT_EQUALS:
+                            case tokens::LESS_EQUALS: case tokens::GREATER_EQUALS: case tokens::LEFT_SHIFT:
+                            case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
+                            case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
+                            case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::RIGHT_SLIM_ARROW:
+                            case '+': case '-': case '*': case '%': case '=': case '<': case '>': case '!': case '/':
+                                current = current->get_next();
+                                break;
+
+                            default:
+                                errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
+                                break;
+                        }
+                    }
+                    break;
+
+                default:
+                    current = current->get_next();
+                    break;
             }
+            tok++;
         }
     }
+
     if (num_deep != 0){
         errors::EXPECTED_END_OF_FILE(line, '\0');
     }
@@ -112,7 +148,7 @@ std::string errors::print_custom(int chr, std::string val = ""){
     } else{
         switch(chr){
             case 9999: case 9998: case 9997: case 9996: case 9995: // Literals/tokens
-                return val;
+                return "'" + val + "'";
             // Nesting structures
             case 9994: return "(";
             case 9993: return ")";

@@ -53,6 +53,7 @@ void tokenizer::tokenize(std::string filename){
                 handle_str = false;
                 this->out << curr; // OUTPUT TAG
                 this->path->add_node(tokens::STRING_LITERAL, str);
+                this->path->add_node(tokens::single_char(curr));
                 str = "";
             }
             else{
@@ -65,6 +66,7 @@ void tokenizer::tokenize(std::string filename){
                 handle_chr = false;
                 this->out << curr; // OUTPUT TAG
                 this->path->add_node(tokens::CHAR_LITERAL, str);
+                this->path->add_node(tokens::single_char(curr));
                 str = "";
             }
             else{
@@ -76,6 +78,7 @@ void tokenizer::tokenize(std::string filename){
             switch(curr){
                 // String literals
                 case '"':
+                    this->path->add_node(tokens::single_char(curr));
                     handle_str = true;
                     entered_at = line;
                     this->out << curr; // OUTPUT TAG
@@ -83,6 +86,7 @@ void tokenizer::tokenize(std::string filename){
 
                 // Character literals
                 case '\'':
+                    this->path->add_node(tokens::single_char(curr));
                     handle_chr = true;
                     entered_at = line;
                     this->out << curr; // OUTPUT TAG
@@ -190,7 +194,28 @@ void tokenizer::tokenize(std::string filename){
                         this->out << str; // OUTPUT TAG
                         this->path->add_node(tokens::RIGHT_SLIM_ARROW);
                         str = "";
-                    } else{
+                    } else if (is_num(in.peek())){
+                        str = curr;
+                        bool dot = false;
+                        while (is_num(in.peek()) || in.peek() == '.'){
+                            in.get(curr);
+                            if (curr == '.'){
+                                dot = true;
+                            }
+                            if ((curr == '.' && !is_num(in.peek())) || (curr == '.' && dot)){
+                                errors::EXPECTED_VALUE(line, curr);
+                            }
+                            str += curr;
+                        }
+                        this->out << str; // OUTPUT TAG
+                        if (dot){
+                            this->path->add_node(tokens::FLOAT_AS_STRING, str);
+                        }
+                        else {
+                            this->path->add_node(tokens::INT_AS_STRING, str);
+                        }
+                    }
+                    else{
                         this->out << curr; // OUTPUT TAG
                         this->path->add_node(tokens::single_char(curr));
                     }

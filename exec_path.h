@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 class exec_node{
 public:
@@ -73,6 +74,10 @@ public:
     void add_node(int type, std::string value = "");
 
     void print_path();
+
+    void print_tokens();
+
+    void print_tokens_to_file();
 
 private:
     // Abs. head/tail

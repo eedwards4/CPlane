@@ -74,3 +74,274 @@ void exec_path::print_path() {
         }
     }
 }
+
+void exec_path::print_tokens_to_file() {
+    std::ofstream out;
+    out.open("output_assignment_2.txt");
+    exec_node* temp = head;
+    out << "\nToken list:\n\n";
+    std::vector<exec_node*> printstructure;
+    while (temp != nullptr){
+        bool printing = false;
+        if (temp->get_type() != tokens::NEWLINE){
+            out << "Token type: ";
+            printing = true;
+        }
+        bool folding_in = false;
+        bool folding_out = false;
+        switch(temp->get_type()){
+            case tokens::TOKEN_AS_STRING:
+                out << "IDENTIFIER\n" << "Token:      " << temp->get_value() << std::endl;
+                break;
+
+            case tokens::STRING_LITERAL:
+                out << "STRING\n" << "Token:      " << temp->get_value() << std::endl;
+                break;
+
+            case tokens::CHAR_LITERAL:
+                out << "STRING\n" << "Token:      " << temp->get_value() << std::endl;
+                break;
+
+            case tokens::INT_AS_STRING:
+                out << "INTEGER\n" << "Token:      " << temp->get_value() << std::endl;
+                break;
+
+            case tokens::FLOAT_AS_STRING:
+                out << "FLOAT\n" << "Token:      " << temp->get_value() << std::endl;
+                break;
+
+            case tokens::NEWLINE:
+                break;
+
+            case tokens::OPEN_BRACE:
+                out << "L_BRACE\n" << "Token:      {" << std::endl;
+                folding_in = true;
+                printstructure.push_back(temp);
+                break;
+
+            case tokens::CLOSE_BRACE:
+                out << "R_BRACE\n" << "Token:      }" << std::endl;
+                folding_out = true;
+                break;
+
+            case tokens::OPEN_BRACKET:
+                out << "L_BRACKET\n" << "Token:      [" << std::endl;
+                folding_in = true;
+                printstructure.push_back(temp);
+                break;
+
+            case tokens::CLOSE_BRACKET:
+                out << "R_BRACKET\n" << "Token:      ]" << std::endl;
+                folding_out = true;
+                break;
+
+            case tokens::OPEN_PAREN:
+                out << "L_PAREN\n" << "Token:      (" << std::endl;
+                folding_in = true;
+                printstructure.push_back(temp);
+                break;
+
+            case tokens::CLOSE_PAREN:
+                out << "R_PAREN\n" << "Token:      )" << std::endl;
+                folding_out = true;
+                break;
+
+            case tokens::PLUS_PLUS:
+                out << "PLUS_PLUS\n" << "Token:      ++" << std::endl;
+                break;
+
+            case tokens::PLUS_EQUALS:
+                out << "PLUS_EQUALS\n" << "Token:      +=" << std::endl;
+                break;
+
+            case tokens::MINUS_MINUS:
+                out << "MINUS_MINUS\n" << "Token:      --" << std::endl;
+                break;
+
+            case tokens::MINUS_EQUALS:
+                out << "MINUS_EQUALS\n" << "Token:      -=" << std::endl;
+                break;
+
+            case tokens::RIGHT_SLIM_ARROW:
+                out << "RIGHT_SLIM_ARROW\n" << "Token:      ->" << std::endl;
+                break;
+
+            case tokens::BOOLEAN_AND:
+                out << "BOOLEAN_AND\n" << "Token:      &&" << std::endl;
+                break;
+
+            case tokens::AND_EQUALS:
+                out << "AND_EQUALS\n" << "Token:      &=" << std::endl;
+                break;
+
+            case tokens::BOOLEAN_OR:
+                out << "BOOLEAN_OR\n" << "Token:      ||" << std::endl;
+                break;
+
+            case tokens::OR_EQUALS:
+                out << "OR_EQUALS\n" << "Token:      |=" << std::endl;
+                break;
+
+            case tokens::NOT_EQUALS:
+                out << "NOT_EQUALS\n" << "Token:      !=" << std::endl;
+                break;
+
+            case tokens::MOD_EQUALS:
+                out << "MOD_EQUALS\n" << "Token:      %=" << std::endl;
+                break;
+
+            case tokens::TIMES_EQUALS:
+                out << "TIMES_EQUALS\n" << "Token:      *=" << std::endl;
+                break;
+
+            case tokens::EQUALS_EQUALS:
+                out << "BOOLEAN_EQUAL\n" << "Token:      ==" << std::endl;
+                break;
+
+            case tokens::XOR_EQUALS:
+                out << "XOR_EQUALS\n" << "Token:      ^=" << std::endl;
+                break;
+
+            case tokens::TOKEN_PASTE:
+                out << "TOKEN_PASTE\n" << "Token:      ##" << std::endl;
+                break;
+
+            case tokens::GREATER_EQUALS:
+                out << "GT_EQUAL\n" << "Token:      >=" << std::endl;
+                break;
+
+            case tokens::RIGHT_SHIFT_EQUALS:
+                out << "RIGHT_SHIFT_EQUALS\n" << "Token:      >>=" << std::endl;
+                break;
+
+            case tokens::RIGHT_SHIFT:
+                out << "RIGHT_SHIFT\n" << "Token:     >>" << std::endl;
+                break;
+
+            case tokens::LESS_EQUALS:
+                out << "LT_EQUAL\n" << "Token:      <=" << std::endl;
+                break;
+
+            case tokens::LEFT_SHIFT_EQUALS:
+                out << "LEFT_SHIFT_EQUALS\n" << "Token:      <<=" << std::endl;
+                break;
+
+            case tokens::LEFT_SHIFT:
+                out << "LEFT_SHIFT\n" << "Token:      <<" << std::endl;
+                break;
+
+            case tokens::DIVIDE_EQUALS:
+                out << "DIVIDE_EQUALS\n" << "Token:      /=" << std::endl;
+                break;
+
+            case tokens::ELLIPSIS:
+                out << "ELLIPSIS\n" << "Token:      ..." << std::endl;
+                break;
+
+            case tokens::SCOPE:
+                out << "SCOPE\n" << "Token:      ::" << std::endl;
+                break;
+
+            case tokens::LITERAL_DEF:
+                out << "LITERAL_DEF\n" << "Token:      L\"\" or L''" << std::endl;
+                break;
+
+            // Single-character operators
+            case '+':
+                out << "PLUS\n" << "Token:      +" << std::endl;
+                break;
+
+            case '-':
+                out << "MINUS\n" << "Token:      -" << std::endl;
+                break;
+
+            case '*':
+                out << "ASTERISK\n" << "Token:      *" << std::endl;
+                break;
+
+            case '/':
+                out << "DIVIDE\n" << "Token:      /" << std::endl;
+                break;
+
+            case '%':
+                out << "MODULO\n" << "Token:      %" << std::endl;
+                break;
+
+            case '=':
+                out << "ASSIGNMENT_OPERATOR\n" << "Token:      =" << std::endl;
+                break;
+
+            case '^':
+                out << "XOR\n" << "Token:      ^" << std::endl;
+                break;
+
+            case '&':
+                out << "AND\n" << "Token:      &" << std::endl;
+                break;
+
+            case '|':
+                out << "OR\n" << "Token:      |" << std::endl;
+                break;
+
+            case '~':
+                out << "NOT\n" << "Token:      ~" << std::endl;
+                break;
+
+            case '!':
+                out << "NOT\n" << "Token:      !" << std::endl;
+                break;
+
+            case '<':
+                out << "LT\n" << "Token:      <" << std::endl;
+                break;
+
+            case '>':
+                out << "GT\n" << "Token:      >" << std::endl;
+                break;
+
+            case '?':
+                out << "TERNARY\n" << "Token:      ?" << std::endl;
+                break;
+
+            case ':':
+                out << "TERNARY\n" << "Token:      :" << std::endl;
+                break;
+
+            case ',':
+                out << "COMMA\n" << "Token:      ," << std::endl;
+                break;
+
+            case ';':
+                out << "SEMICOLON\n" << "Token:      ;" << std::endl;
+                break;
+
+            case '.':
+                out << "DOT\n" << "Token:      ." << std::endl;
+                break;
+
+            case '"':
+                out << "DOUBLE_QUOTE\n" << "Token:      \"" << std::endl;
+                break;
+
+            case '\'':
+                out << "SINGLE_QUOTE\n" << "Token:      '" << std::endl;
+                break;
+
+            default:
+                break;
+        }
+        if (folding_in){
+            temp = temp->get_fold();
+        } else if (folding_out){
+            temp = printstructure.back()->get_next();
+            printstructure.pop_back();
+        } else {
+            temp = temp->get_next();
+        }
+        if (printing){
+            out << std::endl;
+        }
+    }
+    out << std::endl;
+    out.close();
+}

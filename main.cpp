@@ -12,12 +12,12 @@
 using namespace std;
 
 // Precompile options
-#define SKIP_ARGS 0
+#define SKIP_ARGS 1
 
 int main(int argc, char* argv[]) {
     string filename;
     if (SKIP_ARGS){
-        filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\programming_assignment_1-test_file_1.c";
+        filename = "C:\\Users\\evane\\Documents\\CPPprojects\\CPlane\\tests\\programming_assignment_2-test_file_6.c";
     } else{
         if (argc < 2){
             cout << "Please provide a file to tokenize." << endl;
@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
     tokenizer t(&path);
     t.tokenize(filename);
     path.print_path();
+    path.print_tokens_to_file();
     errors e;
     e.check_syntax(&path);
     return 0;
