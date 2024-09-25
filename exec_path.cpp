@@ -77,14 +77,19 @@ void exec_path::print_path() {
 void exec_path::print_tokens_to_file(std::string filename) {
 
     std::string out_filename = "./output_files/" + filename.substr(6, filename.size() - 2) + "_tokenized.txt";
+    std::string out_filename_windows = ".\\output_files\\" + filename.substr(6, filename.size() - 2) + "_tokenized.txt";
     
-
+    // Trying mac directory
     std::ofstream out(out_filename);
     if (!out) {
-      std::cerr << "Error opening output file: " << out_filename << std::endl;
-      exit(1);
+      // Trying windows directory
+      out.close();
+      std::ofstream out(out_filename_windows);
+      if ( !out ){
+	std::cerr << "Error opening output file: " << out_filename << std::endl;
+	exit(1);
+      }
     }
-
     std::cout << "Generated file: " + out_filename << std::endl;
 
     
