@@ -525,12 +525,6 @@ void tokenizer::tokenize(std::string filename){
             }
         }
     }
-    if (handle_str){
-        errors::UNTERM_STRING(entered_at, curr);
-    }
-    if (handle_chr){
-        errors::UNTERM_CHAR(entered_at, curr);
-    }
     if (ignore_mlc){
         errors::UNTERM_COMMENT(entered_at, curr);
     }

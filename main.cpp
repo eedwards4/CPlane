@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     exec_path path;
     tokenizer t(&path);
     t.tokenize(filename);
-    path.print_path();
+    //path.print_path();
     path.print_tokens_to_file();
     errors e;
     e.check_syntax(&path);

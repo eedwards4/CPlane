@@ -11,6 +11,8 @@ void errors::check_syntax(exec_path *path) {
     int line = 1; // Tracks current line number
     int tok = 1; // Tracks current token number
     int entered_at = 0; // Tracks the line where we entered a char, string, or comment
+    bool in_string = false; // Tracks if we are in a string
+    bool in_char = false; // Tracks if we are in a char
     
     while (current != nullptr){
         if (current->get_type() == tokens::NEWLINE){
@@ -70,7 +72,7 @@ void errors::check_syntax(exec_path *path) {
                     }
                     break;
 
-                    // Single char operators
+                // Single char operators
                 case '+': case '-': case '*': case '%': case '=': case '<': case '>': case '!': case '/':
                     if (current->get_next() == nullptr){
                         errors::EXPECTED_EXPRESSION(line, '\0');
@@ -96,7 +98,7 @@ void errors::check_syntax(exec_path *path) {
                     }
                     break;
 
-                    // Variables/statics
+                // Variables/statics
                 case tokens::INT_AS_STRING: case tokens::FLOAT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL:
                     if (current->get_next() == nullptr){
                         errors::EXPECTED_END(line, '\0');
@@ -113,11 +115,35 @@ void errors::check_syntax(exec_path *path) {
                                 current = current->get_next();
                                 break;
 
+                            case tokens::CLOSE_BRACE: case tokens::CLOSE_BRACKET: case tokens::CLOSE_PAREN: case ';': case '\'': case '"':
+                                current = current->get_next();
+                                break;
+
                             default:
                                 errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
                                 break;
                         }
                     }
+                    break;
+
+                case '\'':
+                    if (in_char){
+                        in_char = false;
+                    } else{
+                        in_char = true;
+                        entered_at = line;
+                    }
+                    current = current->get_next();
+                    break;
+
+                case '"':
+                    if (in_string){
+                        in_string = false;
+                    } else{
+                        in_string = true;
+                        entered_at = line;
+                    }
+                    current = current->get_next();
                     break;
 
                 default:
@@ -130,6 +156,12 @@ void errors::check_syntax(exec_path *path) {
 
     if (num_deep != 0){
         errors::EXPECTED_END_OF_FILE(line, '\0');
+    }
+    if (in_char){
+        errors::UNTERM_CHAR(entered_at, '\0');
+    }
+    if (in_string){
+        errors::UNTERM_STRING(entered_at, '\0');
     }
 }
 
