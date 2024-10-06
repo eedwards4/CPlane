@@ -361,23 +361,31 @@ void exec_path::print_tokens_to_file(std::string filename) {
 
 void exec_path::remove_newlines() {
 	std::vector<exec_node*> foldStack;
-	exec_node* tmp;
+	exec_node* temp;
 	
 	while (head->get_type() == tokens::NEWLINE) {
-		tmp = head;
-		head = head->get_next();
-		delete tmp;
+		temp = head->get_next();
+		delete head;
+		head = temp;
 	}
 	exec_node* ptr = head;
 
 	while (ptr != tail && ptr != nullptr) {
-		while (ptr->get_type() == tokens::NEWLINE) {
-			tmp = ptr;
-			ptr = ptr->get_next();
-			delete tmp;
+		if (ptr->get_next() != nullptr && ptr->get_next()->get_type() == tokens::NEWLINE) {
+			temp = ptr->get_next();
+			while (temp != nullptr && temp->get_type() == tokens::NEWLINE) {
+				temp = temp->get_next();
+			}
+			ptr->set_next(temp);
 		}
-		// std::cout << "value: " << ptr->get_value() << " type:" << ptr->get_type() << " fold: " << ptr->get_fold() << std::endl;
-		std::cout << ptr->get_type() << std::endl;
+		if (ptr->get_fold() != nullptr && ptr->get_fold()->get_type() == tokens::NEWLINE) {
+			temp = ptr->get_fold();
+			while (temp != nullptr && temp->get_type() == tokens::NEWLINE) {
+				temp = temp->get_next();
+			}
+			ptr->set_fold(temp);
+		}
+
 		if (ptr->get_fold() != nullptr) {
 			foldStack.push_back(ptr);
 			ptr = ptr->get_fold();
