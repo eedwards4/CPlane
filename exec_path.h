@@ -79,6 +79,8 @@ public:
 
     void print_tokens_to_file(std::string filename);
 
+	void remove_newlines();
+
 private:
     // Abs. head/tail
     exec_node* head;

@@ -358,3 +358,34 @@ void exec_path::print_tokens_to_file(std::string filename) {
 
     std::cout << "Finished writing to file." << std::endl;
 }
+
+void exec_path::remove_newlines() {
+	std::vector<exec_node*> foldStack;
+	exec_node* tmp;
+	
+	while (head->get_type() == tokens::NEWLINE) {
+		tmp = head;
+		head = head->get_next();
+		delete tmp;
+	}
+	exec_node* ptr = head;
+
+	while (ptr != tail && ptr != nullptr) {
+		while (ptr->get_type() == tokens::NEWLINE) {
+			tmp = ptr;
+			ptr = ptr->get_next();
+			delete tmp;
+		}
+		// std::cout << "value: " << ptr->get_value() << " type:" << ptr->get_type() << " fold: " << ptr->get_fold() << std::endl;
+		std::cout << ptr->get_type() << std::endl;
+		if (ptr->get_fold() != nullptr) {
+			foldStack.push_back(ptr);
+			ptr = ptr->get_fold();
+		} else if (ptr->get_next() == nullptr && !foldStack.empty()) {
+			ptr = foldStack.back()->get_next();
+			foldStack.pop_back();
+		} else {
+			ptr = ptr->get_next();
+		}
+	}
+}
