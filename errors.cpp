@@ -9,39 +9,62 @@ void errors::check_syntax(exec_path *path) {
     int num_deep = 0; // Tracks current depth in nested statements. MUST BE ZERO AT END OF FILE
     std::vector<exec_node*> structure; // Tracks the structure of the current nest (e.g. {, [, (, etc). MUST BE EMPTY AT END OF FILE
     int line = 1; // Tracks current line number
-    int tok = 1; // Tracks current token number
     int entered_at = 0; // Tracks the line where we entered a char, string, or comment
     bool in_string = false; // Tracks if we are in a string
     bool in_char = false; // Tracks if we are in a char
-    
+
     while (current != nullptr){
         if (current->get_type() == tokens::NEWLINE){
             current = current->get_next();
             line++;
-            tok = 1;
-        } else{
+        }
+        else if (in_string){
+            if (current->get_type() == '"'){
+                in_string = false;
+            }
+            current = current->get_next();
+        }
+        else if (in_char){
+            if (current->get_type() == '\''){
+                in_char = false;
+            }
+            current = current->get_next();
+        }
+        else{
             switch(current->get_type()){
-                // Nesting
-                case tokens::OPEN_BRACE: case tokens::OPEN_BRACKET: case tokens::OPEN_PAREN:
+                case tokens::OPEN_BRACE:
                     structure.push_back(current);
                     current = current->get_fold();
                     num_deep++;
                     break;
 
-                case tokens::CLOSE_BRACE: case tokens::CLOSE_BRACKET: case tokens::CLOSE_PAREN:
-                    if (current->get_type() == tokens::CLOSE_BRACE && structure.back()->get_type() != tokens::OPEN_BRACE){
+                case tokens::CLOSE_BRACE:
+                    if (structure.back()->get_type() != tokens::OPEN_BRACE){
                         errors::UNEXPECTED_TOKEN(line, '}');
-                    } else if (current->get_type() == tokens::CLOSE_BRACKET && structure.back()->get_type() != tokens::OPEN_BRACKET) {
-                        errors::UNEXPECTED_TOKEN(line, ']');
-                    } else if (current->get_type() == tokens::CLOSE_PAREN && structure.back()->get_type() != tokens::OPEN_PAREN) {
-                        errors::UNEXPECTED_TOKEN(line, ')');
                     }
-                    current = structure.back()->get_next(); // Return to outside of fold
+                    current = current->get_fold(); // Return to outside of fold
                     structure.pop_back();
                     num_deep--;
                     break;
 
-                // Multi char operators
+                case tokens::OPEN_BRACKET: case tokens::OPEN_PAREN:
+                    structure.push_back(current);
+                    current = current->get_next();
+                    num_deep++;
+                    break;
+
+                case tokens::CLOSE_BRACKET: case tokens::CLOSE_PAREN:
+                    if (current->get_type() == tokens::CLOSE_BRACKET && structure.back()->get_type() != tokens::OPEN_BRACKET){
+                        errors::UNEXPECTED_TOKEN(line, ']');
+                    } else if (current->get_type() == tokens::CLOSE_PAREN && structure.back()->get_type() != tokens::OPEN_PAREN){
+                        errors::UNEXPECTED_TOKEN(line, ')');
+                    }
+                    current = current->get_next(); // Return to outside of fold
+                    structure.pop_back();
+                    num_deep--;
+                    break;
+
+                // Multi character operators
                 case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS:
                 case tokens::MINUS_EQUALS: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
                 case tokens::MOD_EQUALS: case tokens::EQUALS_EQUALS: case tokens::NOT_EQUALS:
@@ -127,41 +150,31 @@ void errors::check_syntax(exec_path *path) {
                     break;
 
                 case '\'':
-                    if (in_char){
-                        in_char = false;
-                    } else{
-                        in_char = true;
-                        entered_at = line;
-                    }
-                    current = current->get_next();
+                    in_char = true;
+                    entered_at = line;
                     break;
 
                 case '"':
-                    if (in_string){
-                        in_string = false;
-                    } else{
-                        in_string = true;
-                        entered_at = line;
-                    }
-                    current = current->get_next();
+                    in_string = true;
+                    entered_at = line;
                     break;
 
                 default:
                     current = current->get_next();
                     break;
             }
-            tok++;
         }
     }
 
-    if (num_deep != 0){
-        errors::EXPECTED_END_OF_FILE(line, '\0');
-    }
+    // Check for folding errors and unterminated strings/chars
     if (in_char){
         errors::UNTERM_CHAR(entered_at, '\0');
     }
     if (in_string){
         errors::UNTERM_STRING(entered_at, '\0');
+    }
+    if (num_deep != 0){
+        errors::EXPECTED_END_OF_FILE(line, '\0');
     }
 }
 
@@ -325,4 +338,9 @@ void errors::UNTERM_CHAR(int line, int c, std::string val) {
 void errors::UNKNOWN_TOKEN(int line, int c, std::string val) {
     std::cerr << "Unknown token at line " << line << std::endl;
     exit(21);
+}
+
+void errors::UNKNOWN_ERROR(int line, int c, std::string val) {
+    std::cerr << "Unknown error at line " << line << std::endl;
+    exit(22);
 }

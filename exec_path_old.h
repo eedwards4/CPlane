@@ -1,9 +1,10 @@
 //
-// Created by Ethan Edwards on 10/7/2024.
+// Created by Ethan Edwards on 9/10/24.
+// CURRENTLY UNUSED UNTIL POST-ASSIGNMENT ONE (TOO CLOSE TO DEADLINE TO SAFELY REFACTOR)
 //
 
-#ifndef CPLANE_EXEC_PATH_H
-#define CPLANE_EXEC_PATH_H
+#ifndef CPLANE_EXEC_PATH_OLD_H
+#define CPLANE_EXEC_PATH_OLD_H
 
 #include "tokens.h"
 
@@ -36,11 +37,11 @@ public:
     exec_node* get_fold(){
         return fold;
     }
-    void set_next(exec_node* new_next){
-        this->next = new_next;
+    void set_next(exec_node* next){
+        this->next = next;
     }
-    void set_fold(exec_node* new_fold){
-        this->fold = new_fold;
+    void set_fold(exec_node* fold){
+        this->fold = fold;
     }
 
 private:
@@ -51,35 +52,43 @@ private:
 
 };
 
-class exec_path {
+class exec_path_old {
 public:
-    exec_path(){
+    exec_path_old(){
         head = nullptr;
         tail = nullptr;
         current = nullptr;
     }
-    ~exec_path();
+    ~exec_path_old(){
+        exec_node* temp = head;
+        while (temp != nullptr){
+            exec_node* next = temp->get_next();
+            delete temp;
+            temp = next;
+        }
+    }
 
     exec_node* get_head(){ return head; }
     exec_node* get_tail(){ return tail; }
 
-    void add_node(int type, std::string value="");
+    void add_node(int type, std::string value = "");
+
+    void print_path();
+
+    void print_tokens();
 
     void print_tokens_to_file(std::string filename);
 
-    void print_visual_path();
-
-    void remove_newlines();
+	void remove_newlines();
 
 private:
-    // Head/Tail
+    // Abs. head/tail
     exec_node* head;
     exec_node* tail;
-
-    // For building the path
+    // Navigation
     exec_node* current;
-
+    std::vector<exec_node*> structure;
 };
 
 
-#endif //CPLANE_EXEC_PATH_H
+#endif //CPLANE_EXEC_PATH_OLD_H

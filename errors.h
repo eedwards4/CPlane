@@ -38,6 +38,7 @@ public:
     static void UNTERM_COMMENT(int line, int c, std::string val = ""); // Unterminated multiline comment
     static void UNTERM_CHAR(int line, int c, std::string val = ""); // Unterminated character
     static void UNKNOWN_TOKEN(int line, int c, std::string val = ""); // Unknown token
+    static void UNKNOWN_ERROR(int line, int c, std::string val = ""); // Unknown error
 
 private:
     // Helpers
