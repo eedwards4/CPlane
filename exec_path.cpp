@@ -50,7 +50,6 @@ void exec_path::print_visual_path(){
     exec_node* tmp_head = head;
     exec_node* prev = nullptr;
     int num_spaces_over = 0; // Store the number of spaces to add to the next line when we encounter a fold
-    bool starting_new_line = true;
 
     while (tmp_head != nullptr){
         if ((prev != nullptr) && (prev->get_type() == tokens::OPEN_BRACE || prev->get_type() == tokens::CLOSE_BRACE)){
@@ -58,13 +57,11 @@ void exec_path::print_visual_path(){
             std::cout << " --> NULL" << std::endl;
             std::cout << std::string(num_spaces_over, ' ') << " | \n" <<
                          std::string(num_spaces_over, ' ') << " v \n"; // Down arrow
-            std::cout << std::string(num_spaces_over, ' ');
-            starting_new_line = true;
+            std::cout << std::string(num_spaces_over, ' ') << tmp_head->get_value();
         }
         else if (tmp_head->get_type() >= 9000){ // Custom token
-            if (tmp_head == this->head || starting_new_line){
+            if (tmp_head == this->head){
                 std::cout << tmp_head->get_value();
-                starting_new_line = false;
             } else{
                 std::cout << " --> " << tmp_head->get_value();
                 num_spaces_over += 5;
