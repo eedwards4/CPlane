@@ -67,7 +67,7 @@ public:
 
     void print_tokens_to_file(std::string filename);
 
-    void print_visual_path();
+    void print_visual_path(std::ofstream& out);
 
     void remove_newlines();
 

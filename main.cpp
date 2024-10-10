@@ -18,7 +18,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
     string filename;
     if (SKIP_ARGS){
-        filename = "tests/programming_assignment_3-test_file_1.c";
+        filename = "tests/programming_assignment_2-test_file_2.c";
     } else{
         if (argc != 2){
             cout << "Please provide a single file to tokenize." << endl;
@@ -39,9 +39,12 @@ int main(int argc, char* argv[]) {
     // Sending in the input file
     t.tokenize(filename);
     // Generating output file
-    // path.print_tokens_to_file(filename);
     path.remove_newlines();
-    path.print_visual_path();
+    // Outputting the visual path
+    string output_filename = "./output_files/" + filename.substr(6, filename.size() - 2) + "_pathed.txt";
+    ofstream out(output_filename);
+
+    path.print_visual_path(out);
     // Error handling
     errors e;
     e.check_syntax(&path);

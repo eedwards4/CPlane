@@ -46,44 +46,45 @@ void exec_path::add_node(int type, std::string value) {
     }
 }
 
-void exec_path::print_visual_path(){
+void exec_path::print_visual_path(std::ofstream& out) {
     exec_node* tmp_head = head;
     exec_node* prev = nullptr;
-    int num_spaces_over = 0; // Store the number of spaces to add to the next line when we encounter a fold
+    int num_spaces_over = 0;  // Store the number of spaces to add to the next line when we encounter a fold
 
-    while (tmp_head != nullptr){
-        if ((prev != nullptr) && (prev->get_type() == tokens::OPEN_BRACE || prev->get_type() == tokens::CLOSE_BRACE)){
-            // Output the visual pointers and an extra set of spaces to start off the new line
-            std::cout << " --> NULL" << std::endl;
-            std::cout << std::string(num_spaces_over, ' ') << " | \n" <<
-                         std::string(num_spaces_over, ' ') << " v \n"; // Down arrow
-            std::cout << std::string(num_spaces_over, ' ') << tmp_head->get_value();
+    while (tmp_head != nullptr) {
+        if ((prev != nullptr) && (prev->get_type() == tokens::OPEN_BRACE || prev->get_type() == tokens::CLOSE_BRACE)) {
+            // Output the visual pointers and an extra set of spaces to start the new line
+            out << " --> NULL" << std::endl;
+            out << std::string(num_spaces_over, ' ') << "| \n"
+                << std::string(num_spaces_over, ' ') << "v \n";  // Down arrow
+            out << std::string(num_spaces_over, ' ') << tmp_head->get_value();
+            // Update spaces only for the current token's value length
+            num_spaces_over += tmp_head->get_value().size() - 1;
         }
-        else if (tmp_head->get_type() >= 9000){ // Custom token
-            if (tmp_head == this->head){
-                std::cout << tmp_head->get_value();
-            } else{
-                std::cout << " --> " << tmp_head->get_value();
-                num_spaces_over += 5;
-            }
-            if (tmp_head->get_type() == tokens::OPEN_PAREN || tmp_head->get_type() == tokens::CLOSE_PAREN ||
-                tmp_head->get_type() == tokens::OPEN_BRACKET || tmp_head->get_type() == tokens::CLOSE_BRACKET){
+        else if (tmp_head->get_type() >= 9000) {  // Custom token
+            if (tmp_head == this->head) {
+                out << tmp_head->get_value();
                 num_spaces_over += tmp_head->get_value().size() - 1;
-            } else{
+            } else {
+                out << " --> " << tmp_head->get_value();
+                num_spaces_over += 5;  // For " --> "
                 num_spaces_over += tmp_head->get_value().size();
             }
         }
-        else{
-            std::cout << " --> " << char(tmp_head->get_type());
-            num_spaces_over += 6;
+        else {
+            out << " --> " << char(tmp_head->get_type());
+            num_spaces_over += 6;  // " --> " is 5 characters, plus 1 for the char
         }
+
         prev = tmp_head;
-        if (tmp_head->get_type() == tokens::OPEN_BRACE || tmp_head->get_type() == tokens::CLOSE_BRACE){
-            if (tmp_head->get_fold() == nullptr){
-                std::cout << " --> NULL" << std::endl;
+
+        // Handling folding logic (OPEN_BRACE or CLOSE_BRACE)
+        if (tmp_head->get_type() == tokens::OPEN_BRACE || tmp_head->get_type() == tokens::CLOSE_BRACE) {
+            if (tmp_head->get_fold() == nullptr) {
+                out << " --> NULL" << std::endl;
             }
             tmp_head = tmp_head->get_fold();
-        } else{
+        } else {
             tmp_head = tmp_head->get_next();
         }
     }
