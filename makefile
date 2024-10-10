@@ -1,6 +1,6 @@
 # Compiler and flags
 CC      = g++
-CXXFLAGS = -g -std=c++11
+CXXFLAGS = -g -std=c++14
 LFLAGS  = 
 
 # Source files and object files

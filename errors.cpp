@@ -344,3 +344,8 @@ void errors::UNKNOWN_ERROR(int line, int c, std::string val) {
     std::cerr << "Unknown error at line " << line << std::endl;
     exit(22);
 }
+
+void errors::E_EPERM(int line, int c, std::string val) {
+    std::cerr << "Operation not permitted at line " << line << std::endl;
+    exit(23);
+}
