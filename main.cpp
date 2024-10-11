@@ -25,29 +25,32 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 	
-	filename = argv[1];
+	    filename = argv[1];
 	
-	if ( filename.substr(filename.size() - 2) != ".c" ){
-	  cout << "Please provide a valid .c file." << endl;
-	  return 1;
- 	}
+	    if ( filename.substr(filename.size() - 2) != ".c" ){
+	        cout << "Please provide a valid .c file." << endl;
+	    return 1;
+ 	    }
     }
+    // Generate output filename base
+    string output_base = "./output_files/" + filename.substr(6, filename.size() - 2);
 
     // Setting up tokenizer
     exec_path path;
     tokenizer t(&path);
-    // Sending in the input file
+    // Tokenize the file
     t.tokenize(filename);
-    // Generating output file
-    path.remove_newlines();
-    // Outputting the visual path
-    string output_filename = "./output_files/" + filename.substr(6, filename.size() - 2) + "_pathed.txt";
-    ofstream out(output_filename);
-
-    path.print_visual_path(out);
     // Error handling
     errors e;
     e.check_syntax(&path);
+    // Remove newlines from the path as they are now unnecessary
+    path.remove_newlines();
+    // Outputting the tokens
+    string tokens_filename = output_base + "_tokens.txt";
+    path.print_tokens_to_file(tokens_filename);
+    // Outputting the visual path
+    string vpath_filename = output_base + "_pathed.txt";
+    path.print_visual_path(vpath_filename);
     // Cleanup
     return 0;
 }

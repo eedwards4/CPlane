@@ -53,6 +53,7 @@ private:
 
 class exec_path {
 public:
+    // Management
     exec_path(){
         head = nullptr;
         tail = nullptr;
@@ -60,16 +61,18 @@ public:
     }
     ~exec_path();
 
+    void add_node(int type, std::string value="");
+
+    void remove_newlines();
+
+    // Getters
     exec_node* get_head(){ return head; }
     exec_node* get_tail(){ return tail; }
 
-    void add_node(int type, std::string value="");
-
+    // Output
     void print_tokens_to_file(std::string filename);
 
-    void print_visual_path(std::ofstream& out);
-
-    void remove_newlines();
+    void print_visual_path(std::string filename);
 
 private:
     // Head/Tail
