@@ -47,7 +47,18 @@ void errors::check_syntax(exec_path *path) {
                     num_deep--;
                     break;
 
-                case tokens::OPEN_BRACKET: case tokens::OPEN_PAREN:
+                case tokens::OPEN_BRACKET:
+                    structure.push_back(current);
+                    if (current->get_next()->get_type() == tokens::INT_AS_STRING){
+                        if (std::stoi(current->get_next()->get_value()) < 0){
+                            errors::ARR_SIZE_POS(line);
+                        }
+                    }
+                    current = current->get_next();
+                    num_deep++;
+                    break;
+
+                case tokens::OPEN_PAREN:
                     structure.push_back(current);
                     current = current->get_next();
                     num_deep++;
@@ -388,6 +399,10 @@ void errors::E_EPERM(int line, int c, std::string val) {
 
 void errors::MISSING_CLOSING_QUOTE(int line) {
     std::cerr << "Syntax error on line " << line << ": unterminated string quote." << std::endl;
+}
+
+void errors::ARR_SIZE_POS(int line) {
+    std::cerr << "Syntax error on line " << line << ": array size must be a positive integer." << std::endl;
 }
 /*
 void errors::E_ENOENT(int line, int c, std::string val) {
