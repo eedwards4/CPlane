@@ -189,6 +189,24 @@ void errors::check_syntax(exec_path *path) {
                     }
                     break;
 
+                case tokens::TOKEN_AS_STRING:
+                    if (current->get_value() == "int" || current->get_value() == "float" || current->get_value() == "char"){
+                        for (std::string word : reserved_word_list){
+                            if (current->get_next()->get_value() == word){
+                                errors::RESERVED_WORD_VAR(line, current->get_next()->get_value());
+                            }
+                        }
+                    }
+                    if (current->get_value() == "function"){
+                        for (std::string word : reserved_word_list){
+                            if (current->get_next()->get_next()->get_value() == word){
+                                errors::RESERVED_WORD_FUNC(line, current->get_next()->get_next()->get_value());
+                            }
+                        }
+                    }
+                    current = current->get_next();
+                    break;
+
                 case '\'':
                     in_char = true;
                     entered_at = line;
@@ -399,10 +417,22 @@ void errors::E_EPERM(int line, int c, std::string val) {
 
 void errors::MISSING_CLOSING_QUOTE(int line) {
     std::cerr << "Syntax error on line " << line << ": unterminated string quote." << std::endl;
+    exit(24);
 }
 
 void errors::ARR_SIZE_POS(int line) {
     std::cerr << "Syntax error on line " << line << ": array size must be a positive integer." << std::endl;
+    exit(25);
+}
+
+void errors::RESERVED_WORD_VAR(int line, std::string val) {
+    std::cerr << "Syntax error on line " << line << ": reserved word " << val << " cannot be used as a variable name." << std::endl;
+    exit(26);
+}
+
+void errors::RESERVED_WORD_FUNC(int line, std::string val) {
+    std::cerr << "Syntax error on line " << line << ": reserved word " << val << " cannot be used as a function name." << std::endl;
+    exit(27);
 }
 /*
 void errors::E_ENOENT(int line, int c, std::string val) {

@@ -42,6 +42,8 @@ public:
     static void UNKNOWN_ERROR(int line, int c, std::string val = ""); // Unknown error
     static void MISSING_CLOSING_QUOTE(int line);
     static void ARR_SIZE_POS(int line);
+    static void RESERVED_WORD_VAR(int line, std::string val);
+    static void RESERVED_WORD_FUNC(int line, std::string val);
 
     static void E_UNEXPECTED_USE_OF_CHAR(int line, int c, std::string val ="");
     static void E_UNEXPECTED_USE_OF_VOID(int line, int c, std::string val ="");
@@ -65,7 +67,7 @@ private:
                                                    "explicit", "export", "false", "friend", "inline", "mutable", "namespace",
                                                    "new", "operator", "private", "protected", "public", "reinterpret_cast",
                                                    "static_cast", "template", "this", "throw", "true", "try", "typeid", "typename",
-                                                   "using", "virtual", "wchar_t"};
+                                                   "using", "virtual", "wchar_t", "printf"};
 
 };
 
