@@ -104,6 +104,7 @@ void errors::check_syntax(exec_path *path) {
                         switch (current->get_next()->get_type()){
                             case tokens::FLOAT_AS_STRING: case tokens::INT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL: case tokens::TOKEN_AS_STRING:
                                 current = current->get_next();
+				//
                                 break;
 
                             case '\'': case '"':
@@ -339,7 +340,6 @@ void errors::UNKNOWN_TOKEN(int line, int c, std::string val) {
     std::cerr << "Unknown token at line " << line << std::endl;
     exit(21);
 }
-
 void errors::UNKNOWN_ERROR(int line, int c, std::string val) {
     std::cerr << "Unknown error at line " << line << std::endl;
     exit(22);
@@ -349,3 +349,29 @@ void errors::E_EPERM(int line, int c, std::string val) {
     std::cerr << "Operation not permitted at line " << line << std::endl;
     exit(23);
 }
+
+void errors::E_ENOENT(int line, int c, std::string val) {
+  std::cerr << "No such file or directory on line " << line << std::endl;
+  exit(24);
+}
+
+
+
+void errors::E_UNTERM_QUOTE(int line, int c, std::string val) {
+  std::cerr << "syntax error on line " << line << ": closing quote is missing. " << std::endl;
+  exit(27);
+}
+void errors::E_UNEXPECTED_USE_OF_CHAR(int line, int c, std::string val) {
+  std::cerr << "syntax error on line: " << line << " reserved word char cannot be for the name of a variable" << line << std::endl;
+  exit(25);
+}
+void errors::E_UNEXPECTED_USE_OF_VOID(int line, int c, std::string val) {
+  std::cerr << "syntax error on line " << line << ": reserved word void cannot be for the name of a variable " << std::endl;
+  exit(26);
+}
+void errors::E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val) {
+  std::cerr << "syntax error on line " << line << ": array size must be declared as a positive integer" << std::endl;
+  exit(28);
+}
+
+

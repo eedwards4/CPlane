@@ -1,5 +1,6 @@
 //
 // Created by Ethan Edwards on 9/8/2024.
+// Edited by Logan Puntous on 10/13/2024.
 //
 
 #ifndef CPLANE_ERRORS_H
@@ -39,7 +40,19 @@ public:
     static void UNTERM_CHAR(int line, int c, std::string val = ""); // Unterminated character
     static void UNKNOWN_TOKEN(int line, int c, std::string val = ""); // Unknown token
     static void UNKNOWN_ERROR(int line, int c, std::string val = ""); // Unknown error
+
+
+
+  static void E_UNEXPECTED_USE_OF_CHAR(int line, int c, std::string val ="");
+  static void E_UNEXPECTED_USE_OF_VOID(int line, int c, std::string val ="");
+  static void E_UNTERM_QUOTE(int line, int c, std::string val ="");
+  static void E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val ="");
+  //oh no
+  //
+
+    
     static void E_EPERM(int line, int c, std::string val = ""); // Operation not permitted
+    static void E_ENOENT(int line, int c, std::string val);
 
 private:
     // Helpers
