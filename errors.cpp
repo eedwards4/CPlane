@@ -123,7 +123,35 @@ void errors::check_syntax(exec_path *path) {
                     break;
 
                 // Variables/statics
-                case tokens::INT_AS_STRING: case tokens::FLOAT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL:
+                case tokens::INT_AS_STRING: case tokens::FLOAT_AS_STRING: case tokens::CHAR_LITERAL:
+                    if (current->get_next() == nullptr){
+                        errors::EXPECTED_END(line, '\0');
+                    } else{
+                        switch(current->get_next()->get_type()){
+                            case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS:
+                            case tokens::MINUS_EQUALS: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
+                            case tokens::MOD_EQUALS: case tokens::EQUALS_EQUALS: case tokens::NOT_EQUALS:
+                            case tokens::LESS_EQUALS: case tokens::GREATER_EQUALS: case tokens::LEFT_SHIFT:
+                            case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
+                            case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
+                            case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::RIGHT_SLIM_ARROW:
+                            case '+': case '-': case '*': case '%': case '=': case '<': case '>': case '!': case '/':
+                                current = current->get_next();
+                                break;
+
+                            case tokens::CLOSE_BRACE: case tokens::CLOSE_BRACKET: case tokens::CLOSE_PAREN: case ';': case '\'': case '"':
+                                current = current->get_next();
+                                break;
+
+                            default:
+                                errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
+                                break;
+                        }
+                    }
+                    break;
+
+                case tokens::STRING_LITERAL:
+                    string_error_checker(current->get_value(), line);
                     if (current->get_next() == nullptr){
                         errors::EXPECTED_END(line, '\0');
                     } else{
@@ -186,6 +214,14 @@ bool errors::is_num(char c) {
 
 bool errors::is_alpha(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+void errors::string_error_checker(std::string val, int line) {
+    for (char c : val){
+        if (c == '\\' && c == val.back()){
+            errors::MISSING_CLOSING_QUOTE(line);
+        }
+    }
 }
 
 std::string errors::print_custom(int chr, std::string val = ""){
@@ -350,11 +386,15 @@ void errors::E_EPERM(int line, int c, std::string val) {
     exit(23);
 }
 
+void errors::MISSING_CLOSING_QUOTE(int line) {
+    std::cerr << "Syntax error on line " << line << ": unterminated string quote." << std::endl;
+}
+/*
 void errors::E_ENOENT(int line, int c, std::string val) {
   std::cerr << "No such file or directory on line " << line << std::endl;
   exit(24);
 }
-
+*/
 
 
 void errors::E_UNTERM_QUOTE(int line, int c, std::string val) {

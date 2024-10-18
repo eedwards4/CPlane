@@ -40,25 +40,31 @@ public:
     static void UNTERM_CHAR(int line, int c, std::string val = ""); // Unterminated character
     static void UNKNOWN_TOKEN(int line, int c, std::string val = ""); // Unknown token
     static void UNKNOWN_ERROR(int line, int c, std::string val = ""); // Unknown error
+    static void MISSING_CLOSING_QUOTE(int line);
 
+    static void E_UNEXPECTED_USE_OF_CHAR(int line, int c, std::string val ="");
+    static void E_UNEXPECTED_USE_OF_VOID(int line, int c, std::string val ="");
+    static void E_UNTERM_QUOTE(int line, int c, std::string val ="");
+    static void E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val ="");
 
-
-  static void E_UNEXPECTED_USE_OF_CHAR(int line, int c, std::string val ="");
-  static void E_UNEXPECTED_USE_OF_VOID(int line, int c, std::string val ="");
-  static void E_UNTERM_QUOTE(int line, int c, std::string val ="");
-  static void E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val ="");
-  //oh no
-  //
-
-    
     static void E_EPERM(int line, int c, std::string val = ""); // Operation not permitted
-    static void E_ENOENT(int line, int c, std::string val);
+    // static void E_ENOENT(int line, int c, std::string val);
 
 private:
     // Helpers
     bool is_num(char c); // Checks if a character is a number
     static bool is_alpha(char c); // Checks if a character is a letter
     static std::string print_custom(int chr, std::string val);
+    static void string_error_checker(std::string val, int line);
+    std::vector<std::string> reserved_word_list = {"auto", "break", "case", "char", "const", "continue", "default", "do",
+                                                   "double", "else", "enum", "extern", "float", "for", "goto", "if", "int",
+                                                   "long", "register", "return", "short", "signed", "sizeof", "static",
+                                                   "struct", "switch", "typedef", "union", "unsigned", "void", "volatile",
+                                                   "while", "asm", "bool", "catch", "class", "const_cast", "delete", "dynamic_cast",
+                                                   "explicit", "export", "false", "friend", "inline", "mutable", "namespace",
+                                                   "new", "operator", "private", "protected", "public", "reinterpret_cast",
+                                                   "static_cast", "template", "this", "throw", "true", "try", "typeid", "typename",
+                                                   "using", "virtual", "wchar_t"};
 
 };
 
