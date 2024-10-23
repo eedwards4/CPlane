@@ -1,5 +1,6 @@
 //
 // Created by Ethan Edwards on 10/11/2024.
+// Edited by Logan Puntous on 10/22/2024.
 //
 
 #ifndef CPLANE_SYMBOLS_H
@@ -7,23 +8,47 @@
 
 #include <string>
 
-class symbol {
+
+class Symbol {
 public:
-    symbol() = default;
-    ~symbol() = default;
+  std::string IDENT_NAME;
+  int IDENT_TYPE;
+  int DATATYPE;
+  bool IS_ARRAY;
+  int ARRAY_SIZE;
+  int SCOPE;
 
+  Symbol *next;
+
+  // Default constructor
+  Symbol();
+  
+  // Constructor
+  Symbol(std::string IDENT_NAME, int IDENT_TYPE, int DATATYPE, bool IS_ARRAY, int ARRAY_SIZE, int SCOPE);
 private:
-    std::string IDENT_NAME;
-    int IDENT_TYPE;
-    int DATATYPE = -1;
-    bool IS_ARRAY = false;
-    int ARRAY_SIZE = 0;
-    int SCOPE = 1;
-
+  
 };
 
-class symbols {
 
+
+
+
+
+
+
+class SymbolTable {
+  Symbol *head;
+  
+public:
+  // Constructor
+  SymbolTable() {
+    head = NULL;
+  }
+  
+  ~SymbolTable();
+  
+  void insertAtHead(std::string IDENT_NAME, int IDENT_TYPE, int DATATYPE, bool IS_ARRAY, int ARRAY_SIZE, int SCOPE);
+  void print();
 };
 
 
