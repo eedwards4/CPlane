@@ -3,6 +3,7 @@
 //
 
 #include "errors.h"
+#include <set>
 
 void errors::check_syntax(exec_path *path) {
     exec_node* current = path->get_head();
@@ -12,6 +13,12 @@ void errors::check_syntax(exec_path *path) {
     int entered_at = 0; // Tracks the line where we entered a char, string, or comment
     bool in_string = false; // Tracks if we are in a string
     bool in_char = false; // Tracks if we are in a char
+
+
+    std::set<std::string> global_variables; // Track global variable names
+    std::set<std::string> local_variables;   // Track local variable names in the current function/procedure
+    bool expecting_variable = false; // Flag to track when a variable name is expected
+    bool in_local_scope = false;   //check for local vs global
 
     while (current != nullptr){
         if (current->get_type() == tokens::NEWLINE){
@@ -204,6 +211,7 @@ void errors::check_syntax(exec_path *path) {
                             }
                         }
                     }
+                    //start of already defined variable checks. Removed for now
                     current = current->get_next();
                     break;
 
@@ -459,4 +467,14 @@ void errors::E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val) {
   exit(28);
 }
 
+void errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, std::string val) {
+    std::string error_message = "Syntax error on line " + std::to_string(line) + ": variable '" + val + "' is already defined globally";
+    std::cerr << error_message << std::endl;
+    exit(29);
+}
 
+void errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(int line, std::string val) {
+    std::string error_message = "Syntax error on line " + std::to_string(line) + ": variable '" + val + "' is already defined locally";
+    std::cerr << error_message << std::endl;
+    exit(29);
+}
