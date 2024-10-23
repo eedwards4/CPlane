@@ -11,7 +11,13 @@
 
 class Symbol {
 public:
-  int data;
+  std::string IDENT_NAME;
+  int IDENT_TYPE;
+  int DATATYPE;
+  bool IS_ARRAY;
+  int ARRAY_SIZE;
+  int SCOPE;
+
   Symbol *next;
 
   // Default constructor
@@ -19,6 +25,8 @@ public:
   
   // Constructor
   Symbol(std::string IDENT_NAME, int IDENT_TYPE, int DATATYPE, bool IS_ARRAY, int ARRAY_SIZE, int SCOPE);
+private:
+  
 };
 
 
