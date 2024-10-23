@@ -468,7 +468,7 @@ void errors::E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val) {
 }
 
 void errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, std::string val) {
-    std::string error_message = "Syntax error on line " + std::to_string(line) + ": variable  '" + val + "' is already defined globally";
+    std::string error_message = "Syntax error on line " + std::to_string(line) + ": variable '" + val + "' is already defined globally";
     std::cerr << error_message << std::endl;
     exit(29);
 }

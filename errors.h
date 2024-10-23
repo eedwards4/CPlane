@@ -51,8 +51,8 @@ public:
     static void E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val ="");
 
 
-    void E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, std::string val); //error: already defined global variable1
-    void E_ALREADY_DEFINED_VARIABLE_LOCAL(int line, std::string val); //error: already defined local variable1
+    void E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, std::string val); //error: already defined global variable
+    void E_ALREADY_DEFINED_VARIABLE_LOCAL(int line, std::string val); //error: already defined local variable
 
     static void E_EPERM(int line, int c, std::string val = ""); // Operation not permitted
     // static void E_ENOENT(int line, int c, std::string val);
