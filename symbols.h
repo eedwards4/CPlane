@@ -7,6 +7,7 @@
 #define CPLANE_SYMBOLS_H
 
 #include <string>
+#include <iostream>
 
 
 class Symbol {

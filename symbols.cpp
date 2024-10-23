@@ -6,9 +6,10 @@
 
 #include "symbols.h"
 
-/*
-  CLASS: SYMBOL
-*/
+
+/********************                                                                                                                                               
+  CLASS: SYMBOL                                                                                                                                                
+*********************/
 
 // Default constructor
 Symbol::Symbol() {
@@ -37,14 +38,14 @@ Symbol::Symbol(std::string IDENT_NAME, int IDENT_TYPE, int DATATYPE, bool IS_ARR
 
 
 
-/*
+/********************
   CLASS: SYMBOLTABLE
-*/
+*********************/
 
-
+// Deconstructing the LL
 SymbolTable::~SymbolTable() {
-    Node *current = head;
-    Node *nextNode;
+    Symbol *current = head;
+    Symbol *nextNode;
 
     while (current != NULL) {
         nextNode = current->next;
@@ -81,7 +82,7 @@ void SymbolTable::print() {
   // Check for empty list                                                                                                                                           
   if (head == NULL) {
     // NEED ERROR HERE
-    cout << "Error in SymbolTable::print(), List is empty." << endl;
+    std::cout << "Error in SymbolTable::print(), List is empty." << std::endl;
     return;
   }
 
