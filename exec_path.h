@@ -14,38 +14,38 @@
 
 class exec_node{
 public:
-    exec_node() = default;
-    ~exec_node() = default;
-
-    exec_node (int type, std::string value, exec_node* next, exec_node* fold){
+    // Management
+    exec_node (int type, std::string value, int line, int col, exec_node* next, exec_node* fold){
         this->type = type;
         this->value = value;
         this->next = next;
         this->fold = fold;
+        this->line = line;
+        this->column = col;
     }
-
-    int get_type() const{
-        return type;
-    }
-    std::string get_value() const{
-        return value;
-    }
-    exec_node* get_next(){
-        return next;
-    }
-    exec_node* get_fold(){
-        return fold;
-    }
-    void set_next(exec_node* new_next){
-        this->next = new_next;
-    }
-    void set_fold(exec_node* new_fold){
-        this->fold = new_fold;
-    }
+    ~exec_node() = default;
+    // Values
+    int get_type() const{ return type; }
+    std::string get_value() const{ return value; }
+    void set_next(exec_node* new_next){ this->next = new_next; }
+    void set_fold(exec_node* new_fold){ this->fold = new_fold; }
+    // Errors
+    int get_line(){ return line; }
+    int get_column(){ return column; }
+    // std::string get_filename(){ return filename; } // Unused for now, placeholder for multi-file support
+    // Navigation
+    exec_node* get_next(){ return next; }
+    exec_node* get_fold(){ return fold; }
 
 private:
+    // Values
     int type;
     std::string value;
+    // Errors
+    int line;
+    int column;
+    // std::string filename; // Unused for now, placeholder for multi-file support
+    // Navigation
     exec_node* next;
     exec_node* fold;
 
@@ -61,7 +61,7 @@ public:
     }
     ~exec_path();
 
-    void add_node(int type, std::string value="");
+    void add_node(int type, int line, int col, std::string value="");
 
     void remove_newlines();
 

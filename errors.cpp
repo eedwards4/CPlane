@@ -9,7 +9,6 @@ void errors::check_syntax(exec_path *path) {
     exec_node* current = path->get_head();
     int num_deep = 0; // Tracks current depth in nested statements. MUST BE ZERO AT END OF FILE
     std::vector<exec_node*> structure; // Tracks the structure of the current nest (e.g. {, [, (, etc). MUST BE EMPTY AT END OF FILE
-    int line = 1; // Tracks current line number
     int entered_at = 0; // Tracks the line where we entered a char, string, or comment
     bool in_string = false; // Tracks if we are in a string
     bool in_char = false; // Tracks if we are in a char
@@ -23,7 +22,6 @@ void errors::check_syntax(exec_path *path) {
     while (current != nullptr){
         if (current->get_type() == tokens::NEWLINE){
             current = current->get_next();
-            line++;
         }
         else if (in_string){
             if (current->get_type() == '"'){
@@ -47,7 +45,7 @@ void errors::check_syntax(exec_path *path) {
 
                 case tokens::CLOSE_BRACE:
                     if (structure.back()->get_type() != tokens::OPEN_BRACE){
-                        errors::UNEXPECTED_TOKEN(line, '}');
+                        errors::UNEXPECTED_TOKEN(current->get_line(), '}');
                     }
                     current = current->get_fold(); // Return to outside of fold
                     structure.pop_back();
@@ -58,7 +56,7 @@ void errors::check_syntax(exec_path *path) {
                     structure.push_back(current);
                     if (current->get_next()->get_type() == tokens::INT_AS_STRING){
                         if (std::stoi(current->get_next()->get_value()) < 0){
-                            errors::ARR_SIZE_POS(line);
+                            errors::ARR_SIZE_POS(current->get_line());
                         }
                     }
                     current = current->get_next();
@@ -73,9 +71,9 @@ void errors::check_syntax(exec_path *path) {
 
                 case tokens::CLOSE_BRACKET: case tokens::CLOSE_PAREN:
                     if (current->get_type() == tokens::CLOSE_BRACKET && structure.back()->get_type() != tokens::OPEN_BRACKET){
-                        errors::UNEXPECTED_TOKEN(line, ']');
+                        errors::UNEXPECTED_TOKEN(current->get_line(), ']');
                     } else if (current->get_type() == tokens::CLOSE_PAREN && structure.back()->get_type() != tokens::OPEN_PAREN){
-                        errors::UNEXPECTED_TOKEN(line, ')');
+                        errors::UNEXPECTED_TOKEN(current->get_line(), ')');
                     }
                     current = current->get_next(); // Return to outside of fold
                     structure.pop_back();
@@ -91,7 +89,7 @@ void errors::check_syntax(exec_path *path) {
                 case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
                 case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::RIGHT_SLIM_ARROW:
                     if (current->get_next() == nullptr){
-                        errors::EXPECTED_END(line, '\0');
+                        errors::EXPECTED_END(current->get_line(), '\0');
                     } else{
                         switch(current->get_next()->get_type()){
                             case tokens::FLOAT_AS_STRING: case tokens::INT_AS_STRING: case tokens::STRING_LITERAL: case tokens::CHAR_LITERAL: case tokens::TOKEN_AS_STRING:
@@ -107,7 +105,7 @@ void errors::check_syntax(exec_path *path) {
                                 break;
 
                             default:
-                                errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
+                                errors::EXPECTED_EXPRESSION(current->get_line(), current->get_next()->get_column(), current->get_next()->get_value());
                                 break;
                         }
                     }
@@ -116,7 +114,7 @@ void errors::check_syntax(exec_path *path) {
                 // Single char operators
                 case '+': case '-': case '*': case '%': case '=': case '<': case '>': case '!': case '/':
                     if (current->get_next() == nullptr){
-                        errors::EXPECTED_EXPRESSION(line, '\0');
+                        errors::EXPECTED_EXPRESSION(current->get_line(), '\0');
                         break;
                     } else{
                         switch (current->get_next()->get_type()){
@@ -134,7 +132,7 @@ void errors::check_syntax(exec_path *path) {
                                 break;
 
                             default:
-                                errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
+                                errors::EXPECTED_EXPRESSION(current->get_line(), current->get_next()->get_column(), current->get_next()->get_value());
                                 break;
                         }
                     }
@@ -143,7 +141,7 @@ void errors::check_syntax(exec_path *path) {
                 // Variables/statics
                 case tokens::INT_AS_STRING: case tokens::FLOAT_AS_STRING: case tokens::CHAR_LITERAL:
                     if (current->get_next() == nullptr){
-                        errors::EXPECTED_END(line, '\0');
+                        errors::EXPECTED_END(current->get_line(), '\0');
                     } else{
                         switch(current->get_next()->get_type()){
                             case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS:
@@ -162,16 +160,16 @@ void errors::check_syntax(exec_path *path) {
                                 break;
 
                             default:
-                                errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
+                                errors::EXPECTED_EXPRESSION(current->get_line(), current->get_next()->get_column(), current->get_next()->get_value());
                                 break;
                         }
                     }
                     break;
 
                 case tokens::STRING_LITERAL:
-                    string_error_checker(current->get_value(), line);
+                    string_error_checker(current->get_value(), current->get_line());
                     if (current->get_next() == nullptr){
-                        errors::EXPECTED_END(line, '\0');
+                        errors::EXPECTED_END(current->get_line(), '\0');
                     } else{
                         switch(current->get_next()->get_type()){
                             case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS:
@@ -190,7 +188,7 @@ void errors::check_syntax(exec_path *path) {
                                 break;
 
                             default:
-                                errors::EXPECTED_EXPRESSION(line, current->get_next()->get_type(), current->get_next()->get_value());
+                                errors::EXPECTED_EXPRESSION(current->get_line(), current->get_next()->get_column(), current->get_next()->get_value());
                                 break;
                         }
                     }
@@ -200,14 +198,14 @@ void errors::check_syntax(exec_path *path) {
                     if (current->get_value() == "int" || current->get_value() == "float" || current->get_value() == "char"){
                         for (std::string word : reserved_word_list){
                             if (current->get_next()->get_value() == word){
-                                errors::RESERVED_WORD_VAR(line, current->get_next()->get_value());
+                                errors::RESERVED_WORD_VAR(current->get_line(), current->get_next()->get_value());
                             }
                         }
                     }
                     if (current->get_value() == "function"){
                         for (std::string word : reserved_word_list){
                             if (current->get_next()->get_next()->get_value() == word){
-                                errors::RESERVED_WORD_FUNC(line, current->get_next()->get_next()->get_value());
+                                errors::RESERVED_WORD_FUNC(current->get_line(), current->get_next()->get_next()->get_column(), current->get_next()->get_next()->get_value());
                             }
                         }
                     }
@@ -217,12 +215,12 @@ void errors::check_syntax(exec_path *path) {
 
                 case '\'':
                     in_char = true;
-                    entered_at = line;
+                    entered_at = current->get_line();
                     break;
 
                 case '"':
                     in_string = true;
-                    entered_at = line;
+                    entered_at = current->get_line();
                     break;
 
                 default:
@@ -240,7 +238,7 @@ void errors::check_syntax(exec_path *path) {
         errors::UNTERM_STRING(entered_at, '\0');
     }
     if (num_deep != 0){
-        errors::EXPECTED_END_OF_FILE(line, '\0');
+        errors::EXPECTED_END_OF_FILE(0, '\0'); // TODO: Add line number
     }
 }
 
@@ -310,7 +308,7 @@ std::string errors::print_custom(int chr, std::string val = ""){
 
 // Error handlers
 void errors::EXPECTED_EXPRESSION(int line, int c, std::string val) {
-    std::cerr << "Expected an expression at line " << line << " but found " << errors::print_custom(c, val) << std::endl;
+    std::cerr << ":" << line << ":" << c << ": error: expected expression but found " << val << std::endl;
     exit(1);
 }
 
@@ -438,8 +436,8 @@ void errors::RESERVED_WORD_VAR(int line, std::string val) {
     exit(26);
 }
 
-void errors::RESERVED_WORD_FUNC(int line, std::string val) {
-    std::cerr << "Syntax error on line " << line << ": reserved word " << val << " cannot be used as a function name." << std::endl;
+void errors::RESERVED_WORD_FUNC(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: reserved word " << val << " cannot be used as a function name." << std::endl;
     exit(27);
 }
 /*
@@ -448,7 +446,6 @@ void errors::E_ENOENT(int line, int c, std::string val) {
   exit(24);
 }
 */
-
 
 void errors::E_UNTERM_QUOTE(int line, int c, std::string val) {
   std::cerr << "syntax error on line " << line << ": closing quote is missing. " << std::endl;

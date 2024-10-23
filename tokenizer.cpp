@@ -22,12 +22,12 @@ void tokenizer::tokenize(std::string filename){
 
     while (!in.eof()){
         in.get(curr);
+        col++;
         if (ignore_slc){
             if (curr == '\n'){
                 ignore_slc = false;
                 this->out << "\n"; // OUTPUT TAG
-                this->path->add_node(tokens::NEWLINE, "\n");
-                line++;
+                line++; col = 0;
             }
             else{
                 this->out << " "; // OUTPUT TAG
@@ -40,9 +40,8 @@ void tokenizer::tokenize(std::string filename){
                 this->out << "  "; // OUTPUT TAG
             }
             else if (curr == '\n'){
-                line++;
+                line++; col = 0;
                 this->out << "\n"; // OUTPUT TAG
-                this->path->add_node(tokens::NEWLINE, "\n");
             }
             else{
                 this->out << " "; // OUTPUT TAG
@@ -52,8 +51,8 @@ void tokenizer::tokenize(std::string filename){
             if (curr == '"'){
                 handle_str = false;
                 this->out << curr; // OUTPUT TAG
-                this->path->add_node(tokens::STRING_LITERAL, str);
-                this->path->add_node(tokens::single_char(curr));
+                this->path->add_node(tokens::STRING_LITERAL, line, col - str.size(), str);
+                this->path->add_node(tokens::single_char(curr), line, col);
                 str = "";
             }
             else{
@@ -65,8 +64,8 @@ void tokenizer::tokenize(std::string filename){
             if (curr == '\''){
                 handle_chr = false;
                 this->out << curr; // OUTPUT TAG
-                this->path->add_node(tokens::CHAR_LITERAL, str);
-                this->path->add_node(tokens::single_char(curr));
+                this->path->add_node(tokens::CHAR_LITERAL, line, col - str.size(), str);
+                this->path->add_node(tokens::single_char(curr), line, col);
                 str = "";
             }
             else{
@@ -78,7 +77,7 @@ void tokenizer::tokenize(std::string filename){
             switch(curr){
                 // String literals
                 case '"':
-                    this->path->add_node(tokens::single_char(curr));
+                    this->path->add_node(tokens::single_char(curr), line, col);
                     handle_str = true;
                     entered_at = line;
                     this->out << curr; // OUTPUT TAG
@@ -86,7 +85,7 @@ void tokenizer::tokenize(std::string filename){
 
                 // Character literals
                 case '\'':
-                    this->path->add_node(tokens::single_char(curr));
+                    this->path->add_node(tokens::single_char(curr), line, col);
                     handle_chr = true;
                     entered_at = line;
                     this->out << curr; // OUTPUT TAG
@@ -95,7 +94,6 @@ void tokenizer::tokenize(std::string filename){
                 // Ignored characters
                 case '\n': // Newline
                     this->out << "\n"; // OUTPUT TAG
-                    this->path->add_node(tokens::NEWLINE, "\n");
                     line++;
                     col = 0;
                     break;
@@ -107,19 +105,19 @@ void tokenizer::tokenize(std::string filename){
                 // Nesting structures
                 case '{':
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::OPEN_BRACE, "{");
+                    this->path->add_node(tokens::OPEN_BRACE, line, col, "{");
                     structure.push_back(curr);
                     break;
 
                 case '[':
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::OPEN_BRACKET, "[");
+                    this->path->add_node(tokens::OPEN_BRACKET, line, col, "[");
                     structure.push_back(curr);
                     break;
 
                 case '(':
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::OPEN_PAREN, "(");
+                    this->path->add_node(tokens::OPEN_PAREN, line, col, "(");
                     structure.push_back(curr);
                     break;
 
@@ -129,7 +127,7 @@ void tokenizer::tokenize(std::string filename){
                     }
                     structure.pop_back();
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::CLOSE_BRACE, "}");
+                    this->path->add_node(tokens::CLOSE_BRACE, line, col, "}");
                     break;
 
                 case ']':
@@ -138,7 +136,7 @@ void tokenizer::tokenize(std::string filename){
                     }
                     structure.pop_back();
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::CLOSE_BRACKET, "]");
+                    this->path->add_node(tokens::CLOSE_BRACKET, line, col, "]");
                     break;
 
                 case ')':
@@ -147,7 +145,7 @@ void tokenizer::tokenize(std::string filename){
                     }
                     structure.pop_back();
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::CLOSE_PAREN, ")");
+                    this->path->add_node(tokens::CLOSE_PAREN, line, col, ")");
                     break;
 
                 // Characters with 2+ secondaries
@@ -155,20 +153,22 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '+'){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::PLUS_PLUS, "++");
+                        this->path->add_node(tokens::PLUS_PLUS, line, col, "++");
                         str = "";
                     } else if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::PLUS_EQUALS, "+=");
+                        this->path->add_node(tokens::PLUS_EQUALS, line, col, "+=");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -176,29 +176,33 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '-'){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::MINUS_MINUS, "--");
+                        this->path->add_node(tokens::MINUS_MINUS, line, col, "--");
                         str = "";
                     } else if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::MINUS_EQUALS, "-=");
+                        this->path->add_node(tokens::MINUS_EQUALS, line, col, "-=");
                         str = "";
                     } else if (in.peek() == '>'){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::RIGHT_SLIM_ARROW, "->");
+                        this->path->add_node(tokens::RIGHT_SLIM_ARROW, line, col, "->");
                         str = "";
                     } else if (is_num(in.peek())){
                         str = curr;
                         bool dot = false;
                         while (is_num(in.peek()) || in.peek() == '.'){
                             in.get(curr);
+                            col++;
                             if (curr == '.'){
                                 dot = true;
                             }
@@ -209,15 +213,15 @@ void tokenizer::tokenize(std::string filename){
                         }
                         this->out << str; // OUTPUT TAG
                         if (dot){
-                            this->path->add_node(tokens::FLOAT_AS_STRING, str);
+                            this->path->add_node(tokens::FLOAT_AS_STRING, line, col, str);
                         }
                         else {
-                            this->path->add_node(tokens::INT_AS_STRING, str);
+                            this->path->add_node(tokens::INT_AS_STRING, line, col, str);
                         }
                     }
                     else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -225,20 +229,22 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '&'){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::BOOLEAN_AND, "&&");
+                        this->path->add_node(tokens::BOOLEAN_AND, line, col, "&&");
                         str = "";
                     } else if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::AND_EQUALS, "&=");
+                        this->path->add_node(tokens::AND_EQUALS, line, col, "&=");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -246,20 +252,22 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '|'){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::BOOLEAN_OR, "||");
+                        this->path->add_node(tokens::BOOLEAN_OR, line, col, "||");
                         str = "";
                     } else if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::OR_EQUALS, "|=");
+                        this->path->add_node(tokens::OR_EQUALS, line, col, "|=");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -268,13 +276,14 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::NOT_EQUALS, "!=");
+                        this->path->add_node(tokens::NOT_EQUALS, line, col, "!=");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -282,13 +291,14 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::MOD_EQUALS, "%=");
+                        this->path->add_node(tokens::MOD_EQUALS, line, col, "%=");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -296,13 +306,14 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::TIMES_EQUALS, "*=");
+                        this->path->add_node(tokens::TIMES_EQUALS, line, col, "*=");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -310,13 +321,14 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::EQUALS_EQUALS, "==");
+                        this->path->add_node(tokens::EQUALS_EQUALS, line, col, "==");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -324,13 +336,14 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '='){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::XOR_EQUALS, "^=");
+                        this->path->add_node(tokens::XOR_EQUALS, line, col, "^=");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -338,13 +351,14 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '#'){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::TOKEN_PASTE, "##");
+                        this->path->add_node(tokens::TOKEN_PASTE, line, col, "##");
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -353,28 +367,31 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '=') {
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::GREATER_EQUALS, ">=");
+                        this->path->add_node(tokens::GREATER_EQUALS, line, col, ">=");
                         str = "";
                     } else if (in.peek() == '>') {
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         if (in.peek() == '=') {
                             in.get(curr); // Consume secondary
+                            col++;
                             str += curr;
                             this->out << str; // OUTPUT TAG
-                            this->path->add_node(tokens::RIGHT_SHIFT_EQUALS, ">>=");
+                            this->path->add_node(tokens::RIGHT_SHIFT_EQUALS, line, col, ">>=");
                             str = "";
                             break;
                         }
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::RIGHT_SHIFT, ">>");
+                        this->path->add_node(tokens::RIGHT_SHIFT, line, col, ">>");
                         str = "";
                     } else {
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -382,45 +399,50 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == '=') {
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::LESS_EQUALS, "<=");
+                        this->path->add_node(tokens::LESS_EQUALS, line, col, "<=");
                         str = "";
                     } else if (in.peek() == '<') {
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         if (in.peek() == '=') {
                             in.get(curr); // Consume secondary
+                            col++;
                             str += curr;
                             this->out << str; // OUTPUT TAG
-                            this->path->add_node(tokens::LEFT_SHIFT_EQUALS, "<<=");
+                            this->path->add_node(tokens::LEFT_SHIFT_EQUALS, line, col, "<<=");
                             str = "";
                             break;
                         }
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::LEFT_SHIFT, "<<");
+                        this->path->add_node(tokens::LEFT_SHIFT, line, col, "<<");
                         str = "";
                     } else {
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
                 case '/':
                     if (in.peek() == '/') {
                         in.get(curr); // Consume secondary
+                        col++;
                         ignore_slc = true;
                         entered_at = line;
                         this->out << "  "; // OUTPUT TAG
                     } else if (in.peek() == '*') {
                         in.get(curr); // Consume secondary
+                        col++;
                         ignore_mlc = true;
                         entered_at = line;
                         this->out << "  "; // OUTPUT TAG
                     } else {
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -431,15 +453,17 @@ void tokenizer::tokenize(std::string filename){
                     else if (in.peek() == '.'){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         if (in.peek() == '.'){
                             in.get(curr); // Consume tertiary
+                            col++;
                             str += curr;
                             if (in.peek() == '.'){
                                 errors::UNEXPECTED_TOKEN(line, curr);
                             }
                             this->out << str; // OUTPUT TAG
-                            this->path->add_node(tokens::ELLIPSIS, "...");
+                            this->path->add_node(tokens::ELLIPSIS, line, col, "...");
                             str = "";
                             break;
                         } else{
@@ -448,7 +472,7 @@ void tokenizer::tokenize(std::string filename){
                     }
                     else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
@@ -456,25 +480,26 @@ void tokenizer::tokenize(std::string filename){
                     if (in.peek() == ':'){
                         str = curr;
                         in.get(curr); // Consume secondary
+                        col++;
                         str += curr;
                         this->out << str; // OUTPUT TAG
-                        this->path->add_node(tokens::SCOPE, "::");
+                        this->path->add_node(tokens::SCOPE, line, col, "::");
                         str = "";
                     }
                     else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr));
+                        this->path->add_node(tokens::single_char(curr), line, col);
                     }
                     break;
 
                 case ',': case ';': case '?': case '~': case '`':
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::single_char(curr));
+                    this->path->add_node(tokens::single_char(curr), line, col);
                     break;
 
                 case 'L': // Can be used as an identifier or as a prefix for a string literal
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::LITERAL_DEF, "L");
+                    this->path->add_node(tokens::LITERAL_DEF, line, col, "L");
                     break;
 
                 case '_': case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -490,9 +515,10 @@ void tokenizer::tokenize(std::string filename){
                     while (is_alpha(in.peek()) || is_num(in.peek()) || in.peek() == '_'){
                         in.get(curr);
                         str += curr;
+                        col++;
                     }
                     this->out << str; // OUTPUT TAG
-                    this->path->add_node(tokens::TOKEN_AS_STRING, str);
+                    this->path->add_node(tokens::TOKEN_AS_STRING, line, col - str.size(), str);
                     str = "";
                     break;
 
@@ -501,6 +527,7 @@ void tokenizer::tokenize(std::string filename){
                     is_float = false;
                     while (is_num(in.peek()) || in.peek() == '.'){
                         in.get(curr);
+                        col++;
                         if (curr == '.'){
                             is_float = true;
                         }
@@ -511,10 +538,10 @@ void tokenizer::tokenize(std::string filename){
                     }
                     this->out << str; // OUTPUT TAG
                     if (is_float){
-                        this->path->add_node(tokens::FLOAT_AS_STRING, str);
+                        this->path->add_node(tokens::FLOAT_AS_STRING, line, col - str.size(), str);
                     }
                     else {
-                        this->path->add_node(tokens::INT_AS_STRING, str);
+                        this->path->add_node(tokens::INT_AS_STRING, line, col - str.size(), str);
                     }
                     str = "";
                     is_float = false;

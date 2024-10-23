@@ -27,8 +27,8 @@ exec_path::~exec_path() {
 }
 
 // Add a node to the path
-void exec_path::add_node(int type, std::string value) {
-    auto* node = new exec_node(type, value, nullptr, nullptr);
+void exec_path::add_node(int type, int line, int col, std::string value) {
+    auto* node = new exec_node(type, value, line, col, nullptr, nullptr);
 
     if (head == nullptr) {
         head = node;
