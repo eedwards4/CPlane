@@ -464,14 +464,12 @@ void errors::E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val) {
   exit(28);
 }
 
-void errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, std::string val) {
-    std::string error_message = "Syntax error on line " + std::to_string(line) + ": variable '" + val + "' is already defined globally";
-    std::cerr << error_message << std::endl;
+void errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: variable '" << val << "' is already defined globally." << std::endl;
     exit(29);
 }
 
-void errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(int line, std::string val) {
-    std::string error_message = "Syntax error on line " + std::to_string(line) + ": variable '" + val + "' is already defined locally";
-    std::cerr << error_message << std::endl;
+void errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: variable '" << val << "' is already defined locally." << std::endl;
     exit(29);
 }

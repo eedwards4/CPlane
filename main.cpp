@@ -14,12 +14,12 @@
 using namespace std;
 
 // Precompile options
-#define SKIP_ARGS 1
+#define SKIP_ARGS 0
 
 int main(int argc, char* argv[]) {
     string filename;
     if (SKIP_ARGS){
-        filename = "tests/programming_assignment_4-test_file_7.c";
+        filename = "tests/programming_assignment_4-test_file_1.c";
     } else{
         if (argc != 2){
             cout << "Please provide a single file to tokenize." << endl;
@@ -69,5 +69,6 @@ int main(int argc, char* argv[]) {
     cout << "Output files can be found at: " << endl;
     cout << "Tokens: " << tokens_filename << endl;
     cout << "Visual Path: " << vpath_filename << endl;
+    cout << "Symbol Table: " << symbol_table_filename << endl;
     return 0;
 }

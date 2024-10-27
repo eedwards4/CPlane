@@ -153,8 +153,7 @@ void symbol_table::addSymbol(symbol_node *newSymbol) {
                 if (current->getIDENT_NAME() == newSymbol->getIDENT_NAME()) {
                     // Handle duplicate symbol error
                     // TODO: MOVE TO ERRORS.CPP
-                    std::cerr << ":" << newSymbol->get_line() << ":" << newSymbol->get_column() << ": error: variable '" << newSymbol->getIDENT_NAME() << "' is already defined locally." << std::endl;
-                    exit(1);
+                    errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(newSymbol->get_line(), newSymbol->get_column(), newSymbol->getIDENT_NAME());
                 }
                 if (newSymbol->getIDENT_TYPE() == ident){
                     // We have a function in a function/procedure in a procedure
@@ -170,9 +169,7 @@ void symbol_table::addSymbol(symbol_node *newSymbol) {
                 while (paramCurrent != nullptr) {
                     if (paramCurrent->getIDENT_NAME() == newSymbol->getIDENT_NAME()) {
                         // Handle duplicate symbol error
-                        // TODO: MOVE TO ERRORS.CPP
-                        std::cerr << ":" << newSymbol->get_line() << ":" << newSymbol->get_column() << ": error: variable '" << newSymbol->getIDENT_NAME() << "' is already defined locally." << std::endl;
-                        exit(1);
+                        errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(newSymbol->get_line(), newSymbol->get_column(), newSymbol->getIDENT_NAME());
                     }
                     paramCurrent = paramCurrent->getNext();
                 }
@@ -183,9 +180,7 @@ void symbol_table::addSymbol(symbol_node *newSymbol) {
                 while (g_current != nullptr) {
                     if (g_current->getIDENT_NAME() == newSymbol->getIDENT_NAME()) {
                         // Handle duplicate symbol error
-                        // TODO: MOVE TO ERRORS.CPP
-                        std::cerr << ":" << newSymbol->get_line() << ":" << newSymbol->get_column() << ": error: variable '" << newSymbol->getIDENT_NAME() << "' is already defined globally." << std::endl;
-                        exit(1);
+                        errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(newSymbol->get_line(), newSymbol->get_column(), newSymbol->getIDENT_NAME());
                     }
                     g_current = g_current->getNext();
                 }
