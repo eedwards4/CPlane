@@ -8,6 +8,8 @@
 
 #include "errors.h"
 #include "tokenizer.h"
+#include "exec_path.h"
+#include "symbol_table.h"
 
 using namespace std;
 
@@ -17,7 +19,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
     string filename;
     if (SKIP_ARGS){
-        filename = "./tests/programming_assignment_2-test_file_6.c";
+        filename = "tests/programming_assignment_4-test_file_7.c";
     } else{
         if (argc != 2){
             cout << "Please provide a single file to tokenize." << endl;
@@ -47,6 +49,9 @@ int main(int argc, char* argv[]) {
     e.check_syntax(&path);
     // Remove newlines from the path as they are now unnecessary
     path.remove_newlines();
+    // Generate symbol table
+    symbol_table sym_table;
+    sym_table.addSymbols(path);
 
     cout << "Generating output files..." << endl;
     // Outputting the tokens
@@ -55,6 +60,10 @@ int main(int argc, char* argv[]) {
     // Outputting the visual path
     string vpath_filename = output_base + "_pathed.txt";
     path.print_visual_path(vpath_filename);
+    // Outputting the symbol table
+    string symbol_table_filename = output_base + "_symbols.txt";
+    sym_table.printSymbols(symbol_table_filename);
+
     // Cleanup
     cout << "Done!" << endl;
     cout << "Output files can be found at: " << endl;

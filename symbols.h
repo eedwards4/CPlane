@@ -1,55 +1,60 @@
 //
-// Created by Ethan Edwards on 10/11/2024.
-// Edited by Logan Puntous on 10/22/2024.
+// Created by Ethan Edwards on 10/24/2024.
 //
 
 #ifndef CPLANE_SYMBOLS_H
 #define CPLANE_SYMBOLS_H
 
 #include <string>
-#include <iostream>
 
-
-class Symbol {
+class symbols {
 public:
-  std::string IDENT_NAME;
-  int IDENT_TYPE;
-  int DATATYPE;
-  bool IS_ARRAY;
-  int ARRAY_SIZE;
-  int SCOPE;
+    class identifiers {
+    public:
+        static constexpr int FUNCTION = 9999;
+        static constexpr int PROCEDURE = 9998;
+        static constexpr int DATATYPE = 9997;
+        static constexpr int PARAMETER = 9996;
 
-  Symbol *next;
+        static std::string get_type(int type){
+            switch (type) {
+                case FUNCTION: return "function";
+                case PROCEDURE: return "procedure";
+                case DATATYPE: return "datatype";
+                default: return "unknown";
+            }
+        }
+    };
+    class data_types {
+    public:
+        static constexpr int NA = 9999;
+        static constexpr int INT = 9998;
+        static constexpr int FLOAT = 9997;
+        static constexpr int CHAR = 9996;
+        static constexpr int BOOL = 9995;
+        static constexpr int VOID = 9994;
 
-  // Default constructor
-  Symbol();
-  
-  // Constructor
-  Symbol(std::string IDENT_NAME, int IDENT_TYPE, int DATATYPE, bool IS_ARRAY, int ARRAY_SIZE, int SCOPE);
-private:
-  
-};
+        static int check_type(const std::string& type){
+            if (type == "int") return INT;
+            if (type == "float") return FLOAT;
+            if (type == "char") return CHAR;
+            if (type == "bool") return BOOL;
+            if (type == "void") return VOID;
+            return -1; // Invalid type
+        }
 
-
-
-
-
-
-
-
-class SymbolTable {
-  Symbol *head;
-  
-public:
-  // Constructor
-  SymbolTable() {
-    head = NULL;
-  }
-  
-  ~SymbolTable();
-  
-  void insertAtHead(std::string IDENT_NAME, int IDENT_TYPE, int DATATYPE, bool IS_ARRAY, int ARRAY_SIZE, int SCOPE);
-  void print();
+        static std::string get_type(int type){
+            switch (type) {
+                case INT: return "int";
+                case FLOAT: return "float";
+                case CHAR: return "char";
+                case BOOL: return "bool";
+                case VOID: return "void";
+                case NA: return "NA";
+                default: return "unknown";
+            }
+        }
+    };
 };
 
 
