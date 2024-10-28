@@ -17,8 +17,8 @@ public:
     ~errors() = default;
 
     void check_syntax(exec_path* path); // Checks for syntax errors
-    // Error handlers
-    static void EXPECTED_EXPRESSION(int line, int c, std::string val = ""); // Expected an expression
+    // Syntax errors
+    static void EXPECTED_EXPRESSION(int line, int c, std::string val = ""); // Expected an expressn
     static void EXPECTED_STATEMENT(int line, int c, std::string val = ""); // Expected a statement
     static void EXPECTED_IDENTIFIER(int line, int c, std::string val = ""); // Expected an identifier
     static void EXPECTED_OPERATOR(int line, int c, std::string val = ""); // Expected an operator
@@ -40,22 +40,25 @@ public:
     static void UNTERM_CHAR(int line, int c, std::string val = ""); // Unterminated character
     static void UNKNOWN_TOKEN(int line, int c, std::string val = ""); // Unknown token
     static void UNKNOWN_ERROR(int line, int c, std::string val = ""); // Unknown error
-    static void MISSING_CLOSING_QUOTE(int line);
+    static void MISSING_CLOSING_QUOTE(int line); // Missing a closing quote
     static void ARR_SIZE_POS(int line);
-    static void RESERVED_WORD_VAR(int line, std::string val);
-    static void RESERVED_WORD_FUNC(int line, int col, std::string val);
+    static void RESERVED_WORD_VAR(int line, std::string val); // Use of reserverd word as a variable
+    static void RESERVED_WORD_FUNC(int line, int col, std::string val); // Use of reserved word as a function
 
-    static void E_UNEXPECTED_USE_OF_CHAR(int line, int c, std::string val ="");
-    static void E_UNEXPECTED_USE_OF_VOID(int line, int c, std::string val ="");
-    static void E_UNTERM_QUOTE(int line, int c, std::string val ="");
-    static void E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val ="");
+    static void E_UNEXPECTED_USE_OF_CHAR(int line, int c, std::string val =""); // Unexpected use of char
+    static void E_UNEXPECTED_USE_OF_VOID(int line, int c, std::string val =""); // Unexpected use of void
+    static void E_UNTERM_QUOTE(int line, int c, std::string val =""); // Unterminated quote
+    static void E_NEGATIVE_ARRAY_SIZE(int line, int c, std::string val =""); // Negative array size used
 
 
     static void E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, int col, std::string val); //error: already defined global variable
     static void E_ALREADY_DEFINED_VARIABLE_LOCAL(int line, int col, std::string val); //error: already defined local variable
 
     static void E_EPERM(int line, int c, std::string val = ""); // Operation not permitted
-    // static void E_ENOENT(int line, int c, std::string val);
+
+
+    // Runtime errors
+  
 
 private:
     // Helpers

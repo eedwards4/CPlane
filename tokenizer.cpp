@@ -7,6 +7,11 @@
 void tokenizer::tokenize(std::string filename){
     // Input
     std::ifstream in(filename, std::ios::binary);
+    if (!in) {
+      std::cerr << "Error: Unable to open file " << filename << std::endl;
+      exit(1);
+    }
+    
     std::string str;
     char curr;
     // Tracking

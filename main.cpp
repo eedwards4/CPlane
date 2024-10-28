@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 	        exit(1);
  	    }
     }
-    cout << "File successfully loaded." << endl;
+    
     // Generate output filename base
     string output_base = "./output_files/" + filename.substr(6, filename.size() - 2);
 
