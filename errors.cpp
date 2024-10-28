@@ -471,5 +471,20 @@ void errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, int col, std::string va
 
 void errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(int line, int col, std::string val) {
     std::cerr << ":" << line << ":" << col << ": error: variable '" << val << "' is already defined locally." << std::endl;
-    exit(29);
+    exit(30);
+}
+
+void errors::E_NON_FUNCTION_SCOPE_DECLARATION(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: symbol '" << val << "' cannot be declared as a unique scope." << std::endl;
+    exit(31);
+}
+
+void errors::E_DUPLICATE_SYMBOL(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: duplicate symbol '" << val << "' is already defined in this scope." << std::endl;
+    exit(32);
+}
+
+void errors::E_NESTED_FUNCTION_NOT_ALLOWED(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: nested function or procedure '" << val << "' is not allowed under ISO C." << std::endl;
+    exit(33);
 }

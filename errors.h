@@ -53,6 +53,10 @@ public:
 
     static void E_ALREADY_DEFINED_VARIABLE_GLOBAL(int line, int col, std::string val); //error: already defined global variable
     static void E_ALREADY_DEFINED_VARIABLE_LOCAL(int line, int col, std::string val); //error: already defined local variable
+    static void E_NON_FUNCTION_SCOPE_DECLARATION(int line, int col, std::string val); //error: Non-functions/Non-procedures cannot be declared as a unique scope
+    static void E_DUPLICATE_SYMBOL(int line, int col, std::string val); //error: duplicated symbol
+    static void E_NESTED_FUNCTION_NOT_ALLOWED(int line, int col, std::string val); //error: nested funciton
+
 
     static void E_EPERM(int line, int c, std::string val = ""); // Operation not permitted
 
