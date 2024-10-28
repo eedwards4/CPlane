@@ -1,3 +1,5 @@
 .idea
 .vscode
 cmake-build-debug
+output_assignment_1.txt
+/output_files
