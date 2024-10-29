@@ -74,6 +74,7 @@ public:
 
     // Setters
     void addSymbols(exec_path& path);
+    exec_node* addVariables(exec_node* current, int dataType = -1, int scope = -1);
     exec_node* addParameters(symbol_node* functionSymbol, exec_node* current);
 
     // Getters
