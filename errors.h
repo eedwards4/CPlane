@@ -60,6 +60,86 @@ public:
 
     static void E_EPERM(int line, int c, std::string val = ""); // Operation not permitted
 
+    void E_EDEADLK(int line, int col, std::string val);
+    void E_ENOMEM(int line, int col, std::string val);
+    void E_EACCES(int line, int col, std::string val);
+    void E_EFAULT(int line, int col, std::string val);
+    void E_ENOTBLK(int line, int col, std::string val);
+    void E_EBUSY(int line, int col, std::string val);
+    void E_EEXIST(int line, int col, std::string val);
+    void E_EXDEV(int line, int col, std::string val);
+    void E_ENODEV(int line, int col, std::string val);
+    void E_ENOTDIR(int line, int col, std::string val);
+    void E_EISDIR(int line, int col, std::string val);
+    void E_EINVAL(int line, int col, std::string val);
+    void E_EMFILE(int line, int col, std::string val);
+    void E_ENFILE(int line, int col, std::string val);
+    void E_ENOTTY(int line, int col, std::string val);
+    void E_ETXTBSY(int line, int col, std::string val);
+    void E_EFBIG(int line, int col, std::string val);
+    void E_ENOSPC(int line, int col, std::string val);
+    void E_ESPIPE(int line, int col, std::string val);
+    void E_EROFS(int line, int col, std::string val);
+    void E_EMLINK(int line, int col, std::string val);
+    void E_EPIPE(int line, int col, std::string val);
+    void E_EDOM(int line, int col, std::string val);
+    void E_ERANGE(int line, int col, std::string val);
+    void E_EAGAIN(int line, int col, std::string val);
+    void E_EWOULDBLOCK(int line, int col, std::string val);
+    void E_EINPROGRESS(int line, int col, std::string val);
+    void E_EALREADY(int line, int col, std::string val);
+    void E_ENOTSOCK(int line, int col, std::string val);
+    void E_EMSGSIZE(int line, int col, std::string val);
+    void E_EPROTOTYPE(int line, int col, std::string val);
+    void E_ENOPROTOOPT(int line, int col, std::string val);
+    void E_EPROTONOSUPPORT(int line, int col, std::string val);
+    void E_ESOCKTNOSUPPORT(int line, int col, std::string val);
+    void E_EOPNOTSUPP(int line, int col, std::string val);
+    void E_EPFNOSUPPORT(int line, int col, std::string val);
+    void E_EAFNOSUPPORT(int line, int col, std::string val);
+    void E_EADDRINUSE(int line, int col, std::string val);
+    void E_EADDRNOTAVAIL(int line, int col, std::string val);
+    void E_ENETDOWN(int line, int col, std::string val);
+    void E_ENETUNREACH(int line, int col, std::string val);
+    void E_ENETRESET(int line, int col, std::string val);
+    void E_ECONNABORTED(int line, int col, std::string val);
+    void E_ECONNRESET(int line, int col, std::string val);
+    void E_ENOBUFS(int line, int col, std::string val);
+    void E_EISCONN(int line, int col, std::string val);
+    void E_ENOTCONN(int line, int col, std::string val);
+    void E_EDESTADDRREQ(int line, int col, std::string val);
+    void E_ESHUTDOWN(int line, int col, std::string val);
+    void E_ETOOMANYREFS(int line, int col, std::string val);
+    void E_ETIMEDOUT(int line, int col, std::string val);
+    void E_ECONNREFUSED(int line, int col, std::string val);
+    void E_ELOOP(int line, int col, std::string val);
+    void E_ENAMETOOLONG(int line, int col, std::string val);
+    void E_EHOSTDOWN(int line, int col, std::string val);
+    void E_EHOSTUNREACH(int line, int col, std::string val);
+    void E_ENOTEMPTY(int line, int col, std::string val);
+    void E_EPROCLIM(int line, int col, std::string val);
+    void E_EUSERS(int line, int col, std::string val);
+    void E_EDQUOT(int line, int col, std::string val);
+    void E_ESTALE(int line, int col, std::string val);
+    void E_EREMOTE(int line, int col, std::string val);
+    void E_ENOLCK(int line, int col, std::string val);
+    void E_ENOSYS(int line, int col, std::string val);
+    void E_ENOTSUP(int line, int col, std::string val);
+    void E_EILSEQ(int line, int col, std::string val);
+    void E_EBADMSG(int line, int col, std::string val);
+    void E_ECANCELED(int line, int col, std::string val);
+    void E_ENOTRECOVERABLE(int line, int col, std::string val);
+    void E_EOWNERDEAD(int line, int col, std::string val);
+    void E_EMULTIHOP(int line, int col, std::string val);
+    void E_ENOLINK(int line, int col, std::string val);
+    void E_ENOMEDIUM(int line, int col, std::string val);
+    void E_EMEDIUMTYPE(int line, int col, std::string val);
+    void E_EKEYEXPIRED(int line, int col, std::string val);
+    void E_EKEYREVOKED(int line, int col, std::string val);
+    void E_EKEYREJECTED(int line, int col, std::string val);
+    void E_ERFKILL(int line, int col, std::string val);
+    void E_EHWPOISON(int line, int col, std::string val);
+
 
     // Runtime errors
   

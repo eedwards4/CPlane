@@ -488,3 +488,404 @@ void errors::E_NESTED_FUNCTION_NOT_ALLOWED(int line, int col, std::string val) {
     std::cerr << ":" << line << ":" << col << ": error: nested function or procedure '" << val << "' is not allowed under ISO C." << std::endl;
     exit(33);
 }
+
+
+
+
+
+void errors::E_ENOMEM(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Cannot allocate memory for '" << val << "'." << std::endl;
+    exit(34);
+}
+
+void errors::E_EACCES(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Permission denied for access to '" << val << "'." << std::endl;
+    exit(35);
+}
+
+void errors::E_EFAULT(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Bad address for '" << val << "'." << std::endl;
+    exit(36);
+}
+
+void errors::E_ENOTBLK(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Block device required for '" << val << "'." << std::endl;
+    exit(37);
+}
+
+void errors::E_EBUSY(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Device or resource busy while accessing '" << val << "'." << std::endl;
+    exit(38);
+}
+
+void errors::E_EEXIST(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: File '" << val << "' already exists." << std::endl;
+    exit(39);
+}
+
+void errors::E_EXDEV(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Invalid cross-device link for '" << val << "'." << std::endl;
+    exit(40);
+}
+
+void errors::E_ENODEV(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: No such device for '" << val << "'." << std::endl;
+    exit(41);
+}
+
+void errors::E_ENOTDIR(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Not a directory: '" << val << "'." << std::endl;
+    exit(42);
+}
+
+void errors::E_EISDIR(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: '" << val << "' is a directory." << std::endl;
+    exit(43);
+}
+
+void errors::E_EINVAL(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Invalid argument: '" << val << "'." << std::endl;
+    exit(44);
+}
+
+void errors::E_EMFILE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Too many open files for process accessing '" << val << "'." << std::endl;
+    exit(45);
+}
+
+void errors::E_ENFILE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Too many open files in the system when accessing '" << val << "'." << std::endl;
+    exit(46);
+}
+
+void errors::E_ENOTTY(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Inappropriate ioctl for device '" << val << "'." << std::endl;
+    exit(47);
+}
+
+void errors::E_ETXTBSY(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Text file '" << val << "' busy." << std::endl;
+    exit(48);
+}
+
+void errors::E_EFBIG(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: File '" << val << "' too large." << std::endl;
+    exit(49);
+}
+
+void errors::E_ENOSPC(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: No space left on device for '" << val << "'." << std::endl;
+    exit(50);
+}
+
+void errors::E_ESPIPE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Illegal seek on '" << val << "'." << std::endl;
+    exit(51);
+}
+
+void errors::E_EROFS(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Read-only file system for '" << val << "'." << std::endl;
+    exit(52);
+}
+
+void errors::E_EMLINK(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Too many links for '" << val << "'." << std::endl;
+    exit(53);
+}
+
+void errors::E_EPIPE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Broken pipe while accessing '" << val << "'." << std::endl;
+    exit(54);
+}
+
+void errors::E_EDOM(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Numerical argument out of domain for '" << val << "'." << std::endl;
+    exit(55);
+}
+
+void errors::E_ERANGE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Numerical result out of range for '" << val << "'." << std::endl;
+    exit(56);
+}
+
+void errors::E_EAGAIN(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Resource temporarily unavailable for '" << val << "'." << std::endl;
+    exit(57);
+}
+
+void errors::E_EWOULDBLOCK(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Operation would block for '" << val << "'." << std::endl;
+    exit(58);
+}
+
+void errors::E_EINPROGRESS(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Operation now in progress for '" << val << "'." << std::endl;
+    exit(59);
+}
+
+void errors::E_EALREADY(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Operation already in progress for '" << val << "'." << std::endl;
+    exit(60);
+}
+
+void errors::E_ENOTSOCK(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Socket operation on non-socket: '" << val << "'." << std::endl;
+    exit(61);
+}
+
+void errors::E_EMSGSIZE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Message too long for socket operation on '" << val << "'." << std::endl;
+    exit(62);
+}
+
+void errors::E_EPROTOTYPE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Protocol wrong type for socket on '" << val << "'." << std::endl;
+    exit(63);
+}
+
+void errors::E_ENOPROTOOPT(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Protocol not available for socket option on '" << val << "'." << std::endl;
+    exit(64);
+}
+
+void errors::E_EPROTONOSUPPORT(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Protocol not supported on '" << val << "'." << std::endl;
+    exit(65);
+}
+
+void errors::E_ESOCKTNOSUPPORT(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Socket type not supported for '" << val << "'." << std::endl;
+    exit(66);
+}
+
+void errors::E_EOPNOTSUPP(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Operation not supported on '" << val << "'." << std::endl;
+    exit(67);
+}
+
+void errors::E_EPFNOSUPPORT(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Protocol family not supported for '" << val << "'." << std::endl;
+    exit(68);
+}
+
+void errors::E_EAFNOSUPPORT(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Address family not supported by protocol for '" << val << "'." << std::endl;
+    exit(69);
+}
+
+void errors::E_EADDRINUSE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Address already in use: '" << val << "'." << std::endl;
+    exit(70);
+}
+
+void errors::E_EADDRNOTAVAIL(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Cannot assign requested address: '" << val << "'." << std::endl;
+    exit(71);
+}
+
+// Continue in this pattern for the remaining error codes.
+
+void errors::E_ENETDOWN(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Network is down for '" << val << "'." << std::endl;
+    exit(72);
+}
+
+void errors::E_ENETUNREACH(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Network is unreachable for '" << val << "'." << std::endl;
+    exit(73);
+}
+
+void errors::E_ENETRESET(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Network dropped connection on reset for '" << val << "'." << std::endl;
+    exit(74);
+}
+
+void errors::E_ECONNABORTED(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Software caused connection abort on '" << val << "'." << std::endl;
+    exit(75);
+}
+
+void errors::E_ECONNRESET(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Connection reset by peer on '" << val << "'." << std::endl;
+    exit(76);
+}
+
+void errors::E_ENOBUFS(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: No buffer space available for '" << val << "'." << std::endl;
+    exit(77);
+}
+
+void errors::E_EISCONN(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Transport endpoint is already connected for '" << val << "'." << std::endl;
+    exit(78);
+}
+
+void errors::E_ENOTCONN(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Transport endpoint is not connected for '" << val << "'." << std::endl;
+    exit(79);
+}
+
+void errors::E_EDESTADDRREQ(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Destination address required for '" << val << "'." << std::endl;
+    exit(80);
+}
+
+void errors::E_ESHUTDOWN(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Cannot send after transport endpoint shutdown for '" << val << "'." << std::endl;
+    exit(81);
+}
+
+void errors::E_ETOOMANYREFS(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Too many references: cannot splice for '" << val << "'." << std::endl;
+    exit(82);
+}
+
+void errors::E_ETIMEDOUT(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Connection timed out for '" << val << "'." << std::endl;
+    exit(83);
+}
+
+void errors::E_ECONNREFUSED(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Connection refused by '" << val << "'." << std::endl;
+    exit(84);
+}
+
+void errors::E_ELOOP(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Too many levels of symbolic links for '" << val << "'." << std::endl;
+    exit(85);
+}
+
+void errors::E_ENAMETOOLONG(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: File name too long: '" << val << "'." << std::endl;
+    exit(86);
+}
+
+void errors::E_EHOSTDOWN(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Host is down for '" << val << "'." << std::endl;
+    exit(87);
+}
+
+void errors::E_EHOSTUNREACH(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: No route to host for '" << val << "'." << std::endl;
+    exit(88);
+}
+
+void errors::E_ENOTEMPTY(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Directory not empty: '" << val << "'." << std::endl;
+    exit(89);
+}
+
+void errors::E_EPROCLIM(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Too many processes for user when accessing '" << val << "'." << std::endl;
+    exit(90);
+}
+
+void errors::E_EUSERS(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Too many users for quota system related to '" << val << "'." << std::endl;
+    exit(91);
+}
+
+void errors::E_EDQUOT(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Disk quota exceeded for '" << val << "'." << std::endl;
+    exit(92);
+}
+
+void errors::E_ESTALE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Stale file handle for '" << val << "'." << std::endl;
+    exit(93);
+}
+
+void errors::E_EREMOTE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Object is remote: '" << val << "'." << std::endl;
+    exit(94);
+}
+
+void errors::E_ENOLCK(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: No locks available for '" << val << "'." << std::endl;
+    exit(95);
+}
+
+void errors::E_ENOSYS(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Function not implemented for '" << val << "'." << std::endl;
+    exit(96);
+}
+
+void errors::E_ENOTSUP(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Operation not supported for '" << val << "'." << std::endl;
+    exit(97);
+}
+
+void errors::E_EILSEQ(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Invalid or incomplete multibyte or wide character in '" << val << "'." << std::endl;
+    exit(98);
+}
+
+void errors::E_EBADMSG(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Bad message for '" << val << "'." << std::endl;
+    exit(99);
+}
+
+void errors::E_ECANCELED(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Operation canceled for '" << val << "'." << std::endl;
+    exit(100);
+}
+
+void errors::E_ENOTRECOVERABLE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: State not recoverable for '" << val << "'." << std::endl;
+    exit(101);
+}
+
+void errors::E_EOWNERDEAD(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Owner died for resource '" << val << "'." << std::endl;
+    exit(102);
+}
+
+void errors::E_EMULTIHOP(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Multihop attempted for '" << val << "'." << std::endl;
+    exit(103);
+}
+
+void errors::E_ENOLINK(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Link has been severed for '" << val << "'." << std::endl;
+    exit(104);
+}
+
+void errors::E_ENOMEDIUM(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: No medium found for '" << val << "'." << std::endl;
+    exit(105);
+}
+
+void errors::E_EMEDIUMTYPE(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Wrong medium type for '" << val << "'." << std::endl;
+    exit(106);
+}
+
+void errors::E_EKEYEXPIRED(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Key expired for '" << val << "'." << std::endl;
+    exit(107);
+}
+
+void errors::E_EKEYREVOKED(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Key revoked for '" << val << "'." << std::endl;
+    exit(108);
+}
+
+void errors::E_EKEYREJECTED(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Key rejected by service for '" << val << "'." << std::endl;
+    exit(109);
+}
+
+void errors::E_ERFKILL(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Operation not possible due to RF-kill for '" << val << "'." << std::endl;
+    exit(110);
+}
+
+void errors::E_EHWPOISON(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Memory page has hardware error for '" << val << "'." << std::endl;
+    exit(111);
+}
+
+void errors::E_EDEADLK(int line, int col, std::string val) {
+    std::cerr << ":" << line << ":" << col << ": error: Resource deadlock avoided while accessing '" << val << "'." << std::endl;
+    exit(112);
+}
