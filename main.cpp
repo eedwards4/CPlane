@@ -9,7 +9,8 @@
 #include "errors.h"
 #include "tokenizer.h"
 #include "exec_path.h"
-#include "symbol_table.h"
+//#include "symbol_table.h"
+#include "symbolTable.h"
 
 using namespace std;
 
@@ -50,8 +51,8 @@ int main(int argc, char* argv[]) {
     // Remove newlines from the path as they are now unnecessary
     path.remove_newlines();
     // Generate symbol table
-    symbol_table sym_table;
-    sym_table.addSymbols(path);
+    SymbolTable table;
+    table.generateSymbolTable(path);
 
     cout << "Generating output files..." << endl;
     // Outputting the tokens
@@ -62,7 +63,7 @@ int main(int argc, char* argv[]) {
     path.print_visual_path(vpath_filename);
     // Outputting the symbol table
     string symbol_table_filename = output_base + "_symbols.txt";
-    sym_table.printSymbols(symbol_table_filename);
+    table.printSymbolTable(symbol_table_filename);
 
     // Cleanup
     cout << "Done!" << endl;

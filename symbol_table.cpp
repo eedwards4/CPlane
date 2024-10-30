@@ -1,8 +1,13 @@
 //
 // Created by Ethan Edwards on 10/24/2024.
+// Edited by Logan Puntous on 10/29/2024.
 //
 
 #include "symbol_table.h"
+
+
+
+
 
 // Destructor
 symbol_table::~symbol_table() {
@@ -15,7 +20,11 @@ symbol_table::~symbol_table() {
     }
 }
 
-void symbol_table::addSymbols(exec_path &path) {
+
+
+
+// Generates the inital symbol table using token stream.
+void symbol_table::generateSymbolTable(exec_path &path) {
     exec_node* current = path.get_head(); // Get the head of the execution path
     int scope = 0; // Initialize the scope level at global (0)
     int function_scope = 0; // Track the function scope level (i.e how many functions/procedures we have)
@@ -28,19 +37,21 @@ void symbol_table::addSymbols(exec_path &path) {
                     errors::E_NESTED_FUNCTION_NOT_ALLOWED( current->get_line(), current->get_column(), current->get_next()->get_next()->get_value());
                 }
                 auto newSymbol = new symbol_node();
-                function_scope++;
                 newSymbol->setIDENT_TYPE(symbols::identifiers::FUNCTION);
-
+		function_scope++;
+		// First token
                 current = current->get_next();
-                newSymbol->setDATATYPE(symbols::data_types::check_type(current->get_value())); // Get the return type
+                newSymbol->setDATATYPE(symbols::data_types::check_type(current->get_value()));
 
+		// Second token
                 current = current->get_next();
-                newSymbol->setIDENT_NAME(current->get_value()); // Get the function name
-                // Add line/col info
+                newSymbol->setIDENT_NAME(current->get_value());
                 newSymbol->set_line(current->get_line());
                 newSymbol->set_column(current->get_column());
-                newSymbol->setSCOPE(function_scope); // Set the scope
-                symbol_table::addSymbol(newSymbol); // Add the new symbol to the symbol table
+                newSymbol->setSCOPE(function_scope);
+
+		// Adding new function symbol to symbol table
+                symbol_table::addSymbol(newSymbol);
                 // Consume parameters
                 current = addParameters(newSymbol, current);
             }
@@ -224,7 +235,7 @@ void symbol_table::addSymbol(symbol_node* newSymbol) {
     }
 }
 
-void symbol_table::printSymbols(const std::string& filename) const {
+void symbol_table::printSymbolTable(const std::string& filename) const {
     std::ofstream out(filename);
     if (!out) {
         std::cerr << "Error opening file: " << filename << std::endl;
@@ -272,3 +283,4 @@ void symbol_table::printSymbols(const std::string& filename) const {
         }
     }
 }
+

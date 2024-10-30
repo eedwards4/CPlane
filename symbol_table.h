@@ -1,5 +1,6 @@
 //
 // Created by Ethan Edwards on 10/24/2024.
+// Edited by Logan Puntous on 10/29/2024.
 //
 
 #ifndef CPLANE_SYMBOL_TABLE_H
@@ -66,6 +67,12 @@ private:
     int column = -1;
 };
 
+
+
+
+
+
+
 class symbol_table {
 public:
     // Constructor
@@ -73,12 +80,12 @@ public:
     ~symbol_table();
 
     // Setters
-    void addSymbols(exec_path& path);
+    void generateSymbolTable(exec_path& path);
     exec_node* addVariables(exec_node* current, int dataType = -1, int scope = -1);
     exec_node* addParameters(symbol_node* functionSymbol, exec_node* current);
 
     // Getters
-    void printSymbols(const std::string& filename) const; // Function to print all symbols in the table
+    void printSymbolTable(const std::string& filename) const; // Function to print all symbols in the table
 
 private:
     // Setup
