@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     path.remove_newlines();
     // Generate symbol table
     symbol_table sym_table;
-    sym_table.addSymbols(path);
+    sym_table.build_table(path);
 
     cout << "Generating output files..." << endl;
     // Outputting the tokens
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     path.print_visual_path(vpath_filename);
     // Outputting the symbol table
     string symbol_table_filename = output_base + "_symbols.txt";
-    sym_table.printSymbols(symbol_table_filename);
+    sym_table.print_symbols(symbol_table_filename);
 
     // Cleanup
     cout << "Done!" << endl;
