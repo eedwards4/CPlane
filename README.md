@@ -1,6 +1,7 @@
 # CPlane
 A C interpreter
-Contributers: Ethan, Logan, Sean, Felix, Martin
+
+<h2>Contributers: Ethan, Logan, Sean, Felix, Martin</h2>
 
 <h2>Functionality</h2>
 This program will take an input c file.
@@ -11,7 +12,7 @@ It will generate a symbol table based on tokens.
 MORE TO COME...
 
 <h2>To compile</h2>
-(in source directory) make
+(in source directory) $ make
 <h2>To run</h2>
 ./cplane (path/to/c_file.c)
 <ul>
