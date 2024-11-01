@@ -1,5 +1,15 @@
 # CPlane
 A C interpreter
+Contributers: Ethan, Logan, Sean, Felix, Martin
+
+<h2>Functionality</h2>
+This program will take an input c file.
+It will remove all unnecessary code such as comments.
+It will tokenize the entire .c file.
+It will check for syntax errors.
+It will generate a symbol table based on tokens.
+MORE TO COME...
+
 <h2>To compile</h2>
 (in source directory) make
 <h2>To run</h2>
