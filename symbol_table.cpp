@@ -327,3 +327,27 @@ void symbol_table::print_symbols(const std::string& filename) const {
 
     out.close();
 }
+
+bool symbol_table::find_symbol(const std::string name) const{
+    for (const auto& scope : scopes){
+        if (scope != nullptr){
+            if (scope->get_params() != nullptr){
+                symbol_node* p_current = scope->get_params();
+                while (p_current != nullptr){
+                    if (p_current->IDENT_NAME == name){
+                        return true;
+                    }
+                    p_current = p_current->get_next();
+                }
+            }
+            symbol_node* current = scope;
+            while (current != nullptr){
+                if (current->IDENT_NAME == name){
+                    return true;
+                }
+                current = current->get_next();
+            }
+        }
+    }
+    return false;
+}

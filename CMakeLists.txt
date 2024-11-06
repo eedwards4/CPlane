@@ -11,4 +11,6 @@ add_executable(CPlane
         exec_path.h exec_path.cpp
         symbols.h
         symbol_table.h symbol_table.cpp
+        ast.cpp
+        ast.h
 )

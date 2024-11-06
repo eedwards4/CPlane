@@ -66,6 +66,7 @@ public:
 
     // Getters
     void print_symbols(const std::string& filename) const;
+    bool find_symbol(const std::string name) const;
 
 private:
     // Setup
