@@ -19,6 +19,7 @@ public:
     static constexpr int EXPRESSION_FOR = 9993;
     static constexpr int EXPRESSION_WHILE = 9992;
     static constexpr int STATEMENT_PRINTF = 9991;
+    static constexpr int TOKEN = 9990;
 };
 
 class ast_node{
