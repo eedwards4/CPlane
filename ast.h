@@ -59,7 +59,7 @@ private:
 
 class ast {
 public:
-    ast() = default;
+    ast();
     ~ast();
 
     // Driver for building the tree
