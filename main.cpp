@@ -54,9 +54,9 @@ int main(int argc, char* argv[]) {
     symbol_table sym_table;
     sym_table.build_table(path);
 	// Generate ast
-	ast as_tree;
-	as_tree.build_tree(path.get_head(), sym_table);
-	as_tree.print_tree();
+    ast as_tree;
+    as_tree.build_tree(path.get_head(), sym_table);
+    as_tree.print_tree();
 
     cout << "Generating output files..." << endl;
     // Outputting the tokens

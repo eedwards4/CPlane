@@ -5,6 +5,13 @@
 #include "ast.h"
 #include "symbol_table.h"
 
+ast::ast(){
+  head = nullptr;
+  tail = nullptr;
+}
+
+
+
 ast::~ast(){
     while (head != nullptr){
         if (head->get_next() == nullptr && head->get_chld() == nullptr){
@@ -265,8 +272,9 @@ bool check_precedence(exec_node* a, exec_node* b){
 }
 
 ast_node* ast::shunting_yard(std::vector<exec_node*> tokens){
-    ast_node* mini_head = nullptr;
-    ast_node* mini_tail = nullptr;
+
+  ast_node* mini_head = nullptr;
+  ast_node* mini_tail = nullptr;
 
     std::vector<exec_node*> stack;
 
@@ -289,7 +297,8 @@ ast_node* ast::shunting_yard(std::vector<exec_node*> tokens){
             }
         }
         else if (is_operator(token)){
-            while (!stack.size() > 0 && check_precedence(stack.back(), token)){
+	  // ALTERED
+	  while (!(stack.size() > 0) && check_precedence(stack.back(), token)){
                 auto new_node = new ast_node;
                 new_node->set_type(ast_types::OPERATOR);
                 new_node->set_value(token->get_value());
@@ -325,6 +334,7 @@ ast_node* ast::shunting_yard(std::vector<exec_node*> tokens){
         mini_tail = new_node;
         stack.pop_back();
     }
+    
     return mini_head;
 }
 
