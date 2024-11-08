@@ -20,6 +20,7 @@ public:
     static constexpr int EXPRESSION_WHILE = 9992;
     static constexpr int STATEMENT_PRINTF = 9991;
     static constexpr int TOKEN = 9990;
+    static constexpr int OPERATOR = 9989;
 };
 
 class ast_node{
@@ -29,12 +30,14 @@ public:
 
     void set_type(const int t){ this->type = t; }
     void set_depth(const int d){ this->depth = d; }
+    void set_value(const std::string& v){ this->value = v; }
     void set_err(const int l, const int c){ this->line = l; this->col = c; }
     void set_next(ast_node* n){ this->next = n; }
     void set_chld(ast_node* c){ this->chld = c; }
 
     int get_type() const{ return type; }
     int get_depth() const{ return depth; }
+    std::string get_value() const{ return value; }
     int get_line() const{ return line; }
     int get_col() const{ return col; }
     ast_node* get_next() const { return next; }
@@ -43,6 +46,8 @@ public:
 private:
     int type = -1;
     int depth = 0;
+
+    std::string value;
 
     int line = -1;
     int col = -1;
@@ -70,9 +75,12 @@ public:
     // Add nodes to the tree
     void add_node(ast_node* n);
 
+    // Out
+    void print_tree();
+
 private:
-    ast_node* head;
-    ast_node* tail;
+    ast_node* head = nullptr;
+    ast_node* tail = nullptr;
 
 };
 

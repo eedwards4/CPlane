@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "errors.h"
+#include "ast.h"
 #include "tokenizer.h"
 #include "exec_path.h"
 #include "symbol_table.h"
@@ -14,12 +15,12 @@
 using namespace std;
 
 // Precompile options
-#define SKIP_ARGS 0
+#define SKIP_ARGS 1
 
 int main(int argc, char* argv[]) {
     string filename;
     if (SKIP_ARGS){
-        filename = "tests/programming_assignment_4-test_file_7.c";
+        filename = "tests/programming_assignment_5-test_file_1.c";
     } else{
         if (argc != 2){
             cout << "Please provide a single file to tokenize." << endl;
@@ -52,6 +53,10 @@ int main(int argc, char* argv[]) {
     // Generate symbol table
     symbol_table sym_table;
     sym_table.build_table(path);
+	// Generate ast
+	ast as_tree;
+	as_tree.build_tree(path.get_head(), sym_table);
+	as_tree.print_tree();
 
     cout << "Generating output files..." << endl;
     // Outputting the tokens
