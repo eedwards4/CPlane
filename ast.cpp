@@ -1,126 +1,144 @@
 //
-// Created by Ethan Edwards on 11/5/24.
+// Created by Ethan Edwards on 11/7/2024.
 //
 
 #include "ast.h"
-#include "symbol_table.h"
 
-ast::~ast(){
-    while (head != nullptr){
-        if (head->get_next() == nullptr && head->get_chld() == nullptr){
-            delete head;
-            return;
-        }
-        if (head->get_next() == nullptr){
-            ast_node* tmp = head;
-            head = head->get_chld();
-            delete tmp;
-        }
-        else{
-            ast_node* tmp = head;
-            head = head->get_next();
-            delete tmp;
-        }
-    }
-}
-
-void ast::build_tree(exec_node* cst_head, symbol_table table){
+void ast::build_tree(exec_node *cst_head, symbol_table& table) {
+    int if_depth_tracker = 0;
     int for_depth_tracker = 0;
     int while_depth_tracker = 0;
 
+    std::vector<int> prev_tracker; // Tracks if/while/for depth
+
     while (cst_head != nullptr){
-        std::cout << cst_head->get_value() << " " << cst_head->get_type() << std::endl;
         if (cst_head->get_type() == tokens::OPEN_BRACE){
             auto new_node = new ast_node;
-            new_node->set_type(ast_types::BEG_BLOCK);
+            new_node->type = ast_types::BEG_BLOCK;
+            new_node->set_err(cst_head->get_line(), cst_head->get_column());
             add_node(new_node);
         }
         else if (cst_head->get_type() == tokens::CLOSE_BRACE){
             auto new_node = new ast_node;
-            new_node->set_type(ast_types::END_BLOCK);
+            new_node->type = ast_types::END_BLOCK;
+            new_node->set_err(cst_head->get_line(), cst_head->get_column());
             add_node(new_node);
         }
         else if (cst_head->get_type() == tokens::TOKEN_AS_STRING){
             auto new_node = new ast_node;
             if (cst_head->get_value() == "function" || cst_head->get_value() == "procedure"){
-                new_node->set_type(ast_types::DECLARATION);
+                new_node->type = ast_types::DECLARATION;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
                 add_node(new_node);
                 // Consume declaration
                 while (cst_head->get_next()->get_type() != tokens::OPEN_BRACE){
                     cst_head = cst_head->get_next();
                 }
             }
+            else if (cst_head->get_value() == "printf"){
+                new_node->type = ast_types::STATEMENT_PRINTF;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                add_node(new_node);
+                // Skip parens
+                cst_head = cst_head->get_next()->get_next();
+                while (cst_head->get_next()->get_type() != ';'){
+                    if (cst_head->get_type() != '"' && cst_head->get_type() != ','){ // Ignore commas and quotes
+                        new_node = new ast_node;
+                        new_node->type = ast_types::TOKEN;
+                        new_node->value = cst_head->get_value();
+                        new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                        add_node(new_node);
+                    }
+                    cst_head = cst_head->get_next();
+                }
+            }
+            else if (cst_head->get_value() == "if"){
+                new_node->type = ast_types::STATEMENT_IF;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                new_node->depth = if_depth_tracker;
+                add_node(new_node);
+                // Skip to the first thing inside the statement
+                cst_head = cst_head->get_next()->get_next();
+                // Shunting time!
+                cst_head = shunting_yard_wrapper(cst_head, new_node, table);
+                // Track depth
+                if_depth_tracker++;
+                prev_tracker.push_back(ast_types::STATEMENT_IF);
+            }
+            else if (cst_head->get_value() == "return"){
+                new_node->type = ast_types::RETURN;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                new_node->depth = if_depth_tracker;
+                add_node(new_node);
+                cst_head = shunting_yard_wrapper(cst_head->get_next(), new_node, table);
+            }
+            else if (cst_head->get_value() == "for"){
+                new_node->type = ast_types::EXPRESSION_FOR;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                new_node->depth = for_depth_tracker;
+                add_node(new_node);
+                cst_head = shunting_yard_wrapper(cst_head->get_next(), new_node, table);
+                // Track depth
+                for_depth_tracker++;
+                prev_tracker.push_back(ast_types::EXPRESSION_FOR);
+            }
+            else if (cst_head->get_value() == "while"){
+                new_node->type = ast_types::EXPRESSION_WHILE;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                add_node(new_node);
+                cst_head = shunting_yard_wrapper(cst_head->get_next(), new_node, table);
+                // Track depth
+                while_depth_tracker++;
+                prev_tracker.push_back(ast_types::EXPRESSION_WHILE);
+            }
             else if (symbols::data_types::check_type(cst_head->get_value()) != -1 && symbols::data_types::check_type(cst_head->get_value()) != symbols::data_types::VOID){
-                new_node->set_type(ast_types::DECLARATION);
+                new_node->type = ast_types::DECLARATION;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
                 add_node(new_node);
 
-                if (cst_head->get_next()->get_next()->get_value() == "="){
-                    // We have a declaration and assignment in one line
-                    new_node = new ast_node;
-                    new_node->set_type(ast_types::ASSIGNMENT);
-                    add_node(new_node);
-                    // Handle the rest of the declaration with shunting yard and push tokens to the table
-                    cst_head = shunting_yard_wrapper(cst_head, new_node);
-                }
-                else{ // Consume declaration
+                // Handle inline assignment
+                if (cst_head->get_next()->get_next()->get_value() == "="){ // Skip the name and check for assignment operator/semicolon
+                    /*cst_head = cst_head->get_next()->get_next();
+                    auto new_node_two = new ast_node;
+                    new_node_two->type = ast_types::ASSIGNMENT;
+                    new_node_two->set_err(cst_head->get_line(), cst_head->get_column());
+                    add_node(new_node_two);
+                    // Handle the rest of the assignment with shunting yard
+                    cst_head = shunting_yard_wrapper(cst_head, new_node_two);*/
+                    std::cout << "Called on: " << cst_head->get_next()->get_next()->get_value() << std::endl;
+                } else{ // Consume the declaration
                     while (cst_head->get_next()->get_type() != ';'){
                         cst_head = cst_head->get_next();
                     }
                 }
             }
             else if (table.find_symbol(cst_head->get_value())){
-                new_node->set_type(ast_types::ASSIGNMENT);
+                new_node->type = ast_types::ASSIGNMENT;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
                 add_node(new_node);
+                // Create a token node to hold the actual value being assigned to
                 auto new_node_2 = new ast_node;
-                new_node_2->set_type(ast_types::TOKEN);
-                new_node_2->set_value(cst_head->get_value());
+                new_node_2->type = ast_types::TOKEN;
+                new_node_2->value = cst_head->get_value();
+                new_node_2->set_err(cst_head->get_line(), cst_head->get_column());
                 add_node(new_node_2);
-                // Handle the rest of the declaration with shunting yard and push tokens to the table
-                cst_head = shunting_yard_wrapper(cst_head, new_node);
-            }
-            else if (cst_head->get_value() == "printf"){
-                new_node->set_type(ast_types::STATEMENT_PRINTF);
-                add_node(new_node);
-                // Handle the rest of the printf statement
-                cst_head = shunting_yard_wrapper(cst_head, new_node);
-            }
-            else if (cst_head->get_value() == "if"){
-                new_node->set_type(ast_types::STATEMENT_IF);
-                add_node(new_node);
-                // Handle the rest of the if statement
-                cst_head = shunting_yard_wrapper(cst_head, new_node);
-            }
-            else if (cst_head->get_value() == "return"){
-                new_node->set_type(ast_types::RETURN);
-                add_node(new_node);
-                // Handle the rest of the return
-                cst_head = shunting_yard_wrapper(cst_head, new_node);
-            }
-            else if (cst_head->get_value() == "for"){
-                new_node->set_type(ast_types::EXPRESSION_FOR);
-                new_node->set_depth(for_depth_tracker);
-                add_node(new_node);
-                // Handle the for loop conditions with shunting yard
-                cst_head = shunting_yard_wrapper(cst_head, new_node);
-
-                for_depth_tracker++; // TODO: Properly implement this
-            }
-            else if (cst_head->get_value() == "while"){
-                new_node->set_type(ast_types::EXPRESSION_WHILE);
-                new_node->set_depth(while_depth_tracker);
-                add_node(new_node);
-
-                // Handle the for loop conditions with shunting yard
-                cst_head = shunting_yard_wrapper(cst_head, new_node);
-
-                while_depth_tracker++; // TODO: Properly implement this
+                // Transition to the next token (should be = since this is an assignment)
+                cst_head = cst_head->get_next();
+                // Handle the rest of the assignment with shunting yard
+                cst_head = shunting_yard_wrapper(cst_head, new_node, table);
             }
         }
-        // Navigation
+        // Nav
         if (cst_head->get_next() == nullptr){
             if (cst_head->get_fold() == nullptr){
                 break;
             }
+            // Pop the last depth tracker
+            if (prev_tracker.back() == ast_types::STATEMENT_IF){ if_depth_tracker--; }
+            else if (prev_tracker.back() == ast_types::EXPRESSION_FOR){ for_depth_tracker--; }
+            else if (prev_tracker.back() == ast_types::EXPRESSION_WHILE){ while_depth_tracker--; }
+            prev_tracker.pop_back();
+
             cst_head = cst_head->get_fold();
         }
         else{
@@ -129,81 +147,44 @@ void ast::build_tree(exec_node* cst_head, symbol_table table){
     }
 }
 
-exec_node* ast::shunting_yard_wrapper(exec_node* cst_head, ast_node* prev){
+exec_node* ast::shunting_yard_wrapper(exec_node* cst_head, ast_node* prev, symbol_table& table) {
     std::vector<exec_node*> tokens;
-    if (prev->get_type() == ast_types::ASSIGNMENT){
-        while (cst_head->get_next() != nullptr && cst_head->get_next()->get_type() != ';'){
-            cst_head = cst_head->get_next();
+    if (prev->type == ast_types::ASSIGNMENT || prev->type == ast_types::RETURN){
+        while (cst_head != nullptr && cst_head->get_type() != ';'){
             tokens.push_back(cst_head);
+            cst_head = cst_head->get_next();
         }
     }
-    else if (prev->get_type() == ast_types::STATEMENT_IF || prev->get_type() == ast_types::EXPRESSION_FOR || prev->get_type() == ast_types::EXPRESSION_WHILE){
-        // Create a vector of all symbols between the first symbol and an open brace
-        while (cst_head->get_next()->get_type() != tokens::OPEN_BRACE){
-            cst_head = cst_head->get_next();
+    else if (prev->type == ast_types::STATEMENT_IF || prev->type == ast_types::EXPRESSION_WHILE || prev->type == ast_types::EXPRESSION_FOR){
+        while (cst_head != nullptr && cst_head->get_type() != tokens::CLOSE_PAREN){
+            std::cout << "Adding: " << cst_head->get_value() << std::endl;
             tokens.push_back(cst_head);
+            cst_head = cst_head->get_next();
         }
     }
 
     auto mini_head = new ast_node;
-    if (tokens.size() > 1){
-        mini_head = shunting_yard(tokens, prev);
-        if (mini_head != nullptr){
-            tail->set_next(mini_head);
-            while(mini_head->get_next() != nullptr){ // Move through the newly added nodes to find the new tail
-                mini_head = mini_head->get_next();
-            }
-            tail = mini_head;
-        }
-    }
-    else{ // Skip shunting yard on single-token inputs
-        mini_head->set_type(ast_types::TOKEN);
-        mini_head->set_err(cst_head->get_line(), cst_head->get_column());
+    if (!tokens.empty()){
+        mini_head = shunting_yard(tokens, table);
         tail->set_next(mini_head);
+        while(mini_head->get_next() != nullptr){
+            mini_head = mini_head->get_next();
+        }
         tail = mini_head;
     }
-
     return cst_head;
-}
-
-bool is_num(char c){
-    return c >= '0' && c <= '9';
-}
-
-bool is_operator(exec_node* token){
-    int type = token->get_type();
-    switch (type){
-        case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS: case tokens::MINUS_EQUALS:
-        case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::AND_EQUALS: case tokens::OR_EQUALS:
-        case tokens::XOR_EQUALS: case tokens::GREATER_EQUALS: case tokens::LESS_EQUALS: case tokens::LEFT_SHIFT:
-        case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
-        case tokens::RIGHT_SLIM_ARROW: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
-        case tokens::NOT_EQUALS: case tokens::MOD_EQUALS:
-            return true;
-
-        default:
-            break;
-    }
-
-    if (token->get_value().size() == 1){
-        std::string val = token->get_value();
-        try{
-            if (!std::isalpha(std::stoi(val)) && !is_num(val[0])){
-                return true;
-            }
-        }
-        catch (std::invalid_argument&){
-            return false;
-        }
-    }
-
-    return false;
 }
 
 int get_precedence(exec_node* node){
     switch (node->get_type()){
-        case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::RIGHT_SLIM_ARROW:
+        case tokens::TOKEN_AS_STRING: case tokens::INT_AS_STRING: case tokens::FLOAT_AS_STRING:
+            return 0;
+
+        case tokens::CLOSE_PAREN: case tokens::OPEN_BRACKET: case tokens::CLOSE_BRACKET:
             return 1;
+
+        case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::RIGHT_SLIM_ARROW:
+            return 2;
 
         case tokens::LEFT_SHIFT: case tokens::RIGHT_SHIFT:
             return 5;
@@ -223,6 +204,9 @@ int get_precedence(exec_node* node){
         case tokens::PLUS_EQUALS: case tokens::MINUS_EQUALS: case tokens::DIVIDE_EQUALS: case tokens::TIMES_EQUALS: case tokens::MOD_EQUALS:
         case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS: case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
             return 14;
+
+        case tokens::OPEN_PAREN:
+            return 16; // KISS MY ASS ISO C
 
         default:
             break;
@@ -268,148 +252,162 @@ bool check_precedence(exec_node* a, exec_node* b){
     precedence_b = get_precedence(b);
 
     // Compare precedence
-    if (precedence_a >= precedence_b){
+    if (precedence_a <= precedence_b){
         return true;
     }
     return false;
 }
 
-ast_node* ast::shunting_yard(std::vector<exec_node*> tokens, ast_node* first){
+ast_node* ast::shunting_yard(std::vector<exec_node *> tokens, symbol_table& table) {
     ast_node* mini_head = nullptr;
     ast_node* mini_tail = nullptr;
 
-    std::vector<exec_node*> stack;
+    std::stack<exec_node*> stack;
+    std::vector<exec_node*> queue;
 
     for (exec_node* token : tokens){
-        if (token->get_type() == tokens::TOKEN_AS_STRING || token->get_type() == tokens::INT_AS_STRING || token->get_type() == tokens::FLOAT_AS_STRING){
-            auto new_node = new ast_node;
-            new_node->set_type(ast_types::TOKEN);
-            new_node->set_value(token->get_value());
-            new_node->set_err(token->get_line(), token->get_column());
-            if (mini_head == nullptr){
-                mini_head = new_node;
-                mini_tail = new_node;
-            } else{
-                mini_tail->set_next(new_node);
-                mini_tail = new_node;
-            }
+        if (table.find_symbol(token->get_value()) || token->get_type() == tokens::INT_AS_STRING || token->get_type() == tokens::FLOAT_AS_STRING){
+            queue.push_back(token);
         }
         else if (is_operator(token)){
-            while (!stack.empty() && check_precedence(stack.back(), token)){
-                auto new_node = new ast_node;
-                new_node->set_type(ast_types::OPERATOR);
-                new_node->set_value(token->get_value());
-                new_node->set_err(stack.back()->get_line(), stack.back()->get_column());
-                mini_tail->set_next(new_node);
-                mini_tail = new_node;
-                stack.pop_back();
+            while (!stack.empty() && check_precedence(stack.top(), token)){
+                queue.push_back(stack.top());
+                stack.pop();
             }
-            stack.push_back(token);
+            stack.push(token);
         }
         else if (token->get_type() == tokens::OPEN_PAREN){
-            stack.push_back(token);
+            stack.push(token);
         }
         else if (token->get_type() == tokens::CLOSE_PAREN){
-            while(!stack.empty() && stack.back()->get_type() != tokens::OPEN_PAREN){
-                auto new_node = new ast_node;
-                new_node->set_type(ast_types::OPERATOR);
-                new_node->set_value(token->get_value());
-                new_node->set_err(stack.back()->get_line(), stack.back()->get_column());
-                mini_tail->set_next(new_node);
-                mini_tail = new_node;
-                stack.pop_back();
+            while (!stack.empty() && stack.top()->get_type() != tokens::OPEN_PAREN){
+                queue.push_back(stack.top());
+                stack.pop();
             }
-            if (!stack.empty()){ stack.pop_back(); }
+            if (!stack.empty()){
+                stack.pop();
+            }
         }
     }
+
     while (!stack.empty()){
+        queue.push_back(stack.top());
+        stack.pop();
+    }
+
+    for (exec_node* token : queue){
+        std::cout << "Queue: " << token->get_value() << std::endl;
+    }
+
+    for (exec_node* token : queue){
         auto new_node = new ast_node;
-        new_node->set_type(ast_types::OPERATOR);
-        new_node->set_value(stack.back()->get_value());
-        new_node->set_err(stack.back()->get_line(), stack.back()->get_column());
-        mini_tail->set_next(new_node);
-        mini_tail = new_node;
-        stack.pop_back();
+        new_node->type = ast_types::TOKEN;
+        new_node->value = token->get_value();
+        new_node->set_err(token->get_line(), token->get_column());
+        if (mini_head == nullptr){
+            mini_head = new_node;
+            mini_tail = new_node;
+        }
+        else{
+            mini_tail->set_next(new_node);
+            mini_tail = new_node;
+        }
     }
     return mini_head;
 }
 
-void ast::add_node(ast_node* n){
-    if (head == nullptr){ // First node
-        head = n;
-        tail = head;
-    }
-    else{
-        if (n->get_type() < 9000){
-            tail->set_next(n);
-            tail = n;
-        }
-        else{
-            tail->set_chld(n);
-            tail = n;
-        }
-    }
+bool is_num(char c){
+    return c >= '0' && c <= '9';
 }
 
-void ast::print_tree(){
-    ast_node* current = head;
-    ast_node* prev = head;
-    int num_spaces_over = 0;
-
-    while (current != nullptr){
-        switch (current->get_type()){
-        case ast_types::BEG_BLOCK:
-            std::cout << "BEGIN BLOCK";
-            num_spaces_over += 11;
-            break;
-
-        case ast_types::END_BLOCK:
-            std::cout << "END BLOCK";
-            num_spaces_over += 9;
-            break;
-
-        case ast_types::RETURN:
-            std::cout << "RETURN";
-            num_spaces_over += 6;
-            break;
-
-        case ast_types::DECLARATION:
-            std::cout << "DECLARATION";
-            num_spaces_over += 11;
-            break;
-
-        case ast_types::ASSIGNMENT:
-            std::cout << "ASSIGNMENT";
-            num_spaces_over += 10;
-            break;
-
-        case ast_types::STATEMENT_IF:
-            std::cout << "IF";
-            num_spaces_over += 2;
-            break;
-
-        case ast_types::EXPRESSION_FOR:
-            std::cout << "FOR";
-            num_spaces_over += 3;
-            break;
-
-        case ast_types::EXPRESSION_WHILE:
-            std::cout << "WHILE";
-            num_spaces_over += 5;
-            break;
-
-        case ast_types::STATEMENT_PRINTF:
-            std::cout << "PRINTF";
-            num_spaces_over += 6;
-            break;
-
-        case ast_types::TOKEN: case ast_types::OPERATOR:
-            std::cout << current->get_value();
-            num_spaces_over += current->get_value().length();
-            break;
+bool ast::is_operator(exec_node *token) {
+    int type = token->get_type();
+    switch (type){
+        case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::PLUS_EQUALS: case tokens::MINUS_EQUALS:
+        case tokens::BOOLEAN_AND: case tokens::BOOLEAN_OR: case tokens::AND_EQUALS: case tokens::OR_EQUALS:
+        case tokens::XOR_EQUALS: case tokens::GREATER_EQUALS: case tokens::LESS_EQUALS: case tokens::LEFT_SHIFT:
+        case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
+        case tokens::RIGHT_SLIM_ARROW: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
+        case tokens::NOT_EQUALS: case tokens::MOD_EQUALS:
+            return true;
 
         default:
             break;
+    }
+
+    if (token->get_value().length() == 1){
+        char val = token->get_value()[0];
+        switch (val){
+            case '*': case '/': case '%': case '+': case '-': case '<': case '>': case '&': case '^': case '|': case '=': case ',':
+                return true;
+
+            default:
+                break;
+        }
+    }
+
+    return false;
+}
+
+void ast::print_tree() {
+    ast_node* current = head;
+    int num_spaces_over = 0;
+
+    while (current != nullptr) {
+        switch (current->type) {
+            case ast_types::BEG_BLOCK:
+                std::cout << "BEGIN BLOCK";
+                num_spaces_over += 11;
+                break;
+
+            case ast_types::END_BLOCK:
+                std::cout << "END BLOCK";
+                num_spaces_over += 9;
+                break;
+
+            case ast_types::RETURN:
+                std::cout << "RETURN";
+                num_spaces_over += 6;
+                break;
+
+            case ast_types::DECLARATION:
+                std::cout << "DECLARATION";
+                num_spaces_over += 11;
+                break;
+
+            case ast_types::ASSIGNMENT:
+                std::cout << "ASSIGNMENT";
+                num_spaces_over += 11;
+                break;
+
+            case ast_types::STATEMENT_IF:
+                std::cout << "IF";
+                num_spaces_over += 2;
+                break;
+
+            case ast_types::EXPRESSION_FOR:
+                std::cout << "FOR";
+                num_spaces_over += 3;
+                break;
+
+            case ast_types::EXPRESSION_WHILE:
+                std::cout << "WHILE";
+                num_spaces_over += 5;
+                break;
+
+            case ast_types::STATEMENT_PRINTF:
+                std::cout << "PRINTF";
+                num_spaces_over += 6;
+                break;
+
+            case ast_types::TOKEN:
+            case ast_types::OPERATOR:
+                std::cout << current->value;
+                num_spaces_over += current->value.length();
+                break;
+
+            default:
+                break;
         }
 
         std::cout << " -> ";
@@ -418,7 +416,7 @@ void ast::print_tree(){
         if (current->get_next() == nullptr && current->get_chld() == nullptr){
             return;
         }
-        if (current->get_next() == nullptr){
+        else if (current->get_next() == nullptr && current->get_chld() != nullptr){
             num_spaces_over -= 3;
             current = current->get_chld();
         }
@@ -428,3 +426,19 @@ void ast::print_tree(){
     }
 }
 
+void ast::add_node(ast_node *n) {
+    if (head == nullptr){
+        head = n;
+        tail = head;
+    }
+    else{
+        if (n->type < 9000){
+            tail->set_next(n);
+            tail = n;
+        }
+        else{
+            tail->set_chld(n);
+            tail = n;
+        }
+    }
+}

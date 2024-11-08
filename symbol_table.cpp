@@ -12,13 +12,13 @@ symbol_table::~symbol_table() {
             symbol_node* p = s->get_params();
             while (p != nullptr) {
                 symbol_node* temp = p;
-                p = p->get_next();
+                if (p->get_next() != nullptr) { p = p->get_next(); }
                 delete temp;
             }
         }
         while (s != nullptr) {
             symbol_node* temp = s;
-            s = s->get_next();
+            if (s->get_next() != nullptr) { s = s->get_next(); }
             delete temp;
         }
     }
