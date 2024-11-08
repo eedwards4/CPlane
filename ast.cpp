@@ -413,6 +413,7 @@ void ast::print_tree(){
             return;
         }
         if (current->get_next() == nullptr){
+            num_spaces_over -= 3;
             current = current->get_chld();
         }
         else{

@@ -52,8 +52,8 @@ private:
     int line = -1;
     int col = -1;
 
-    ast_node* next;
-    ast_node* chld;
+    ast_node* next = nullptr;
+    ast_node* chld = nullptr;
 };
 
 
