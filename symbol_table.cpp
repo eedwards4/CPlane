@@ -5,6 +5,7 @@
 #include "symbol_table.h"
 
 // Destructor
+/*
 symbol_table::~symbol_table() {
     for (symbol_node* s : scopes) {
         // Delete parameters
@@ -23,7 +24,7 @@ symbol_table::~symbol_table() {
         }
     }
 }
-
+*/
 // Driver function for building the table
 void symbol_table::build_table(exec_path &path) {
     exec_node* current = path.get_head();

@@ -57,7 +57,7 @@ class symbol_table {
 public:
     // Constructor
     symbol_table() = default;
-    ~symbol_table();
+    //~symbol_table();
 
     // Setters
     void build_table(exec_path& path);
