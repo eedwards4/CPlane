@@ -24,6 +24,8 @@ public:
     static constexpr int STATEMENT_PRINTF = 9991;
     static constexpr int TOKEN = 9990;
     static constexpr int OPERATOR = 9989;
+    static constexpr int ELSE = 9988;
+    static constexpr int CALL = 9987;
 };
 
 class ast_node{
@@ -32,7 +34,7 @@ public:
     ~ast_node() = default;
 
     int type = -1;
-    int depth = 0;
+    int for_expr_num = 0;
 
     std::string value;
 
@@ -57,7 +59,7 @@ public:
     ~ast() = default;
 
     void build_tree(exec_node* cst_head, symbol_table& table);
-    void print_tree();
+    void print_tree(std::string &filename);
 
 private:
     ast_node* head = nullptr;

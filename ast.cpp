@@ -5,11 +5,6 @@
 #include "ast.h"
 
 void ast::build_tree(exec_node *cst_head, symbol_table& table) {
-    int if_depth_tracker = 0;
-    int for_depth_tracker = 0;
-    int while_depth_tracker = 0;
-
-    std::vector<int> prev_tracker; // Tracks if/while/for depth
 
     while (cst_head != nullptr){
         if (cst_head->get_type() == tokens::OPEN_BRACE){
@@ -47,7 +42,8 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
                         new_node->type = ast_types::TOKEN;
                         new_node->value = cst_head->get_value();
                         new_node->set_err(cst_head->get_line(), cst_head->get_column());
-                        add_node(new_node);
+                        tail->set_next(new_node);
+                        tail = new_node;
                     }
                     cst_head = cst_head->get_next();
                 }
@@ -55,48 +51,53 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
             else if (cst_head->get_value() == "if"){
                 new_node->type = ast_types::STATEMENT_IF;
                 new_node->set_err(cst_head->get_line(), cst_head->get_column());
-                new_node->depth = if_depth_tracker;
                 add_node(new_node);
-                // Skip to the first thing inside the statement
-                cst_head = cst_head->get_next()->get_next();
+                // Skip to the statement
+                cst_head = cst_head->get_next();
                 // Shunting time!
                 cst_head = shunting_yard_wrapper(cst_head, new_node, table);
-                // Track depth
-                if_depth_tracker++;
-                prev_tracker.push_back(ast_types::STATEMENT_IF);
+            }
+            else if (cst_head->get_value() == "else"){
+                auto new_node = new ast_node;
+                new_node->type = ast_types::ELSE;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                add_node(new_node);
             }
             else if (cst_head->get_value() == "return"){
                 new_node->type = ast_types::RETURN;
                 new_node->set_err(cst_head->get_line(), cst_head->get_column());
-                new_node->depth = if_depth_tracker;
                 add_node(new_node);
                 cst_head = shunting_yard_wrapper(cst_head->get_next(), new_node, table);
             }
             else if (cst_head->get_value() == "for"){
-                new_node->type = ast_types::EXPRESSION_FOR;
-                new_node->set_err(cst_head->get_line(), cst_head->get_column());
-                new_node->depth = for_depth_tracker;
-                add_node(new_node);
-                cst_head = shunting_yard_wrapper(cst_head->get_next(), new_node, table);
-                // Track depth
-                for_depth_tracker++;
-                prev_tracker.push_back(ast_types::EXPRESSION_FOR);
+                // Skip to the statement
+                cst_head = cst_head->get_next();
+                int for_tracker = 1;
+                while (cst_head->get_type() != tokens::OPEN_BRACE){
+                    std::cout << "Called on: " << cst_head->get_value() << std::endl;
+                    new_node = new ast_node;
+                    new_node->type = ast_types::EXPRESSION_FOR;
+                    new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                    new_node->for_expr_num = for_tracker;
+                    add_node(new_node);
+                    cst_head = shunting_yard_wrapper(cst_head, new_node, table);
+                    for_tracker++;
+                }
             }
             else if (cst_head->get_value() == "while"){
                 new_node->type = ast_types::EXPRESSION_WHILE;
                 new_node->set_err(cst_head->get_line(), cst_head->get_column());
                 add_node(new_node);
+                // Skip to the statement
+                cst_head = cst_head->get_next();
                 cst_head = shunting_yard_wrapper(cst_head->get_next(), new_node, table);
-                // Track depth
-                while_depth_tracker++;
-                prev_tracker.push_back(ast_types::EXPRESSION_WHILE);
             }
             else if (symbols::data_types::check_type(cst_head->get_value()) != -1 && symbols::data_types::check_type(cst_head->get_value()) != symbols::data_types::VOID){
                 new_node->type = ast_types::DECLARATION;
                 new_node->set_err(cst_head->get_line(), cst_head->get_column());
                 add_node(new_node);
 
-                // Handle inline assignment
+                // Handle inline assignment or multi-variable definition
                 if (cst_head->get_next()->get_next()->get_value() == "="){ // Skip the name and check for assignment operator/semicolon
                     /*cst_head = cst_head->get_next()->get_next();
                     auto new_node_two = new ast_node;
@@ -106,13 +107,24 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
                     // Handle the rest of the assignment with shunting yard
                     cst_head = shunting_yard_wrapper(cst_head, new_node_two);*/
                     std::cout << "Called on: " << cst_head->get_next()->get_next()->get_value() << std::endl;
-                } else{ // Consume the declaration
+                }
+                else if (cst_head->get_next()->get_next()->get_value() == ","){
+                    while (cst_head->get_next()->get_next()->get_value() == ","){
+                        cst_head = cst_head->get_next()->get_next();
+                        auto new_node_two = new ast_node;
+                        new_node_two->type = ast_types::DECLARATION;
+                        new_node_two->set_err(cst_head->get_line(), cst_head->get_column());
+                        add_node(new_node_two);
+                    }
+                    cst_head = cst_head->get_next()->get_next();
+                }
+                else{ // Consume the declaration
                     while (cst_head->get_next()->get_type() != ';'){
                         cst_head = cst_head->get_next();
                     }
                 }
             }
-            else if (table.find_symbol(cst_head->get_value())){
+            else if (table.find_symbol(cst_head->get_value()) && (cst_head->get_next()->get_value() == "=" || cst_head->get_next()->get_value() == "[")){
                 new_node->type = ast_types::ASSIGNMENT;
                 new_node->set_err(cst_head->get_line(), cst_head->get_column());
                 add_node(new_node);
@@ -127,17 +139,24 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
                 // Handle the rest of the assignment with shunting yard
                 cst_head = shunting_yard_wrapper(cst_head, new_node, table);
             }
+            else if (table.find_symbol(cst_head->get_value())){ // Not an assignment so it must be a call
+                auto new_node = new ast_node;
+                new_node->type = ast_types::CALL;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                add_node(new_node);
+                cst_head = shunting_yard_wrapper(cst_head, new_node, table);
+            }
         }
         // Nav
+        if (cst_head == nullptr){
+            std::cout << "ERROR! CST head is null." << std::endl;
+            std::cout << "Tail: " << tail->value << std::endl;
+            break;
+        }
         if (cst_head->get_next() == nullptr){
             if (cst_head->get_fold() == nullptr){
                 break;
             }
-            // Pop the last depth tracker
-            if (prev_tracker.back() == ast_types::STATEMENT_IF){ if_depth_tracker--; }
-            else if (prev_tracker.back() == ast_types::EXPRESSION_FOR){ for_depth_tracker--; }
-            else if (prev_tracker.back() == ast_types::EXPRESSION_WHILE){ while_depth_tracker--; }
-            prev_tracker.pop_back();
 
             cst_head = cst_head->get_fold();
         }
@@ -149,17 +168,38 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
 
 exec_node* ast::shunting_yard_wrapper(exec_node* cst_head, ast_node* prev, symbol_table& table) {
     std::vector<exec_node*> tokens;
-    if (prev->type == ast_types::ASSIGNMENT || prev->type == ast_types::RETURN){
+    if (prev->type == ast_types::ASSIGNMENT || prev->type == ast_types::RETURN || prev->type == ast_types::CALL){
         while (cst_head != nullptr && cst_head->get_type() != ';'){
             tokens.push_back(cst_head);
             cst_head = cst_head->get_next();
         }
     }
-    else if (prev->type == ast_types::STATEMENT_IF || prev->type == ast_types::EXPRESSION_WHILE || prev->type == ast_types::EXPRESSION_FOR){
-        while (cst_head != nullptr && cst_head->get_type() != tokens::CLOSE_PAREN){
-            std::cout << "Adding: " << cst_head->get_value() << std::endl;
+    else if (prev->type == ast_types::STATEMENT_IF || prev->type == ast_types::EXPRESSION_WHILE){
+        while (cst_head != nullptr && cst_head->get_type() != tokens::OPEN_BRACE){
+            tokens.push_back(cst_head);
+            if (cst_head->get_next()->get_type() == tokens::OPEN_BRACE){
+                break;
+            }
+            cst_head = cst_head->get_next();
+        }
+    }
+    else if (prev->type == ast_types::EXPRESSION_FOR){
+        if (cst_head->get_type() == tokens::OPEN_PAREN || cst_head->get_type() == ';'){
+            cst_head = cst_head->get_next();
+        }
+        while (cst_head != nullptr && cst_head->get_type() != ';' && cst_head->get_type() != tokens::OPEN_BRACE){
             tokens.push_back(cst_head);
             cst_head = cst_head->get_next();
+        }
+        // Handle final paren
+        int paren_count = 0;
+        for (exec_node* token : tokens){
+            if (token->get_type() == tokens::OPEN_PAREN || token->get_type() == tokens::CLOSE_PAREN){
+                paren_count++;
+            }
+        }
+        if (paren_count % 2 != 0){
+            tokens.pop_back();
         }
     }
 
@@ -179,9 +219,6 @@ int get_precedence(exec_node* node){
     switch (node->get_type()){
         case tokens::TOKEN_AS_STRING: case tokens::INT_AS_STRING: case tokens::FLOAT_AS_STRING:
             return 0;
-
-        case tokens::CLOSE_PAREN: case tokens::OPEN_BRACKET: case tokens::CLOSE_BRACKET:
-            return 1;
 
         case tokens::PLUS_PLUS: case tokens::MINUS_MINUS: case tokens::RIGHT_SLIM_ARROW:
             return 2;
@@ -205,7 +242,7 @@ int get_precedence(exec_node* node){
         case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS: case tokens::AND_EQUALS: case tokens::OR_EQUALS: case tokens::XOR_EQUALS:
             return 14;
 
-        case tokens::OPEN_PAREN:
+        case tokens::OPEN_PAREN: case tokens::CLOSE_PAREN:
             return 16; // KISS MY ASS ISO C
 
         default:
@@ -213,6 +250,10 @@ int get_precedence(exec_node* node){
     }
 
     switch (node->get_value()[0]){
+
+        case '!': case '~':
+            return 2;
+
         case '*': case '/': case '%':
             return 3;
 
@@ -265,26 +306,37 @@ ast_node* ast::shunting_yard(std::vector<exec_node *> tokens, symbol_table& tabl
     std::stack<exec_node*> stack;
     std::vector<exec_node*> queue;
 
-    for (exec_node* token : tokens){
-        if (table.find_symbol(token->get_value()) || token->get_type() == tokens::INT_AS_STRING || token->get_type() == tokens::FLOAT_AS_STRING){
-            queue.push_back(token);
+    for (int i = 0; i < tokens.size(); i++){
+        if (table.is_function(tokens[i]->get_value())){
+            queue.push_back(tokens[i]);
+            i++;
+            while (tokens[i]->get_type() != tokens::CLOSE_PAREN){
+                queue.push_back(tokens[i]);
+                i++;
+            }
+            queue.push_back(tokens[i]);
         }
-        else if (is_operator(token)){
-            while (!stack.empty() && check_precedence(stack.top(), token)){
+        if (table.find_symbol(tokens[i]->get_value()) || tokens[i]->get_type() == tokens::INT_AS_STRING || tokens[i]->get_type() == tokens::FLOAT_AS_STRING ||
+            tokens[i]->get_type() == tokens::STRING_LITERAL || tokens[i]->get_type() == tokens::CHAR_LITERAL || tokens[i]->get_type() == '\'' || tokens[i]->get_type() == '"' ||
+            tokens[i]->get_value() == "TRUE" || tokens[i]->get_value() == "FALSE" || tokens[i]->get_value() == "[" || tokens[i]->get_value() == "]"){
+            queue.push_back(tokens[i]);
+        }
+        else if (is_operator(tokens[i])){
+            while (!stack.empty() && check_precedence(stack.top(), tokens[i])){
                 queue.push_back(stack.top());
                 stack.pop();
             }
-            stack.push(token);
+            stack.push(tokens[i]);
         }
-        else if (token->get_type() == tokens::OPEN_PAREN){
-            stack.push(token);
+        else if (tokens[i]->get_type() == tokens::OPEN_PAREN){
+            stack.push(tokens[i]);
         }
-        else if (token->get_type() == tokens::CLOSE_PAREN){
+        else if (tokens[i]->get_type() == tokens::CLOSE_PAREN){
             while (!stack.empty() && stack.top()->get_type() != tokens::OPEN_PAREN){
                 queue.push_back(stack.top());
                 stack.pop();
             }
-            if (!stack.empty()){
+            if (!stack.empty() && stack.top()->get_type() == tokens::OPEN_PAREN){
                 stack.pop();
             }
         }
@@ -293,10 +345,6 @@ ast_node* ast::shunting_yard(std::vector<exec_node *> tokens, symbol_table& tabl
     while (!stack.empty()){
         queue.push_back(stack.top());
         stack.pop();
-    }
-
-    for (exec_node* token : queue){
-        std::cout << "Queue: " << token->get_value() << std::endl;
     }
 
     for (exec_node* token : queue){
@@ -328,7 +376,7 @@ bool ast::is_operator(exec_node *token) {
         case tokens::XOR_EQUALS: case tokens::GREATER_EQUALS: case tokens::LESS_EQUALS: case tokens::LEFT_SHIFT:
         case tokens::RIGHT_SHIFT: case tokens::LEFT_SHIFT_EQUALS: case tokens::RIGHT_SHIFT_EQUALS:
         case tokens::RIGHT_SLIM_ARROW: case tokens::TIMES_EQUALS: case tokens::DIVIDE_EQUALS:
-        case tokens::NOT_EQUALS: case tokens::MOD_EQUALS:
+        case tokens::NOT_EQUALS: case tokens::MOD_EQUALS: case tokens::EQUALS_EQUALS:
             return true;
 
         default:
@@ -338,7 +386,7 @@ bool ast::is_operator(exec_node *token) {
     if (token->get_value().length() == 1){
         char val = token->get_value()[0];
         switch (val){
-            case '*': case '/': case '%': case '+': case '-': case '<': case '>': case '&': case '^': case '|': case '=': case ',':
+        case '*': case '/': case '%': case '+': case '-': case '<': case '>': case '&': case '^': case '|': case '=': case ',': case '!': case '~':
                 return true;
 
             default:
@@ -349,60 +397,67 @@ bool ast::is_operator(exec_node *token) {
     return false;
 }
 
-void ast::print_tree() {
+void ast::print_tree(std::string &filename) {
     ast_node* current = head;
     int num_spaces_over = 0;
+
+    std::ofstream out(filename);
 
     while (current != nullptr) {
         switch (current->type) {
             case ast_types::BEG_BLOCK:
-                std::cout << "BEGIN BLOCK";
-                num_spaces_over += 11;
+                out << "BEGIN BLOCK";
                 break;
 
             case ast_types::END_BLOCK:
-                std::cout << "END BLOCK";
-                num_spaces_over += 9;
+                out << "END BLOCK";
                 break;
 
             case ast_types::RETURN:
-                std::cout << "RETURN";
+                out << "RETURN";
                 num_spaces_over += 6;
                 break;
 
             case ast_types::DECLARATION:
-                std::cout << "DECLARATION";
-                num_spaces_over += 11;
+                out << "DECLARATION";
                 break;
 
             case ast_types::ASSIGNMENT:
-                std::cout << "ASSIGNMENT";
+                out << "ASSIGNMENT";
                 num_spaces_over += 11;
                 break;
 
             case ast_types::STATEMENT_IF:
-                std::cout << "IF";
+                out << "IF";
                 num_spaces_over += 2;
                 break;
 
             case ast_types::EXPRESSION_FOR:
-                std::cout << "FOR";
+                out << "FOR EXPRESSION " << current->for_expr_num;
                 num_spaces_over += 3;
                 break;
 
             case ast_types::EXPRESSION_WHILE:
-                std::cout << "WHILE";
+                out << "WHILE";
                 num_spaces_over += 5;
                 break;
 
             case ast_types::STATEMENT_PRINTF:
-                std::cout << "PRINTF";
+                out << "PRINTF";
                 num_spaces_over += 6;
                 break;
 
-            case ast_types::TOKEN:
-            case ast_types::OPERATOR:
-                std::cout << current->value;
+            case ast_types::ELSE:
+                out << "ELSE";
+                break;
+
+            case ast_types::CALL:
+                out << "CALL";
+                num_spaces_over += 4;
+                break;
+
+            case ast_types::TOKEN: case ast_types::OPERATOR:
+                out << current->value;
                 num_spaces_over += current->value.length();
                 break;
 
@@ -410,20 +465,27 @@ void ast::print_tree() {
                 break;
         }
 
-        std::cout << " -> ";
-        num_spaces_over += 3;
+        out << " -> ";
+        if (current->get_next() == nullptr){
+            out << std::endl;
+            for (int i = 0; i < num_spaces_over; i++){
+                out << " ";
+            }
+        } else{
+            num_spaces_over += 3;
+        }
 
         if (current->get_next() == nullptr && current->get_chld() == nullptr){
             return;
         }
         else if (current->get_next() == nullptr && current->get_chld() != nullptr){
-            num_spaces_over -= 3;
             current = current->get_chld();
         }
         else{
             current = current->get_next();
         }
     }
+    out.close();
 }
 
 void ast::add_node(ast_node *n) {
@@ -432,7 +494,7 @@ void ast::add_node(ast_node *n) {
         tail = head;
     }
     else{
-        if (n->type < 9000){
+        if (n->type < 9000 || tail->type == ast_types::ASSIGNMENT || tail->type == ast_types::STATEMENT_PRINTF || tail->type == ast_types::CALL){
             tail->set_next(n);
             tail = n;
         }

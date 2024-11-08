@@ -351,3 +351,14 @@ bool symbol_table::find_symbol(const std::string name) const{
     }
     return false;
 }
+
+bool symbol_table::is_function(const std::string name) const {
+    for (const auto& scope : scopes){
+        if (scope != nullptr){
+            if (scope->IDENT_NAME == name){
+                return true;
+            }
+        }
+    }
+    return false;
+}
