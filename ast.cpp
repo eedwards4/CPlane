@@ -29,12 +29,13 @@ void ast::build_tree(exec_node* cst_head, symbol_table table){
     int while_depth_tracker = 0;
 
     while (cst_head != nullptr){
-        if (cst_head->get_type() == tokens::OPEN_BRACKET){
+        std::cout << cst_head->get_value() << " " << cst_head->get_type() << std::endl;
+        if (cst_head->get_type() == tokens::OPEN_BRACE){
             auto new_node = new ast_node;
             new_node->set_type(ast_types::BEG_BLOCK);
             add_node(new_node);
         }
-        else if (cst_head->get_type() == tokens::CLOSE_BRACKET){
+        else if (cst_head->get_type() == tokens::CLOSE_BRACE){
             auto new_node = new ast_node;
             new_node->set_type(ast_types::END_BLOCK);
             add_node(new_node);
@@ -45,7 +46,7 @@ void ast::build_tree(exec_node* cst_head, symbol_table table){
                 new_node->set_type(ast_types::DECLARATION);
                 add_node(new_node);
                 // Consume declaration
-                while (cst_head->get_next() != nullptr){
+                while (cst_head->get_next()->get_type() != tokens::OPEN_BRACE){
                     cst_head = cst_head->get_next();
                 }
             }
@@ -61,12 +62,17 @@ void ast::build_tree(exec_node* cst_head, symbol_table table){
                     // Handle the rest of the declaration with shunting yard and push tokens to the table
                     cst_head = shunting_yard_wrapper(cst_head, new_node);
                 }
+                else{ // Consume declaration
+                    while (cst_head->get_next()->get_type() != ';'){
+                        cst_head = cst_head->get_next();
+                    }
+                }
             }
             else if (table.find_symbol(cst_head->get_value())){
                 new_node->set_type(ast_types::ASSIGNMENT);
                 add_node(new_node);
                 // Handle the rest of the declaration with shunting yard and push tokens to the table
-                cst_head = shunting_yard_wrapper(cst_head, new_node);
+                cst_head = shunting_yard_wrapper(cst_head->get_next(), new_node);
             }
             else if (cst_head->get_value() == "printf"){
                 new_node->set_type(ast_types::STATEMENT_PRINTF);
@@ -122,7 +128,7 @@ void ast::build_tree(exec_node* cst_head, symbol_table table){
 exec_node* ast::shunting_yard_wrapper(exec_node* cst_head, ast_node* prev){
     std::vector<exec_node*> tokens;
     if (prev->get_type() == ast_types::ASSIGNMENT){
-        while (cst_head->get_next() != nullptr && cst_head->get_next()->get_value() != ";"){
+        while (cst_head->get_next() != nullptr && cst_head->get_next()->get_type() != ';'){
             cst_head = cst_head->get_next();
             tokens.push_back(cst_head);
         }
@@ -137,7 +143,7 @@ exec_node* ast::shunting_yard_wrapper(exec_node* cst_head, ast_node* prev){
 
     auto mini_head = new ast_node;
     if (tokens.size() > 1){
-        mini_head = shunting_yard(tokens);
+        mini_head = shunting_yard(tokens, prev);
         if (mini_head != nullptr){
             tail->set_next(mini_head);
             while(mini_head->get_next() != nullptr){ // Move through the newly added nodes to find the new tail
@@ -264,32 +270,23 @@ bool check_precedence(exec_node* a, exec_node* b){
     return false;
 }
 
-ast_node* ast::shunting_yard(std::vector<exec_node*> tokens){
-    ast_node* mini_head = nullptr;
-    ast_node* mini_tail = nullptr;
+ast_node* ast::shunting_yard(std::vector<exec_node*> tokens, ast_node* first){
+    ast_node* mini_head = first;
+    ast_node* mini_tail = first;
 
     std::vector<exec_node*> stack;
 
     for (exec_node* token : tokens){
         if (token->get_type() == tokens::TOKEN_AS_STRING || token->get_type() == tokens::INT_AS_STRING || token->get_type() == tokens::FLOAT_AS_STRING){
-            if (mini_head == nullptr){
-                mini_head = new ast_node;
-                mini_head->set_type(ast_types::TOKEN);
-                mini_head->set_value(token->get_value());
-                mini_head->set_err(token->get_line(), token->get_column());
-                mini_tail = mini_head;
-            }
-            else{
-                auto new_node = new ast_node;
-                new_node->set_type(ast_types::TOKEN);
-                new_node->set_value(token->get_value());
-                new_node->set_err(token->get_line(), token->get_column());
-                mini_tail->set_next(new_node);
-                mini_tail = new_node;
-            }
+            auto new_node = new ast_node;
+            new_node->set_type(ast_types::TOKEN);
+            new_node->set_value(token->get_value());
+            new_node->set_err(token->get_line(), token->get_column());
+            mini_tail->set_next(new_node);
+            mini_tail = new_node;
         }
         else if (is_operator(token)){
-            while (!stack.size() > 0 && check_precedence(stack.back(), token)){
+            while (!stack.empty() && check_precedence(stack.back(), token)){
                 auto new_node = new ast_node;
                 new_node->set_type(ast_types::OPERATOR);
                 new_node->set_value(token->get_value());
@@ -313,7 +310,7 @@ ast_node* ast::shunting_yard(std::vector<exec_node*> tokens){
                 mini_tail = new_node;
                 stack.pop_back();
             }
-            stack.pop_back();
+            if (!stack.empty()){ stack.pop_back(); }
         }
     }
     while (!stack.empty()){

@@ -70,7 +70,7 @@ public:
 
     // Shunting yard algorithm to convert from infix to postfix
     // Returns an ast node to the head of the postfix so that the wrapper can handle adding all tokens at once
-    ast_node* shunting_yard(std::vector<exec_node*> tokens);
+    ast_node* shunting_yard(std::vector<exec_node*> tokens, ast_node* first);
 
     // Add nodes to the tree
     void add_node(ast_node* n);
