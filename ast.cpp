@@ -71,8 +71,12 @@ void ast::build_tree(exec_node* cst_head, symbol_table table){
             else if (table.find_symbol(cst_head->get_value())){
                 new_node->set_type(ast_types::ASSIGNMENT);
                 add_node(new_node);
+                auto new_node_2 = new ast_node;
+                new_node_2->set_type(ast_types::TOKEN);
+                new_node_2->set_value(cst_head->get_value());
+                add_node(new_node_2);
                 // Handle the rest of the declaration with shunting yard and push tokens to the table
-                cst_head = shunting_yard_wrapper(cst_head->get_next(), new_node);
+                cst_head = shunting_yard_wrapper(cst_head, new_node);
             }
             else if (cst_head->get_value() == "printf"){
                 new_node->set_type(ast_types::STATEMENT_PRINTF);
@@ -271,8 +275,8 @@ bool check_precedence(exec_node* a, exec_node* b){
 }
 
 ast_node* ast::shunting_yard(std::vector<exec_node*> tokens, ast_node* first){
-    ast_node* mini_head = first;
-    ast_node* mini_tail = first;
+    ast_node* mini_head = nullptr;
+    ast_node* mini_tail = nullptr;
 
     std::vector<exec_node*> stack;
 
@@ -282,8 +286,13 @@ ast_node* ast::shunting_yard(std::vector<exec_node*> tokens, ast_node* first){
             new_node->set_type(ast_types::TOKEN);
             new_node->set_value(token->get_value());
             new_node->set_err(token->get_line(), token->get_column());
-            mini_tail->set_next(new_node);
-            mini_tail = new_node;
+            if (mini_head == nullptr){
+                mini_head = new_node;
+                mini_tail = new_node;
+            } else{
+                mini_tail->set_next(new_node);
+                mini_tail = new_node;
+            }
         }
         else if (is_operator(token)){
             while (!stack.empty() && check_precedence(stack.back(), token)){
