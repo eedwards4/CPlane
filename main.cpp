@@ -53,10 +53,9 @@ int main(int argc, char* argv[]) {
     // Generate symbol table
     symbol_table sym_table;
     sym_table.build_table(path);
-	// Generate ast
+    // Generate ast
     ast as_tree;
     as_tree.build_tree(path.get_head(), sym_table);
-    as_tree.print_tree();
 
     cout << "Generating output files..." << endl;
     // Outputting the tokens
@@ -68,6 +67,9 @@ int main(int argc, char* argv[]) {
     // Outputting the symbol table
     string symbol_table_filename = output_base + "_symbols.txt";
     sym_table.print_symbols(symbol_table_filename);
+    // Outputting the ast
+    string ast_filename = output_base + "_ast.txt";
+    as_tree.print_tree(ast_filename);
 
     // Cleanup
     cout << "Done!" << endl;
@@ -75,5 +77,6 @@ int main(int argc, char* argv[]) {
     cout << "Tokens: " << tokens_filename << endl;
     cout << "Visual Path: " << vpath_filename << endl;
     cout << "Symbol Table: " << symbol_table_filename << endl;
+    cout << "AST: " << ast_filename << endl;
     return 0;
 }

@@ -57,7 +57,7 @@ void tokenizer::tokenize(std::string filename){
                 handle_str = false;
                 this->out << curr; // OUTPUT TAG
                 this->path->add_node(tokens::STRING_LITERAL, line, col - str.size(), str);
-                this->path->add_node(tokens::single_char(curr), line, col);
+                this->path->add_node(tokens::single_char(curr), line, col, "\"");
                 str = "";
             }
             else{
@@ -70,7 +70,7 @@ void tokenizer::tokenize(std::string filename){
                 handle_chr = false;
                 this->out << curr; // OUTPUT TAG
                 this->path->add_node(tokens::CHAR_LITERAL, line, col - str.size(), str);
-                this->path->add_node(tokens::single_char(curr), line, col);
+                this->path->add_node(tokens::single_char(curr), line, col, "'");
                 str = "";
             }
             else{
@@ -82,7 +82,7 @@ void tokenizer::tokenize(std::string filename){
             switch(curr){
                 // String literals
                 case '"':
-                    this->path->add_node(tokens::single_char(curr), line, col);
+                    this->path->add_node(tokens::single_char(curr), line, col, "\"");
                     handle_str = true;
                     entered_at = line;
                     this->out << curr; // OUTPUT TAG
@@ -90,7 +90,7 @@ void tokenizer::tokenize(std::string filename){
 
                 // Character literals
                 case '\'':
-                    this->path->add_node(tokens::single_char(curr), line, col);
+                    this->path->add_node(tokens::single_char(curr), line, col, "'");
                     handle_chr = true;
                     entered_at = line;
                     this->out << curr; // OUTPUT TAG
@@ -173,7 +173,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "+");
                     }
                     break;
 
@@ -226,7 +226,7 @@ void tokenizer::tokenize(std::string filename){
                     }
                     else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "-");
                     }
                     break;
 
@@ -249,7 +249,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "&");
                     }
                     break;
 
@@ -272,7 +272,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "|");
                     }
                     break;
 
@@ -288,7 +288,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "!");
                     }
                     break;
 
@@ -303,7 +303,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "%");
                     }
                     break;
 
@@ -318,7 +318,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "*");
                     }
                     break;
 
@@ -333,7 +333,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "=");
                     }
                     break;
 
@@ -348,7 +348,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "^");
                     }
                     break;
 
@@ -363,7 +363,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "#");
                     }
                     break;
 
@@ -396,7 +396,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else {
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, ">");
                     }
                     break;
 
@@ -428,7 +428,7 @@ void tokenizer::tokenize(std::string filename){
                         str = "";
                     } else {
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "<");
                     }
                     break;
 
@@ -447,7 +447,7 @@ void tokenizer::tokenize(std::string filename){
                         this->out << "  "; // OUTPUT TAG
                     } else {
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, "/");
                     }
                     break;
 
@@ -477,7 +477,7 @@ void tokenizer::tokenize(std::string filename){
                     }
                     else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, ".");
                     }
                     break;
 
@@ -493,13 +493,13 @@ void tokenizer::tokenize(std::string filename){
                     }
                     else{
                         this->out << curr; // OUTPUT TAG
-                        this->path->add_node(tokens::single_char(curr), line, col);
+                        this->path->add_node(tokens::single_char(curr), line, col, ":");
                     }
                     break;
 
                 case ',': case ';': case '?': case '~': case '`':
                     this->out << curr; // OUTPUT TAG
-                    this->path->add_node(tokens::single_char(curr), line, col);
+                    this->path->add_node(tokens::single_char(curr), line, col, std::string(1, curr));
                     break;
 
                 case 'L': // Can be used as an identifier or as a prefix for a string literal

@@ -57,7 +57,7 @@ class symbol_table {
 public:
     // Constructor
     symbol_table() = default;
-    ~symbol_table();
+    //~symbol_table();
 
     // Setters
     void build_table(exec_path& path);
@@ -67,6 +67,7 @@ public:
     // Getters
     void print_symbols(const std::string& filename) const;
     bool find_symbol(const std::string name) const;
+    bool is_function(const std::string name) const;
 
 private:
     // Setup

@@ -5,6 +5,7 @@
 #include "symbol_table.h"
 
 // Destructor
+/*
 symbol_table::~symbol_table() {
     for (symbol_node* s : scopes) {
         // Delete parameters
@@ -12,18 +13,18 @@ symbol_table::~symbol_table() {
             symbol_node* p = s->get_params();
             while (p != nullptr) {
                 symbol_node* temp = p;
-                p = p->get_next();
+                if (p->get_next() != nullptr) { p = p->get_next(); }
                 delete temp;
             }
         }
         while (s != nullptr) {
             symbol_node* temp = s;
-            s = s->get_next();
+            if (s->get_next() != nullptr) { s = s->get_next(); }
             delete temp;
         }
     }
 }
-
+*/
 // Driver function for building the table
 void symbol_table::build_table(exec_path &path) {
     exec_node* current = path.get_head();
@@ -346,6 +347,17 @@ bool symbol_table::find_symbol(const std::string name) const{
                     return true;
                 }
                 current = current->get_next();
+            }
+        }
+    }
+    return false;
+}
+
+bool symbol_table::is_function(const std::string name) const {
+    for (const auto& scope : scopes){
+        if (scope != nullptr){
+            if (scope->IDENT_NAME == name){
+                return true;
             }
         }
     }
