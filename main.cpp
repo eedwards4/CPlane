@@ -15,11 +15,11 @@
 using namespace std;
 
 // Precompile options
-#define SKIP_ARGS 1
+#define SKIP_ARGS 0
 
 int main(int argc, char* argv[]) {
     string filename;
-    if (SKIP_ARGS){
+    if (SKIP_ARGS || argc == 1){
         filename = "tests/programming_assignment_5-test_file_1.c";
     } else{
         if (argc != 2){
@@ -37,15 +37,15 @@ int main(int argc, char* argv[]) {
     
     // Generate output filename base
     string output_base = "./output_files/" + filename.substr(6, filename.size() - 2);
-
+    cout << "Input file: " << filename << endl;
     // Setting up tokenizer
     exec_path path;
     tokenizer t(&path);
     // Tokenize the file
-    cout << "Tokenizing file..." << endl;
+    cout << "Tokenizing file --> ";
     t.tokenize(filename);
     // Error handling
-    cout << "Checking for syntax errors..." << endl;
+    cout << "Checking for syntax errors --> "s;
     errors e;
     e.check_syntax(&path);
     // Remove newlines from the path as they are now unnecessary
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     ast as_tree;
     as_tree.build_tree(path.get_head(), sym_table);
 
-    cout << "Generating output files..." << endl;
+    cout << "Generating output files --> ";
     // Outputting the tokens
     string tokens_filename = output_base + "_tokens.txt";
     path.print_tokens_to_file(tokens_filename);
@@ -72,11 +72,13 @@ int main(int argc, char* argv[]) {
     as_tree.print_tree(ast_filename);
 
     // Cleanup
-    cout << "Done!" << endl;
+    cout << "Done!" << endl << endl;
     cout << "Output files can be found at: " << endl;
+    cout << "------------------------------------------------------------------------" << std::endl;
     cout << "Tokens: " << tokens_filename << endl;
     cout << "Visual Path: " << vpath_filename << endl;
     cout << "Symbol Table: " << symbol_table_filename << endl;
     cout << "AST: " << ast_filename << endl;
+    cout << "------------------------------------------------------------------------" << std::endl;
     return 0;
 }

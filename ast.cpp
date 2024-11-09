@@ -74,7 +74,7 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
                 cst_head = cst_head->get_next();
                 int for_tracker = 1;
                 while (cst_head->get_type() != tokens::OPEN_BRACE){
-                    std::cout << "Called on: " << cst_head->get_value() << std::endl;
+                    //std::cout << "Called on: " << cst_head->get_value() << std::endl;
                     new_node = new ast_node;
                     new_node->type = ast_types::EXPRESSION_FOR;
                     new_node->set_err(cst_head->get_line(), cst_head->get_column());
@@ -106,7 +106,7 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
                     add_node(new_node_two);
                     // Handle the rest of the assignment with shunting yard
                     cst_head = shunting_yard_wrapper(cst_head, new_node_two);*/
-                    std::cout << "Called on: " << cst_head->get_next()->get_next()->get_value() << std::endl;
+                    //std::cout << "Called on: " << cst_head->get_next()->get_next()->get_value() << std::endl;
                 }
                 else if (cst_head->get_next()->get_next()->get_value() == ","){
                     while (cst_head->get_next()->get_next()->get_value() == ","){

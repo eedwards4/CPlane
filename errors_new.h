@@ -5,9 +5,7 @@
 #ifndef CPLANE_ERRORS_Z
 #define CPLANE_ERRORS_Z
 
-// No further need
-//#include "exec_path.h"
-
+#include "symbol_table.cpp"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -17,8 +15,10 @@
 // When encounter error in file e.ENC_ERROR(Relevant info);
 // Then at end of file you need to call:
 // if ( e.EXISTS ) { e.STOP_SYNTAX_ERRORS };
-// This will stop the program compilation and print all the error statements.
+// This will stop the program compilation and print all the error statements if there are any errors
 /*
+
+// UNUSED
 struct INFO
 {   
     int code;
@@ -38,9 +38,12 @@ class ERROR {
     int column; // column
     std::string filename;
     std::string print_statement;
-    //std::string print_statement; // Message
 
-    private:
+    // TODO need to retrive token that is fked
+    symbol_node symbol; //??
+
+    //private:
+    // UNUSED
     //INFO rel_info;
 };
 
@@ -49,7 +52,7 @@ class ERRORS {
     public:
     ERRORS();
     bool exists; // Does an error exist?
-    void ENC_ERROR(std::string filename, int code, int line, int column);
+    void ENC_ERROR(std::string filename, int code, int line, int column, symbol_node symbol);
     void STOP_SYNTAX_ERRORS();
 
     private:

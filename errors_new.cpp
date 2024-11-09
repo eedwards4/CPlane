@@ -19,6 +19,15 @@ ERRORS::ERRORS(){
     exists = false;
 }
 
+// ERROR PRINT STATEMENTS HERE??
+// PASS THE SYMBOL_NODE into this?
+// std::string ERRORS::UNEXPECTED_THING
+
+
+
+
+
+
 
 // Only exists to print the actual statement. Builds message using info
 void ERRORS::printHelper(ERROR error){
@@ -30,7 +39,7 @@ void ERRORS::printHelper(ERROR error){
 
 
 // Adds an error to the list of errors and continues so the program can get all errors
-void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column/*, Symbol symbol??, or string maybe*/){
+void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column, symbol_node symbol/*, Symbol symbol??, or string maybe*/){
     // New error
     ERROR terror;
     // There are errors
@@ -42,7 +51,8 @@ void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column/*, S
     terror.code = code;
     // TODO: set correct output message somehow.
 
-    // Adding the scary to the list of errors
+
+    // Adding the scary to the list of terries
     VERRORS.push_back(terror);
 }
 
@@ -52,11 +62,12 @@ void ERRORS::STOP_SYNTAX_ERRORS(){
     if ( exists == false) {
         exit(1);
     }
+
     std::cerr << "Compilation failed due to following error(s)" << std::endl;
     ERROR terror; // Temp error
     // Loop through errors and print them johns
     for ( int e = 0; e < VERRORS.size(); e++ ){
-        terror = VERRORS[e];
+        terror = VERRORS[e]; 
         printHelper(terror);
         std::cerr << "|" << std::endl << "|" << std::endl; // Formatting
     }
@@ -65,6 +76,8 @@ void ERRORS::STOP_SYNTAX_ERRORS(){
     // Exiting
     exit(VERRORS[-1].code); 
 }
+
+
 
 
 
