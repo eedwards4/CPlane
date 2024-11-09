@@ -25,7 +25,7 @@ class Interpreter {
     void Begin();
     // Not sure yet but maybe step through the program incrementally with keyboard
     void BeginDebug();
-
+    int Exit();
     private:
     std::stack<int> runtime_stack;
     int program_counter;

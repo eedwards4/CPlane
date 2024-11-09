@@ -15,6 +15,14 @@ Interpreter::Interpreter(ast AST, symbol_table ST){
     // Set head n shit
 }
 
+int Interpreter::Exit(){
+    std::cout << "Process finished with exit code " << exit_code << std::endl; // exit code 0 by default
+    return exit_code;
+}
+
+
+
+
 // Not necessary but would be ez and cool, can step through program manually.
 void Interpreter::BeginDebug(){
     int h;
@@ -40,6 +48,5 @@ void Interpreter::Begin(/*symbol_node?*/){
         program_counter++;
     }   
 
-    // ATP the program has finished either by erroring or not (Doesnt actually exit the program)
-    std::cout << "Process finished with exit code " << exit_code << std::endl; // exit code 0 by default
+
 }

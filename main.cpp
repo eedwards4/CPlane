@@ -19,6 +19,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
     string filename;
     bool debug_mode = false;
+    int exit_code = 0;
     
     /* --------------- USE FILE HERE IF USING IDE ----------------*/
     if ( argc == 1 ){
@@ -94,6 +95,8 @@ int main(int argc, char* argv[]) {
     } else {
         r.Begin();
     }
+    exit_code = r.Exit();
+    std::cout << std::endl;
 
 
     // Cleanup
@@ -105,5 +108,5 @@ int main(int argc, char* argv[]) {
     if ( debug_mode ) { cout << "Symbol Table: " << symbol_table_filename << endl; }
     if ( debug_mode ) { cout << "AST: " << ast_filename << endl; }
     if ( debug_mode ) { cout << "------------------------------------------------------------------------" << std::endl; }
-    return 0;
+    return exit_code;
 }
