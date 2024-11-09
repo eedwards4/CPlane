@@ -18,7 +18,7 @@
 class tokenizer {
 public:
     tokenizer(exec_path* path){
-        this->out.open("output_assignment_1.txt"); // TEMPORARY FOR ASSIGNMENT ONE
+        this->out.open("output_files/output_assignment_1.txt"); // TEMPORARY FOR ASSIGNMENT ONE
         this->path = path;
     };
     ~tokenizer() = default;
