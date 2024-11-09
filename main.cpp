@@ -88,6 +88,20 @@ int main(int argc, char* argv[]) {
     // Outputting the ast
     string ast_filename = output_base + "_ast.txt";
     as_tree.print_tree(ast_filename);
+
+
+    if ( debug_mode ){
+        cout << "Output files can be found at: " << endl;
+        cout << "------------------------------------------------------------------------" << std::endl;
+        cout << "Tokens: " << tokens_filename << endl;
+        cout << "Visual Path: " << vpath_filename << endl;
+        cout << "Symbol Table: " << symbol_table_filename << endl;
+        cout << "AST: " << ast_filename << endl;
+        cout << "------------------------------------------------------------------------" << std::endl;
+        cout << endl;
+    }
+    
+
     // Interpreter time bay bee!
     Interpreter r;
     if ( debug_mode ){
@@ -97,16 +111,5 @@ int main(int argc, char* argv[]) {
     }
     exit_code = r.Exit();
     std::cout << std::endl;
-
-
-    // Cleanup
-    
-    if ( debug_mode ) { cout << "Output files can be found at: " << endl; }
-    if ( debug_mode ) { cout << "------------------------------------------------------------------------" << std::endl; }
-    if ( debug_mode ) { cout << "Tokens: " << tokens_filename << endl; }
-    if ( debug_mode ) { cout << "Visual Path: " << vpath_filename << endl; }
-    if ( debug_mode ) { cout << "Symbol Table: " << symbol_table_filename << endl; }
-    if ( debug_mode ) { cout << "AST: " << ast_filename << endl; }
-    if ( debug_mode ) { cout << "------------------------------------------------------------------------" << std::endl; }
     return exit_code;
 }

@@ -25,7 +25,8 @@ int Interpreter::Exit(){
 
 // Not necessary but would be ez and cool, can step through program manually.
 void Interpreter::BeginDebug(){
-    int h;
+    std::cout << "DEBUG MODE: w -> forward one step (not implemented)" << std::endl;
+    Begin(); 
 }
 
 
