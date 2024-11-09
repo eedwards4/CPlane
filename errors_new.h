@@ -2,8 +2,8 @@
 // Created by Logan Puntous on 11/8/2024.
 //
 
-#ifndef CPLANE_ERRORS_Z
-#define CPLANE_ERRORS_Z
+#ifndef CPLANE_ERRORZ_H
+#define CPLANE_ERRORZ_H
 
 #include "symbol_table.cpp"
 #include <vector>

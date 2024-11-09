@@ -4,9 +4,9 @@ CXXFLAGS = -g -std=c++14
 LFLAGS  = 
 
 # Source files and object files
-SOURCE  = main.cpp tokenizer.cpp exec_path.cpp errors.cpp symbol_table.cpp ast.cpp
+SOURCE  = main.cpp tokenizer.cpp exec_path.cpp errors.cpp symbol_table.cpp ast.cpp interpreter.cpp
 OBJS    = $(SOURCE:.cpp=.o)
-HEADER  = tokens.h tokenizer.h exec_path.h errors.h symbols.h symbol_table.h ast.h
+HEADER  = tokens.h tokenizer.h exec_path.h errors.h symbols.h symbol_table.h ast.h interpreter.h
 OUT     = cplane
 
 # Default target

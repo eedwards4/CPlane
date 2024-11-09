@@ -60,7 +60,7 @@ void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column, sym
 // Goes through all errors and prints them. Then exits.
 void ERRORS::STOP_SYNTAX_ERRORS(){
     if ( exists == false) {
-        exit(1);
+        exit(0); 
     }
 
     std::cerr << "Compilation failed due to following error(s)" << std::endl;
