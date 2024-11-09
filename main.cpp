@@ -15,7 +15,7 @@
 using namespace std;
 
 // Precompile options
-#define SKIP_ARGS 0
+#define SKIP_ARGS 0 // (1 = default input file)
 
 int main(int argc, char* argv[]) {
     string filename;
@@ -45,19 +45,21 @@ int main(int argc, char* argv[]) {
     cout << "Tokenizing file --> ";
     t.tokenize(filename);
     // Error handling
-    cout << "Checking for syntax errors --> "s;
+    cout << "Checking for syntax errors --> ";
     errors e;
     e.check_syntax(&path);
     // Remove newlines from the path as they are now unnecessary
     path.remove_newlines();
     // Generate symbol table
+    cout << "Building symbol table --> ";
     symbol_table sym_table;
     sym_table.build_table(path);
     // Generate ast
+    cout << "Building AST --> ";
     ast as_tree;
     as_tree.build_tree(path.get_head(), sym_table);
 
-    cout << "Generating output files --> ";
+    cout << "Generating output files... " << endl;
     // Outputting the tokens
     string tokens_filename = output_base + "_tokens.txt";
     path.print_tokens_to_file(tokens_filename);
