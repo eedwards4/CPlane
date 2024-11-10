@@ -25,6 +25,8 @@ symbol_table::~symbol_table() {
     }
 }
 */
+
+
 // Driver function for building the table
 void symbol_table::build_table(exec_path &path) {
     exec_node* current = path.get_head();

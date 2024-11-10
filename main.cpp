@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     /* --------------- USE FILE HERE IF USING IDE ----------------*/
     if ( argc == 1 ){
         filename = "tests/programming_assignment_5-test_file_1.c";
-        debug_mode = true; // If u want debug mode on or off
+        debug_mode = false; // If u want debug mode on or off
     }
     /* -----------------------------------------------------------*/
     else if ( argc == 2 ){
@@ -91,19 +91,20 @@ int main(int argc, char* argv[]) {
 
 
     if ( debug_mode ){
-        cout << "Output files can be found at: " << endl;
-        cout << "------------------------------------------------------------------------" << std::endl;
+        cout << endl;
+        cout << "Output files: " << endl;
         cout << "Tokens: " << tokens_filename << endl;
         cout << "Visual Path: " << vpath_filename << endl;
         cout << "Symbol Table: " << symbol_table_filename << endl;
         cout << "AST: " << ast_filename << endl;
         cout << "------------------------------------------------------------------------" << std::endl;
-        cout << endl;
     }
     
 
     // Interpreter time bay bee!
-    Interpreter r;
+    //Interpreter r;
+    Interpreter r(as_tree, sym_table);
+
     if ( debug_mode ){
         r.BeginDebug();
     } else {

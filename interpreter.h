@@ -19,22 +19,29 @@
 class Interpreter {
     public:
     Interpreter();
-    Interpreter(ast AST, symbol_table ST);
+    //Interpreter(ast_node *head, ast_node *tail, symbol_table& table);
+    Interpreter(ast tree, symbol_table& table);
 
     // Runs the program internally
     void Begin();
     // Not sure yet but maybe step through the program incrementally with keyboard
     void BeginDebug();
     int Exit();
+  
     private:
-    std::stack<int> runtime_stack;
+    void clearStack();
+    void printStack(std::stack<ast_node*> runtime_stack);
+    void EvaluateStack();
+
+    bool is_running;
     int program_counter;
-    bool is_running; 
     int exit_code; 
 
-    // Not sure yet
-    const ast AST; // For reading from
-    symbol_table ST; // For reading/writing into
+    std::stack<ast_node*> runtime_stack;
+    ast as_tree;
+    ast_node *ast_head; // For reading from
+    ast_node *ast_tail; // For reading from
+    symbol_table s_table; // For reading/writing into
 };  
 
 

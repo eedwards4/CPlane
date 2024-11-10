@@ -4,6 +4,15 @@
 
 #include "ast.h"
 
+ast_node* ast::get_head(){
+    return head;
+}
+ast_node* ast::get_tail(){
+    return tail;
+}
+
+
+
 void ast::build_tree(exec_node *cst_head, symbol_table& table) {
 
     while (cst_head != nullptr){

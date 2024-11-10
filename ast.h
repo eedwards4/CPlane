@@ -60,6 +60,8 @@ public:
 
     void build_tree(exec_node* cst_head, symbol_table& table);
     void print_tree(std::string &filename);
+    ast_node* get_head();
+    ast_node* get_tail();
 
 private:
     ast_node* head = nullptr;
