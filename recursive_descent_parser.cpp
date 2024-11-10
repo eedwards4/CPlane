@@ -15,8 +15,6 @@ bool RecursiveDescentParser::check_syntax(exec_node* head) {
 		std::cout << "Syntax error on line " + std::to_string(head->get_line()) + ": Expected EOF but got '" + head->get_value() + "' instead." << std::endl;
 		return false;
 	}
-	// good program
-	std::cout << "VALID PROGRAM" << std::endl;
 	return true;
 }
 

@@ -5,11 +5,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstring>
 
 #include "errors.h"
 #include "ast.h"
 #include "tokenizer.h"
 #include "exec_path.h"
+#include "recursive_descent_parser.h"
 #include "symbol_table.h"
 #include "interpreter.h"
 
@@ -23,7 +25,7 @@ int main(int argc, char* argv[]) {
     
     /* --------------- USE FILE HERE IF USING IDE ----------------*/
     if ( argc == 1 ){
-        filename = "tests/programming_assignment_5-test_file_1.c";
+        filename = "tests/programming_assignment_6-test_file_1.c";
         debug_mode = false; // If u want debug mode on or off
     }
     /* -----------------------------------------------------------*/
@@ -64,6 +66,8 @@ int main(int argc, char* argv[]) {
     if ( debug_mode ){ cout << "Checking for syntax errors --> "; }
     errors e;
     e.check_syntax(&path);
+	RecursiveDescentParser rdp;
+	if(!rdp.check_syntax(path.get_head())) { return 1; }
     // Remove newlines from the path as they are now unnecessary
     path.remove_newlines();
     // Generate symbol table
