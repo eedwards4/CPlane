@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "errors.h"
+#include "errors_new.h"
 #include "tokens.h"
 #include "symbols.h"
 #include "exec_path.h"
@@ -57,6 +57,10 @@ class symbol_table {
 public:
     // Constructor
     symbol_table() = default;
+    symbol_table(ERRORS &in_errors, std::string in_filename){
+        errors = in_errors;
+        filename = in_filename;
+    };
     //~symbol_table();
 
     // Setters
@@ -72,7 +76,9 @@ public:
 private:
     // Setup
     void add_symbol(symbol_node* new_symbol);
-
+    std::string error_message;
+    std::string filename;
+    ERRORS errors; // NEED TO KNOW IF THIS UPDATES ORIGINAL OR ELSE NEED TO ADD TO FUCNTION DECLERATIONS THAT USE ERRORS AS PASS BY REFERANCE
     // Navigation
     std::vector<symbol_node*> scopes; // Vector of head pointers to different scopes
 };

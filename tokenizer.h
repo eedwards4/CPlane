@@ -6,7 +6,8 @@
 #define CPLANE_TOKENIZER_H
 
 // Internal
-#include "errors.h"
+//#include "errors.h"
+#include "errors_new.h"
 #include "exec_path.h"
 #include "tokens.h"
 // Standard
@@ -20,14 +21,16 @@ public:
     tokenizer(exec_path* path){
         this->out.open("output_files/output_assignment_1.txt"); // TEMPORARY FOR ASSIGNMENT ONE
         this->path = path;
+        error_message = "DEFAULT TOKENIZER ERROR";
     };
-    ~tokenizer() = default;
+    //~tokenizer() = default;
 
-    void tokenize(std::string filename);
+    void tokenize(std::string filename, ERRORS &errors);
 
 private:
     std::ofstream out; // Output file
     exec_path* path; // Execution path
+    std::string error_message;
 
     // Helpers
     static bool is_num(char c); // Checks if a character is a number

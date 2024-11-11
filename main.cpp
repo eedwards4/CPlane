@@ -7,7 +7,8 @@
 #include <vector>
 #include <cstring>
 
-#include "errors.h"
+//#include "errors.h"
+#include "errors_new.h"
 #include "ast.h"
 #include "tokenizer.h"
 #include "exec_path.h"
@@ -51,34 +52,51 @@ int main(int argc, char* argv[]) {
     if ( debug_mode ){
         cout << "Debug mode ENABLED" << endl;
     }
-    
+
+
+    ERRORS errors;
     
     // Generate output filename base
     string output_base = "./output_files/" + filename.substr(6, filename.size() - 2);
     if ( debug_mode ){ cout << "Input file: " << filename << endl; }
     // Setting up tokenizer
+   
     exec_path path;
     tokenizer t(&path);
     // Tokenize the file
     if ( debug_mode ){ cout << "Tokenizing file --> "; }
-    t.tokenize(filename);
+    t.tokenize(filename, errors);
+    std::cout << "NOW CHECKING TOKENIZED ERRORS..." << std::endl;
+    errors.STOP_SYNTAX_ERRORS(); // CHECKING ERRORS BEFORE CONTINUING
     // Error handling
     if ( debug_mode ){ cout << "Checking for syntax errors --> "; }
-    errors e;
-    e.check_syntax(&path);
-	RecursiveDescentParser rdp;
-	if(!rdp.check_syntax(path.get_head())) { return 1; }
+
+    // Recursive descent parser
+	RecursiveDescentParser rdp(filename, errors);
+	if(!rdp.check_syntax(path.get_head())) {}
+    std::cout << "NOW CHECKING RDP ERRORS..." << std::endl;
+    // TODO THIS IS ERRORING A BUNCH SO NEED TO CATCH WHY
+    rdp.returnErrors();
+
     // Remove newlines from the path as they are now unnecessary
     path.remove_newlines();
-    // Generate symbol table
-    if ( debug_mode ){ cout << "Building symbol table --> "; }
-    symbol_table sym_table;
-    sym_table.build_table(path);
-    // Generate ast
-    if ( debug_mode ){ cout << "Building AST --> "; }
-    ast as_tree;
-    as_tree.build_tree(path.get_head(), sym_table);
 
+    if ( debug_mode ){ cout << "Building symbol table --> "; }
+
+    // Generate symbol table
+    symbol_table sym_table(errors, filename);
+    sym_table.build_table(path);
+    std::cout << "NOW CHECKING SYMBOL ERRORS..." << std::endl;
+    errors.STOP_SYNTAX_ERRORS(); // CHECKING ERRORS BEFORE CONTINUING
+    
+    if ( debug_mode ){ cout << "Building AST --> "; }
+
+     // Generate ast
+    ast as_tree;
+    //SEGMENTATION FAULT HERE for ass2 file 6 cause rdp or symtable not catching 
+    as_tree.build_tree(path.get_head(), sym_table);
+    
+    
     if ( debug_mode ){ cout << "Generating output files... " << endl; }
     // Outputting the tokens
     string tokens_filename = output_base + "_tokens.txt";

@@ -4,7 +4,7 @@
 
 #include "tokenizer.h"
 
-void tokenizer::tokenize(std::string filename){
+void tokenizer::tokenize(std::string filename, ERRORS &errors){
     // Input
     std::ifstream in(filename, std::ios::binary);
     if (!in) {
@@ -24,6 +24,7 @@ void tokenizer::tokenize(std::string filename){
     bool ignore_mlc = false; // Multi line comment
     bool is_float = false; // Floats
     std::vector<char> structure; // Nesting structures
+    error_message = "DEFAULT TOKENIZER ERROR";
 
     while (!in.eof()){
         in.get(curr);
@@ -128,7 +129,10 @@ void tokenizer::tokenize(std::string filename){
 
                 case '}':
                     if (structure.back() != '{'){
-                        errors::EXPECTED_END(line, curr);
+                        //errors::EXPECTED_END(line, curr);
+                        //TODO
+                        
+                        errors.ENC_ERROR(filename, 1, line, col, error_message);
                     }
                     structure.pop_back();
                     this->out << curr; // OUTPUT TAG
@@ -137,7 +141,10 @@ void tokenizer::tokenize(std::string filename){
 
                 case ']':
                     if (structure.back() != '['){
-                        errors::EXPECTED_END(line, curr);
+                        //errors::EXPECTED_END(line, curr);
+                        //TODO
+                        
+                        errors.ENC_ERROR(filename, 1, line, col, error_message);
                     }
                     structure.pop_back();
                     this->out << curr; // OUTPUT TAG
@@ -146,7 +153,10 @@ void tokenizer::tokenize(std::string filename){
 
                 case ')':
                     if (structure.back() != '('){
-                        errors::EXPECTED_END(line, curr);
+                        //errors::EXPECTED_END(line, curr);
+                        //TODO
+                        
+                        errors.ENC_ERROR(filename, 1, line, col, error_message);
                     }
                     structure.pop_back();
                     this->out << curr; // OUTPUT TAG
@@ -212,7 +222,10 @@ void tokenizer::tokenize(std::string filename){
                                 dot = true;
                             }
                             if ((curr == '.' && !is_num(in.peek())) || (curr == '.' && dot)){
-                                errors::EXPECTED_VALUE(line, curr);
+                                //errors::EXPECTED_VALUE(line, curr);
+                                //TODO
+                                
+                                errors.ENC_ERROR(filename, 1, line, col, error_message);
                             }
                             str += curr;
                         }
@@ -453,7 +466,10 @@ void tokenizer::tokenize(std::string filename){
 
                 case '.':
                     if (is_num(in.peek())){
-                        errors::UNEXPECTED_VALUE(line, curr);
+                        //errors::UNEXPECTED_VALUE(line, curr);
+                        //TODO
+
+                        errors.ENC_ERROR(filename, 1, line, col, error_message);
                     }
                     else if (in.peek() == '.'){
                         str = curr;
@@ -465,14 +481,20 @@ void tokenizer::tokenize(std::string filename){
                             col++;
                             str += curr;
                             if (in.peek() == '.'){
-                                errors::UNEXPECTED_TOKEN(line, curr);
+                                //errors::UNEXPECTED_TOKEN(line, curr);
+                                //TODO
+
+                                errors.ENC_ERROR(filename, 1, line, col, error_message);
                             }
                             this->out << str; // OUTPUT TAG
                             this->path->add_node(tokens::ELLIPSIS, line, col, "...");
                             str = "";
                             break;
                         } else{
-                            errors::UNEXPECTED_TOKEN(line, curr);
+                            //errors::UNEXPECTED_TOKEN(line, curr);
+                            //TODO
+
+                            errors.ENC_ERROR(filename, 1, line, col, error_message);
                         }
                     }
                     else{
@@ -537,7 +559,10 @@ void tokenizer::tokenize(std::string filename){
                             is_float = true;
                         }
                         if ((curr == '.' && !is_num(in.peek())) || (curr == '.' && is_float)){
-                            errors::EXPECTED_VALUE(line, curr);
+                            //errors::EXPECTED_VALUE(line, curr);
+                            //TODO
+
+                            errors.ENC_ERROR(filename, 1, line, col, error_message);
                         }
                         str += curr;
                     }
@@ -557,14 +582,26 @@ void tokenizer::tokenize(std::string filename){
             }
         }
     }
+    
     if (ignore_mlc){
-        errors::UNTERM_COMMENT(entered_at, curr);
+        //errors::UNTERM_COMMENT(entered_at, curr);
+        //TODO
+        
+        errors.ENC_ERROR(filename, 1, line, col, error_message);
     }
     if (ignore_slc){
-        errors::UNEXPECTED_END_OF_FILE(entered_at, curr);
+        //errors::UNEXPECTED_END_OF_FILE(entered_at, curr);
+        //TODO
+        
+        errors.ENC_ERROR(filename, 1, line, col, error_message);
     }
+    
     in.close();
+    
     out.close();
+    
+    
+    
 }
 
 // Helpers

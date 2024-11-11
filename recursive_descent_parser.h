@@ -5,17 +5,32 @@
 #include <string>
 
 #include "exec_path.h"
+#include "errors_new.h"
 
 class RecursiveDescentParser {
 	public:
-		RecursiveDescentParser() {}
+		RecursiveDescentParser(std::string in_filename, ERRORS& errors) {
+			filename = in_filename;
+			RST_errors = errors;
+		}
 
 		bool check_syntax(exec_node *head);
+		void returnErrors(){
+			RST_errors.STOP_SYNTAX_ERRORS();
+		}
 
 	private:
-		void setError(int d, std::string message) {
-			if (d >= depth) {
-				error_message = message;
+	
+		//void ENC_ERROR(std::string filename, int code, exec_node*& token, std::string error_msg);
+		void setErrorNew(int d, exec_node*& token, std::string message) {
+			if ( d >= depth ){
+				//message = "DEFAULT RDP ERROR";
+				//error_message = message;
+				// ERROR CODE 1 default
+				if ( token == nullptr ){
+					RST_errors.ENC_ERROR(filename, 1, 0, 0, message);
+				}
+				RST_errors.ENC_ERROR(filename, 1, token->get_line(), token->get_column(), message);
 				depth = d;
 			}
 		}
@@ -27,7 +42,9 @@ class RecursiveDescentParser {
 				to_next(token);
 				return true;
 			}
-			setError(d, "Error on line " + std::to_string(token->get_line()) + ": Expected '" + std::to_string(type) + "' but got '" + std::to_string(token->get_type()) + "' instead.\n");
+			//setError(d, "Error on line " + std::to_string(token->get_line()) + ": Expected '" + std::to_string(type) + "' but got '" + std::to_string(token->get_type()) + "' instead.\n");
+			error_message = "expected " + std::to_string(type) + " but found '" + std::to_string(token->get_type()) + "' instead.";
+			setErrorNew(d, token, error_message);
 			return false;
 		}
 
@@ -38,7 +55,9 @@ class RecursiveDescentParser {
 				to_next(token);
 				return true;
 			}
-			setError(d, "Error on line " + std::to_string(token->get_line()) + ": Expected '" + value + "' but got '" + token->get_value() + "' instead.\n");
+			//setError(d, "Error on line " + std::to_string(token->get_line()) + ": Expected '" + value + "' but got '" + token->get_value() + "' instead.\n");
+			error_message = "expected " + value + " but found '" + token->get_value() + "' instead.";
+			setErrorNew(d, token, error_message);
 			return false;
 		}
 
@@ -51,8 +70,11 @@ class RecursiveDescentParser {
 			}
 		}
 
+		ERRORS RST_errors;
+		std::string filename;
 		std::string error_message = "";
 		int depth = 0;
+
 
 		// Functions for recursive descent parser (35 - 2, 33 total)
 		// bool isCharacter(exec_node*& token, int d);
@@ -92,7 +114,7 @@ class RecursiveDescentParser {
 		bool isProgram(exec_node*& token, int d);
 };
 
-#endif
+#endif //RECURSIVE_DESCENT_PARSER_H
 
 /*
 Reserved Identifiers:

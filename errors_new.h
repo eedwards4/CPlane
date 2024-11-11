@@ -5,7 +5,8 @@
 #ifndef CPLANE_ERRORZ_H
 #define CPLANE_ERRORZ_H
 
-#include "symbol_table.cpp"
+//#include "symbol_table.cpp"
+#include "exec_path.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -16,19 +17,8 @@
 // Then at end of file you need to call:
 // if ( e.EXISTS ) { e.STOP_SYNTAX_ERRORS };
 // This will stop the program compilation and print all the error statements if there are any errors
-/*
 
-// UNUSED
-struct INFO
-{   
-    int code;
-    int line;
-    int c;
-    std::string filename;
-    std::string print_statement;
-    
-};
-*/
+
 
 class ERROR {
     public:
@@ -40,11 +30,7 @@ class ERROR {
     std::string print_statement;
 
     // TODO need to retrive token that is fked
-    symbol_node symbol; //??
-
-    //private:
-    // UNUSED
-    //INFO rel_info;
+    //symbol_node symbol; //??
 };
 
 
@@ -52,8 +38,9 @@ class ERRORS {
     public:
     ERRORS();
     bool exists; // Does an error exist?
-    void ENC_ERROR(std::string filename, int code, int line, int column, symbol_node symbol);
+    void ENC_ERROR(std::string filename, int code, int line, int column, std::string error_msg);
     void STOP_SYNTAX_ERRORS();
+    
 
     private:
     std::vector<ERROR> VERRORS; // vector of errors for printing once STOP_SYNTAX_ERRORS added from ENC_ERROR

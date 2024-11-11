@@ -6,7 +6,7 @@
 #define CPLANE_EXEC_PATH_H
 
 #include "tokens.h"
-
+//#include "errors_new.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -59,7 +59,7 @@ public:
         tail = nullptr;
         current = nullptr;
     }
-    ~exec_path();
+    //m~exec_path();
 
     void add_node(int type, int line, int col, std::string value="");
 

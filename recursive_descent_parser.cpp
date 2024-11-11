@@ -9,10 +9,12 @@
 
 bool RecursiveDescentParser::check_syntax(exec_node* head) {
 	if (!isProgram(head, 1)) { // error in program
-		std::cout << error_message << std::endl;
+		//std::cout << error_message << std::endl;
 		return false;
 	} else if (head != nullptr) { // more program after expected end of program
-		std::cout << "Syntax error on line " + std::to_string(head->get_line()) + ": Expected EOF but got '" + head->get_value() + "' instead." << std::endl;
+		//std::cout << "Syntax error on line " + std::to_string(head->get_line()) + ": Expected EOF but got '" + head->get_value() + "' instead." << std::endl;
+		error_message = "expected EOF but found '" + head->get_value() + "' instead";
+		setErrorNew(depth, head, error_message);
 		return false;
 	}
 	return true;
@@ -68,7 +70,11 @@ bool RecursiveDescentParser::check_syntax(exec_node* head) {
 
 
 bool RecursiveDescentParser::isWholeNumber(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		//setError(d, "Syntax error: Unexpectedly reached EOF."); 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (token->get_type() == tokens::INT_AS_STRING && token->get_value()[0] != '-') {
@@ -78,13 +84,19 @@ bool RecursiveDescentParser::isWholeNumber(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected whole number, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected whole number, but got '" + token->get_value() + "' instead.");
+	error_message = "expected whole number, but found '" + token->get_value() + "' instead";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 
 bool RecursiveDescentParser::isIdentifier(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		//setError(d, "Syntax error: Unexpectedly reached EOF."); 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (token->get_type() == 9995) {
@@ -96,7 +108,10 @@ bool RecursiveDescentParser::isIdentifier(exec_node*& token, int d) {
 			token->get_value() == "function" || token->get_value() == "procedure" ||
 			token->get_value() == "main" || token->get_value() == "void") 
 		{
-			setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": identifier '" + token->get_value() + "' is reserved.");
+			//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": identifier '" + token->get_value() + "' is reserved.");
+			error_message = "identifier '" + token->get_value() + "' is reserved.";
+			setErrorNew(d, token, error_message);
+
 			token = init;
 			return false;
 		}
@@ -106,13 +121,18 @@ bool RecursiveDescentParser::isIdentifier(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected identifier, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected identifier, but got '" + token->get_value() + "' instead.");
+	error_message = "expected identifier, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // <DOUBLE_QUOTE> <STRING> <DOUBLE_QUOTE>
 bool RecursiveDescentParser::isDoubleQuotedString(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isType(token, 34, d + 1) && isType(token, tokens::STRING_LITERAL, d + 2) && isType(token, 34, d + 3)) {
@@ -120,13 +140,18 @@ bool RecursiveDescentParser::isDoubleQuotedString(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected double quoted string, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected double quoted string, but got '" + token->get_value() + "' instead.");
+	error_message = "expected double quoted string, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // <SINGLE_QUOTE> <STRING> <SINGLE_QUOTE>
 bool RecursiveDescentParser::isSingleQuotedString(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isType(token, 39, d + 1) && isType(token, tokens::CHAR_LITERAL, d + 2) && isType(token, 39, d + 3)) {
@@ -134,7 +159,9 @@ bool RecursiveDescentParser::isSingleQuotedString(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected single quoted string, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected single quoted string, but got '" + token->get_value() + "' instead.");
+	error_message = "expected single quoted string, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -143,7 +170,10 @@ bool RecursiveDescentParser::isSingleQuotedString(exec_node*& token, int d) {
 <IDENTIFIER>
 */
 bool RecursiveDescentParser::isIdentifierList(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isIdentifier(token, d + 1) && isType(token, 44, d + 2) && isIdentifierList(token, d + 3)) {
@@ -155,7 +185,9 @@ bool RecursiveDescentParser::isIdentifierList(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected identifier list, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected identifier list, but got '" + token->get_value() + "' instead.");
+	error_message = "expected identifier list, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -166,7 +198,10 @@ bool RecursiveDescentParser::isIdentifierList(exec_node*& token, int d) {
 <IDENTIFIER> <L_BRACKET> <IDENTIFIER> <R_BRACKET> 
 */
 bool RecursiveDescentParser::isIdentifierArrayList(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isIdentifier(token, d + 1) && isType(token, tokens::OPEN_BRACKET, d + 2) && isWholeNumber(token, d + 3) && isType(token, tokens::CLOSE_BRACKET, d + 4) && isType(token, 44, d + 5) && isIdentifierArrayList(token, d + 6)) {
@@ -186,7 +221,9 @@ bool RecursiveDescentParser::isIdentifierArrayList(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected identifier array list, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected identifier array list, but got '" + token->get_value() + "' instead.");
+	error_message = "expected identifier array list, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -197,7 +234,10 @@ bool RecursiveDescentParser::isIdentifierArrayList(exec_node*& token, int d) {
 <IDENTIFIER>
 */
 bool RecursiveDescentParser::isIdentifierAndIdentifierArrayList(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isIdentifierArrayList(token, d + 1) && isType(token, 44, d + 2) && isIdentifierAndIdentifierArrayList(token, d + 3)) {
@@ -216,14 +256,19 @@ bool RecursiveDescentParser::isIdentifierAndIdentifierArrayList(exec_node*& toke
 		return true;
 	}
 
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected identifier and identifier array list, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected identifier and identifier array list, but got '" + token->get_value() + "' instead.");
+	error_message = "expected identifier and identifier array list, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	token = init;
 	return false;
 }
 
 // int | char | bool
 bool RecursiveDescentParser::isDatatypeSpecifier(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (token->get_value() == "int" || token->get_value() == "char" || token->get_value() == "bool") {
@@ -233,7 +278,9 @@ bool RecursiveDescentParser::isDatatypeSpecifier(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected datatype specifier, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected datatype specifier, but got '" + token->get_value() + "' instead.");
+	error_message = "expected datatype specifier, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -249,7 +296,10 @@ bool RecursiveDescentParser::isDatatypeSpecifier(exec_node*& token, int d) {
 <DOUBLE_QUOTE> <ESCAPED_CHARACTER> <DOUBLE_QUOTE>
 */
 bool RecursiveDescentParser::isNumericalOperand(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isType(token, tokens::INT_AS_STRING, d + 1)) {
@@ -295,13 +345,18 @@ bool RecursiveDescentParser::isNumericalOperand(exec_node*& token, int d) {
 	// }
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected numerical operand, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected numerical operand, but got '" + token->get_value() + "' instead.");
+	error_message = "expected numerical operand, but found '" + token->get_value() + "' instead.";
+ 	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // <PLUS> | <MINUS> | <ASTERISK> | <DIVIDE> | <MODULO> | <CARET>
 bool RecursiveDescentParser::isNumericalOperator(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false;
+	}
 	exec_node* init = token;
 
 	if (token->get_type() == 43 || token->get_type() == 45 || token->get_type() == 42 ||
@@ -312,14 +367,19 @@ bool RecursiveDescentParser::isNumericalOperator(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected numerical operator, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected numerical operator, but got '" + token->get_value() + "' instead.");
+	error_message = "expected numerical operator, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 
 }
 
 // <BOOLEAN_AND_OPERATOR> | <BOOLEAN_OR_OPERATOR>
 bool RecursiveDescentParser::isBooleanOperator(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (token->get_type() == tokens::BOOLEAN_AND || token->get_type() == tokens::BOOLEAN_OR) {
@@ -328,14 +388,19 @@ bool RecursiveDescentParser::isBooleanOperator(exec_node*& token, int d) {
 		return true;
 	}
 
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected boolean operator, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected boolean operator, but got '" + token->get_value() + "' instead.");
+	error_message = "expected boolean operator, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	token = init;
 	return false;
 }
 
 // <BOOLEAN_EQUAL> | <BOOLEAN_NOT_EQUAL>
 bool RecursiveDescentParser::isEqualityExpression(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 	
+	}
 	exec_node* init = token;
 
 	if (token->get_type() == tokens::EQUALS_EQUALS || token->get_type() == tokens::NOT_EQUALS) {
@@ -345,13 +410,18 @@ bool RecursiveDescentParser::isEqualityExpression(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected equality expression, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected equality expression, but got '" + token->get_value() + "' instead.");
+	error_message = "expected equality expression, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // <LT> | <LT_EQUAL> | <GT> | <GT_EQUAL> | <BOOLEAN_EQUAL> | <BOOLEAN_NOT_EQUAL>
 bool RecursiveDescentParser::isRelationalExpression(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) {
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (token->get_type() == 60 || token->get_type() == tokens::LESS_EQUALS || token->get_type() == 62 || token->get_type() == tokens::GREATER_EQUALS ||
@@ -362,7 +432,9 @@ bool RecursiveDescentParser::isRelationalExpression(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected numerical operator, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected numerical operator, but got '" + token->get_value() + "' instead.");
+	error_message = "expected numerical operator, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -376,7 +448,10 @@ bool RecursiveDescentParser::isRelationalExpression(exec_node*& token, int d) {
 <LEFT_PAREN> <NUMERICAL_OPERAND> <RIGHT_PAREN>
 */
 bool RecursiveDescentParser::isNumericalExpression(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isNumericalOperand(token, d + 1) && isNumericalOperator(token, d + 2) && isType(token, tokens::OPEN_PAREN, d + 3) && isNumericalExpression(token, d + 4) &&
@@ -410,7 +485,9 @@ bool RecursiveDescentParser::isNumericalExpression(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected numerical expression, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected numerical expression, but got '" + token->get_value() + "' instead.");
+	error_message = "expected numerical expression, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -426,7 +503,10 @@ bool RecursiveDescentParser::isNumericalExpression(exec_node*& token, int d) {
 <IDENTIFIER>
 */
 bool RecursiveDescentParser::isBooleanExpression(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (token->get_value() == "TRUE" || token->get_value() == "FALSE") {
@@ -464,7 +544,9 @@ bool RecursiveDescentParser::isBooleanExpression(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected boolean expression, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected boolean expression, but got '" + token->get_value() + "' instead.");
+	error_message = "expected boolean expression, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -474,7 +556,10 @@ bool RecursiveDescentParser::isBooleanExpression(exec_node*& token, int d) {
 <IDENTIFIER> <ASSIGNMENT_OPERATOR> <DOUBLE_QUOTED_STRING>
 */
 bool RecursiveDescentParser::isInitializationExpression(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isIdentifier(token, d + 1) && isType(token, 61, d + 2) && isExpression(token, d + 3)) {
@@ -490,13 +575,18 @@ bool RecursiveDescentParser::isInitializationExpression(exec_node*& token, int d
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected initialization expression, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected initialization expression, but got '" + token->get_value() + "' instead.");
+	error_message = "expected initialization expression, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // <NUMERICAL_EXPRESSION> | <BOOLEAN_EXPRESSION>
 bool RecursiveDescentParser::isExpression(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isNumericalExpression(token, d + 1)) {
@@ -508,7 +598,9 @@ bool RecursiveDescentParser::isExpression(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected expression, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected expression, but got '" + token->get_value() + "' instead.");
+	error_message = "expected expression, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -521,7 +613,10 @@ if <L_PAREN> <BOOLEAN_EXPRESSION> <R_PAREN> <BLOCK_STATEMENT> else <BLOCK_STATEM
 if <L_PAREN> <BOOLEAN_EXPRESSION> <R_PAREN> <BLOCK_STATEMENT>
 */
 bool RecursiveDescentParser::isSelectionStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isValue(token, "if", d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isBooleanExpression(token, d + 3) && isType(token, tokens::CLOSE_PAREN, d + 4) && isStatement(token, d + 5) &&
@@ -553,7 +648,9 @@ bool RecursiveDescentParser::isSelectionStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected selection statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected selection statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected selection statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -566,7 +663,10 @@ while <L_PAREN> <BOOLEAN_EXPRESSION> <R_PAREN> <STATEMENT> |
 while <L_PAREN> <BOOLEAN_EXPRESSION> <R_PAREN> <BLOCK_STATEMENT>
 */
 bool RecursiveDescentParser::isIterationStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isValue(token, "for", d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isInitializationExpression(token, d + 3) && isType(token, 59, d + 4) &&
@@ -598,7 +698,9 @@ bool RecursiveDescentParser::isIterationStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected iteration statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected iteration statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected iteration statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -608,7 +710,10 @@ bool RecursiveDescentParser::isIterationStatement(exec_node*& token, int d) {
 <IDENTIFIER_AND_IDENTIFIER_ARRAY_LIST> <ASSIGNMENT_OPERATOR> <DOUBLE_QUOTED_STRING> <SEMICOLON>
 */
 bool RecursiveDescentParser::isAssignmentStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isIdentifierAndIdentifierArrayList(token, d + 1) && isType(token, 61, d + 2) && isExpression(token, d + 3) && isType(token, 59, d + 4)) {
@@ -624,7 +729,9 @@ bool RecursiveDescentParser::isAssignmentStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected assignment statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected assignment statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected assignment statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -635,7 +742,10 @@ printf <L_PAREN> <DOUBLE_QUOTED_STRING> <COMMA> <IDENTIFIER_AND_IDENTIFIER_ARRAY
 printf <L_PAREN> <SINGLE_QUOTED_STRING> <COMMA> <IDENTIFIER_AND_IDENTIFIER_ARRAY_LIST> <R_PAREN> <SEMICOLON>
 */
 bool RecursiveDescentParser::isPrintfStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false;
+	}
 	exec_node* init = token;
 
 	if (isValue(token, "printf", d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isDoubleQuotedString(token, d + 3) && isType(token, tokens::CLOSE_PAREN, d + 4) && isType(token, 59, d + 5)) {
@@ -657,21 +767,37 @@ bool RecursiveDescentParser::isPrintfStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected printf statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected printf statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected printf statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // getchar <L_PAREN> <IDENTIFIER> <R_PAREN>
 bool RecursiveDescentParser::isGetcharFunction(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isValue(token, "getchar", d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isIdentifier(token, d + 3) && isType(token, tokens::CLOSE_PAREN, d + 4)) {
 		return true;
 	}
+	// NOT SUREEEEE
+	if (isValue(token, "read", d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isIdentifier(token, d + 3) && isType(token, tokens::CLOSE_PAREN, d + 4)) {
+		return true;
+	}
+	if (isValue(token, "buffer", d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isIdentifier(token, d + 3) && isType(token, tokens::CLOSE_PAREN, d + 4)) {
+		return true;
+	}
+	// END NOT SURRE
+
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected getchar function, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected getchar function, but got '" + token->get_value() + "' instead.");
+	error_message = "expected getchar function, but got '" + token->get_value() + "' instead."; 
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -680,7 +806,10 @@ bool RecursiveDescentParser::isGetcharFunction(exec_node*& token, int d) {
 <IDENTIFIER> <L_PAREN> <IDENTIFIER_AND_IDENTIFIER_ARRAY_LIST> <R_PAREN> |
 */
 bool RecursiveDescentParser::isUserDefinedFunction(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isIdentifier(token, d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isExpression(token, d + 3) && isType(token, tokens::CLOSE_PAREN, d + 4)) {
@@ -692,7 +821,9 @@ bool RecursiveDescentParser::isUserDefinedFunction(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected user defined function, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected user defined function, but got '" + token->get_value() + "' instead.");
+	error_message = "expected user defined function, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -701,7 +832,10 @@ bool RecursiveDescentParser::isUserDefinedFunction(exec_node*& token, int d) {
 <DATATYPE_SPECIFIER> <IDENTIFIER_AND_IDENTIFIER_ARRAY_LIST> <SEMICOLON>
 */
 bool RecursiveDescentParser::isDeclarationStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isDatatypeSpecifier(token, d + 1) && isIdentifier(token, d + 2) && isType(token, 59, d + 3)) {
@@ -713,7 +847,9 @@ bool RecursiveDescentParser::isDeclarationStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected declaration statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected declaration statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected decleration statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -723,7 +859,10 @@ return <SINGLE_QUOTED_STRING> <SEMICOLON> |
 return <DOUBLE_QUOTED_STRING> <SEMICOLON>
 */
 bool RecursiveDescentParser::isReturnStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false;
+	}
 	exec_node* init = token;
 
 	if (isValue(token, "return", d + 1) && isExpression(token, d + 2) && isType(token, 59, d + 3)) {
@@ -739,13 +878,18 @@ bool RecursiveDescentParser::isReturnStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected return statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected return statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected return statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // <DECLARATION_STATEMENT> | <ASSIGNMENT_STATEMENT> | <ITERATION_STATEMENT> | <SELECTION_STATEMENT> | <PRINTF_STATEMENT> | <RETURN_STATEMENT> | <USER_DEFINED_FUNCTION> <SEMICOLON>
 bool RecursiveDescentParser::isStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isDeclarationStatement(token, d + 1)) {
@@ -777,13 +921,18 @@ bool RecursiveDescentParser::isStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // <STATEMENT> <COMPOUND_STATEMENT> | <STATEMENT>
 bool RecursiveDescentParser::isCompoundStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isStatement(token, d + 1) && isCompoundStatement(token, d + 2)) {
@@ -795,13 +944,18 @@ bool RecursiveDescentParser::isCompoundStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected compound statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected compound statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected compount statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // <L_BRACE> <COMPOUND_STATEMENT> <R_BRACE>
 bool RecursiveDescentParser::isBlockStatement(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isType(token, tokens::OPEN_BRACE, d + 1) && isCompoundStatement(token, d + 2) && isType(token, tokens::CLOSE_BRACE, d + 3)) {
@@ -809,7 +963,9 @@ bool RecursiveDescentParser::isBlockStatement(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected block statement, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected block statement, but got '" + token->get_value() + "' instead.");
+	error_message = "expected block statement, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -820,7 +976,10 @@ bool RecursiveDescentParser::isBlockStatement(exec_node*& token, int d) {
 <DATATYPE_SPECIFIER> <IDENTIFIER>
 */
 bool RecursiveDescentParser::isParameterList(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isDatatypeSpecifier(token, d + 1) && isIdentifier(token, d + 2) && isType(token, tokens::OPEN_BRACKET, d + 3) && isWholeNumber(token, d + 4) &&
@@ -842,7 +1001,9 @@ bool RecursiveDescentParser::isParameterList(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected parameter list, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected parameter list, but got '" + token->get_value() + "' instead.");
+	error_message = "expected parameter list, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -851,7 +1012,10 @@ function <DATATYPE_SPECIFIER> <IDENTIFIER> <L_PAREN> <PARAMETER_LIST> <R_PAREN> 
 function <DATATYPE_SPECIFIER> <IDENTIFIER> <L_PAREN> void <R_PAREN> < L_BRACE> <COMPOUND_STATEMENT> <R_BRACE>
 */
 bool RecursiveDescentParser::isFunctionDeclaration(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isValue(token, "function", d + 1) && isDatatypeSpecifier(token, d + 2) && isIdentifier(token, d + 3) && isType(token, tokens::OPEN_PAREN, d + 4) && isParameterList(token, d + 5) &&
@@ -865,7 +1029,9 @@ bool RecursiveDescentParser::isFunctionDeclaration(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected function declaration, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected function declaration, but got '" + token->get_value() + "' instead.");
+	error_message = "expected function declaration, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
@@ -874,7 +1040,10 @@ procedure <IDENTIFIER> <L_PAREN> <PARAMETER_LIST> <R_PAREN> < L_BRACE> <COMPOUND
 procedure <IDENTIFIER> <L_PAREN> void <R_PAREN> < L_BRACE> <COMPOUND_STATEMENT> <R_BRACE>
 */
 bool RecursiveDescentParser::isProcedureDeclaration(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isValue(token, "procedure", d + 1) && isIdentifier(token, d + 2) && isType(token, tokens::OPEN_PAREN, d + 3) && isParameterList(token, d + 4) &&
@@ -888,13 +1057,18 @@ bool RecursiveDescentParser::isProcedureDeclaration(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected procedure declaration, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected procedure declaration, but got '" + token->get_value() + "' instead.");
+	error_message = "expected procedure declaration, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }
 
 // procedure main <L_PAREN> void <R_PAREN> <BLOCK_STATEMENT>
 bool RecursiveDescentParser::isMainProcedure(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false; 
+	}
 	exec_node* init = token;
 
 	if (isValue(token, "procedure", d + 1) && isValue(token, "main", d + 2) && isType(token, tokens::OPEN_PAREN, d + 3) && isValue(token, "void", d + 4) &&
@@ -903,13 +1077,17 @@ bool RecursiveDescentParser::isMainProcedure(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected main procedure, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected main procedure, but got '" + token->get_value() + "' instead.");
+	error_message = "expected main procedure, but found '" + token->get_value() + "' instead.";
 	return false;
 }
 
 // <MAIN_PROCEDURE> | <FUNCTION_DECLARATION> <PROGRAM> | <PROCEDURE_DECLARATION> <PROGRAM> | <DECLARATION_STATEMENT> <PROGRAM>
 bool RecursiveDescentParser::isProgram(exec_node*& token, int d) {
-	if (token == nullptr) { setError(d, "Syntax error: Unexpectedly reached EOF."); return false; }
+	if (token == nullptr) { 
+		setErrorNew(d, token, "unexpectedly reached EOF.");
+		return false;
+	}
 	exec_node* init = token;
 
 	if (isMainProcedure(token, d + 1)) {
@@ -929,6 +1107,8 @@ bool RecursiveDescentParser::isProgram(exec_node*& token, int d) {
 	}
 
 	token = init;
-	setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected program, but got '" + token->get_value() + "' instead.");
+	//setError(d, "Syntax error on line " + std::to_string(token->get_line()) + ": expected program, but got '" + token->get_value() + "' instead.");
+	error_message = "expected program, but found '" + token->get_value() + "' instead.";
+	setErrorNew(d, token, error_message);
 	return false;
 }

@@ -39,18 +39,24 @@ void ERRORS::printHelper(ERROR error){
 
 
 // Adds an error to the list of errors and continues so the program can get all errors
-void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column, symbol_node symbol/*, Symbol symbol??, or string maybe*/){
+void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column, std::string error_msg){
     // New error
     ERROR terror;
     // There are errors
     exists = true;
     // Setting
     terror.filename = filename;
+    terror.code = code;
+    terror.print_statement = error_msg;
     terror.line = line;
     terror.column = column;
-    terror.code = code;
-    // TODO: set correct output message somehow.
 
+    // Checking for dupe errors
+    for ( int e = 0; e < VERRORS.size(); e++ ){
+        if ( terror.print_statement == VERRORS[e].print_statement && terror.line == VERRORS[e].line && terror.column == VERRORS[e].column ){
+            return;
+        }
+    }
 
     // Adding the scary to the list of terries
     VERRORS.push_back(terror);
@@ -59,23 +65,31 @@ void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column, sym
 
 // Goes through all errors and prints them. Then exits.
 void ERRORS::STOP_SYNTAX_ERRORS(){
+    // No errors continue
     if ( exists == false) {
-        exit(0); 
+        return;
     }
-
-    std::cerr << "Compilation failed due to following error(s)" << std::endl;
+    // Errors exist so print them johns
+    std::cerr << std::endl << "Compilation failed due to following error(s)" << std::endl;
     ERROR terror; // Temp error
     // Loop through errors and print them johns
     for ( int e = 0; e < VERRORS.size(); e++ ){
         terror = VERRORS[e]; 
         printHelper(terror);
-        std::cerr << "|" << std::endl << "|" << std::endl; // Formatting
+        if ( terror.line > 9 ){
+            std::cerr << "   " << terror.line << " |" << std::endl << "      |" << std::endl; // Formatting
+        } else {
+            std::cerr << "    " << terror.line << " |" << std::endl << "      |" << std::endl;
+        }
+       
     }
     
     
     // Exiting
     exit(VERRORS[-1].code); 
 }
+
+
 
 
 

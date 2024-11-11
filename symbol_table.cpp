@@ -32,13 +32,17 @@ void symbol_table::build_table(exec_path &path) {
     exec_node* current = path.get_head();
     int curr_scope = 0; // The current pseudo-scope level
     int glob_scope = 0; // The current global scope level
+    error_message = "DEFAULT SYMBOL TABLE ERROR";
 
     while(current != nullptr){
         // Handlers
         if (current->get_type() == tokens::TOKEN_AS_STRING){
             if (current->get_value() == "function"){
                 if (curr_scope != 0){
-                    errors::E_NESTED_FUNCTION_NOT_ALLOWED(current->get_line(), current->get_column(), current->get_next()->get_next()->get_value());
+                    //errors::E_NESTED_FUNCTION_NOT_ALLOWED(current->get_line(), current->get_column(), current->get_next()->get_next()->get_value());
+                    //TODO
+                    
+                    errors.ENC_ERROR(filename, 1, current->get_line(), current->get_column(), error_message);
                 }
                 auto new_symbol = new symbol_node();
                 // Set identifier type
@@ -68,7 +72,9 @@ void symbol_table::build_table(exec_path &path) {
             }
             else if (current->get_value() == "procedure"){
                 if (curr_scope != 0){
-                    errors::E_NESTED_FUNCTION_NOT_ALLOWED(current->get_line(), current->get_column(), current->get_next()->get_next()->get_value());
+                    //errors::E_NESTED_FUNCTION_NOT_ALLOWED(current->get_line(), current->get_column(), current->get_next()->get_next()->get_value());
+                    //TODO
+                    errors.ENC_ERROR(filename, 1, current->get_line(), current->get_column(), error_message);
                 }
                 auto new_symbol = new symbol_node();
                 // Set identifier type
@@ -224,7 +230,9 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
         if (new_symbol->SCOPE_GLOBAL > scopes.size() - 1){ // New scope
             if (new_symbol->IDENT_TYPE == symbols::identifiers::DATATYPE){
                 // Non functions/procedures cannot be declared in a unique scope (THIS SHOULD NEVER HAPPEN)
-                errors::E_NON_FUNCTION_SCOPE_DECLARATION(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
+                //errors::E_NON_FUNCTION_SCOPE_DECLARATION(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
+                //TODO
+                errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
             }
             scopes.push_back(new_symbol);
         }
@@ -240,7 +248,9 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
             while (current != nullptr){
                 if (current->IDENT_NAME == new_symbol->IDENT_NAME){
                     // Handle duplicate symbol error
-                    errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
+                    //errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
+                    //TODO
+                    errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
                 }
                 if (current->get_next() == nullptr){ break; } // Ensure the last symbol is checked
                 current = current->get_next();
@@ -252,7 +262,9 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
                 while (param_current != nullptr){
                     if (param_current->IDENT_NAME == new_symbol->IDENT_NAME){
                         // Handle duplicate symbol error
-                        errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
+                        //errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
+                        //TODO
+                        errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
                     }
                     param_current = param_current->get_next();
                 }
@@ -264,7 +276,9 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
                 while (g_current != nullptr){
                     if (g_current->IDENT_NAME == new_symbol->IDENT_NAME){
                         // Handle duplicate symbol error
-                        errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
+                        //errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
+                        //TODO
+                        errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
                     }
                     g_current = g_current->get_next();
                 }

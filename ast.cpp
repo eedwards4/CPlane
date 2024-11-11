@@ -14,7 +14,6 @@ ast_node* ast::get_tail(){
 
 
 void ast::build_tree(exec_node *cst_head, symbol_table& table) {
-
     while (cst_head != nullptr){
         if (cst_head->get_type() == tokens::OPEN_BRACE){
             auto new_node = new ast_node;
@@ -172,7 +171,9 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
         else{
             cst_head = cst_head->get_next();
         }
+        
     }
+    
 }
 
 exec_node* ast::shunting_yard_wrapper(exec_node* cst_head, ast_node* prev, symbol_table& table) {

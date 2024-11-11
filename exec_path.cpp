@@ -5,6 +5,7 @@
 #include "exec_path.h"
 
 // Destructor
+/*
 exec_path::~exec_path() {
     exec_node* current = head;
 
@@ -25,6 +26,7 @@ exec_path::~exec_path() {
         current = next;
     }
 }
+*/
 
 // Add a node to the path
 void exec_path::add_node(int type, int line, int col, std::string value) {
