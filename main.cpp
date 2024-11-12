@@ -87,6 +87,7 @@ int main(int argc, char* argv[]) {
     symbol_table sym_table(errors, filename);
     sym_table.build_table(path);
     if ( debug_mode ){ std::cout << "NOW CHECKING SYMBOL ERRORS..." << std::endl; }
+    errors = sym_table.returnErrors();
     errors.STOP_SYNTAX_ERRORS(); // CHECKING ERRORS BEFORE CONTINUING
     
     if ( debug_mode ){ cout << "Building AST --> "; }

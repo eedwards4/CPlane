@@ -105,6 +105,10 @@ void ERRORS::RDP_SYNTAX_ERRORS(){
     printHelper(terror);
     if ( terror.line > 9 ){
         std::cerr << "   " << terror.line << " |" << std::endl << "      |" << std::endl; // Formatting
+    } else if ( terror.line > 99 ){
+        std::cerr << "  " << terror.line << " |" << std::endl << "      |" << std::endl;
+    } else if ( terror.line > 999 ){
+        std::cerr << " " << terror.line << " |" << std::endl << "      |" << std::endl;
     } else {
         std::cerr << "    " << terror.line << " |" << std::endl << "      |" << std::endl;
     }

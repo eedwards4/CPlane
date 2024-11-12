@@ -73,12 +73,16 @@ public:
     bool find_symbol(const std::string name) const;
     bool is_function(const std::string name) const;
 
+    ERRORS returnErrors(){
+        return errors;
+    };
+
 private:
     // Setup
     void add_symbol(symbol_node* new_symbol);
     std::string error_message;
     std::string filename;
-    ERRORS errors; // NEED TO KNOW IF THIS UPDATES ORIGINAL OR ELSE NEED TO ADD TO FUCNTION DECLERATIONS THAT USE ERRORS AS PASS BY REFERANCE
+    ERRORS errors;
     // Navigation
     std::vector<symbol_node*> scopes; // Vector of head pointers to different scopes
 };
