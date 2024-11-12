@@ -48,6 +48,7 @@ void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column, std
     terror.filename = filename;
     terror.code = code;
     terror.print_statement = error_msg;
+    //terror.print_statement = "DEFAULT RST ERROR";
     terror.line = line;
     terror.column = column;
 
@@ -73,6 +74,7 @@ void ERRORS::STOP_SYNTAX_ERRORS(){
     std::cerr << std::endl << "Compilation failed due to following error(s)" << std::endl;
     ERROR terror; // Temp error
     // Loop through errors and print them johns
+
     for ( int e = 0; e < VERRORS.size(); e++ ){
         terror = VERRORS[e]; 
         printHelper(terror);
@@ -84,10 +86,34 @@ void ERRORS::STOP_SYNTAX_ERRORS(){
        
     }
     
-    
-    // Exiting
-    exit(VERRORS[-1].code); 
+    // Exiting with code
+    exit(VERRORS[VERRORS.size()-1].code); 
 }
+
+
+// Only prints final error. :(
+void ERRORS::RDP_SYNTAX_ERRORS(){
+    // No errors continue
+    if ( exists == false) {
+        return;
+    }
+    // Errors exist so print that john
+    std::cerr << std::endl << "Compilation failed due to following error(s)" << std::endl;
+    //ERROR terror = VERRORS[(sizeof(VERRORS) / sizeof(VERRORS[0]))-1];
+    //std::cout << VERRORS.size() << std::endl;
+    ERROR terror = VERRORS[VERRORS.size()-1];
+    printHelper(terror);
+    if ( terror.line > 9 ){
+        std::cerr << "   " << terror.line << " |" << std::endl << "      |" << std::endl; // Formatting
+    } else {
+        std::cerr << "    " << terror.line << " |" << std::endl << "      |" << std::endl;
+    }
+
+    // Exiting with code
+    exit(terror.code);
+}
+
+
 
 
 

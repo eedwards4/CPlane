@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
         cout << "Debug mode ENABLED" << endl;
     }
 
-
+    // Setting up the errors class.
     ERRORS errors;
     
     // Generate output filename base
@@ -66,17 +66,17 @@ int main(int argc, char* argv[]) {
     // Tokenize the file
     if ( debug_mode ){ cout << "Tokenizing file --> "; }
     t.tokenize(filename, errors);
-    std::cout << "NOW CHECKING TOKENIZED ERRORS..." << std::endl;
+    if ( debug_mode ){ std::cout << "NOW CHECKING TOKENIZED ERRORS..." << std::endl;}
     errors.STOP_SYNTAX_ERRORS(); // CHECKING ERRORS BEFORE CONTINUING
     // Error handling
     if ( debug_mode ){ cout << "Checking for syntax errors --> "; }
 
     // Recursive descent parser
 	RecursiveDescentParser rdp(filename, errors);
+    if ( debug_mode ){ std::cout << "NOW CHECKING RDP ERRORS..." << std::endl;}
 	if(!rdp.check_syntax(path.get_head())) {}
-    std::cout << "NOW CHECKING RDP ERRORS..." << std::endl;
     // TODO THIS IS ERRORING A BUNCH SO NEED TO CATCH WHY
-    rdp.returnErrors();
+    //rdp.returnErrors();
 
     // Remove newlines from the path as they are now unnecessary
     path.remove_newlines();
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
     // Generate symbol table
     symbol_table sym_table(errors, filename);
     sym_table.build_table(path);
-    std::cout << "NOW CHECKING SYMBOL ERRORS..." << std::endl;
+    if ( debug_mode ){ std::cout << "NOW CHECKING SYMBOL ERRORS..." << std::endl; }
     errors.STOP_SYNTAX_ERRORS(); // CHECKING ERRORS BEFORE CONTINUING
     
     if ( debug_mode ){ cout << "Building AST --> "; }

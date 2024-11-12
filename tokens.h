@@ -4,7 +4,7 @@
 
 #ifndef CPLANE_TOKENS_H
 #define CPLANE_TOKENS_H
-
+#include <iostream>
 
 class tokens {
 public:
@@ -53,6 +53,90 @@ public:
     static int single_char(int c){
         return c;
     }
+
+    static std::string what_is(int id){
+        switch (id){
+            case STRING_LITERAL:
+                return {"STRING_LITERAL"};
+            case CHAR_LITERAL:
+                return {"CHAR_LITERAL"};
+            case INT_AS_STRING:
+                return {"INT_AS_STRING"};
+            case FLOAT_AS_STRING:
+                return {"FLOAT_AS_STRING"};
+            case TOKEN_AS_STRING:
+                return {"TOKEN_AS_STRING"};
+            case OPEN_PAREN:
+                return {"OPEN_PAREN"};
+            case CLOSE_PAREN:
+                return {"CLOSE_PAREN"};
+            case OPEN_BRACE:
+                return {"OPEN_BRACE"};
+            case CLOSE_BRACE:
+                return {"CLOSE_BRACE"};
+            case OPEN_BRACKET:
+                return {"OPEN_BRACKET"};
+            case CLOSE_BRACKET:
+                return {"CLOSE_BRACKET"};
+            case PLUS_PLUS:
+                return {"PLUS_PLUS"};
+            case PLUS_EQUALS:
+                return {"PLUS_EQUALS"};
+            case MINUS_MINUS:
+                return {"MINUS_MINUS"};
+            case MINUS_EQUALS:
+                return {"MINUS_EQUALS"};
+            case RIGHT_SLIM_ARROW:
+                return {"RIGHT_SLIM_ARROW"};
+            case BOOLEAN_AND:
+                return {"BOOLEAN_AND"};
+            case AND_EQUALS:
+                return {"AND_EQUALS"};
+            case BOOLEAN_OR:
+                return {"BOOLEAN_OR"};
+            case OR_EQUALS:
+                return {"OR_EQUALS"};
+            case NOT_EQUALS:
+                return {"NOT_EQUALS"};
+            case MOD_EQUALS:
+                return {"MOD_EQUALS"};
+            case TIMES_EQUALS:
+                return {"TIMES_EQUALS"};
+            case EQUALS_EQUALS:
+                return {"EQUALS_EQUALS"};
+            case XOR_EQUALS:
+                return {"XOR_EQUALS"};
+            case TOKEN_PASTE:
+                return {"TOKEN_PASTE"};
+            case GREATER_EQUALS:
+                return {"GREATER_EQUALS"};
+            case RIGHT_SHIFT_EQUALS:
+                return {"RIGHT_SHIFT_EQUALS"};
+            case RIGHT_SHIFT:
+                return {"RIGHT_SHIFT"};
+            case LESS_EQUALS:
+                return {"LESS_EQUALS"};
+            case LEFT_SHIFT_EQUALS:
+                return {"LEFT_SHIFT_EQUALS"};
+            case LEFT_SHIFT:
+                return {"LEFT_SHIFT"};
+            case DIVIDE_EQUALS:
+                return {"DIVIDE_EQUALS"};
+            case NEWLINE:
+                return {"NEWLINE"};
+            case ELLIPSIS:
+                return {"ELLIPSIS"};
+            case SCOPE:
+                return {"SCOPE"};
+            case LITERAL_DEF:
+                return {"LITERAL_DEF"};
+            default:
+                return {"UNKNOWN TOKEN"};
+        }
+    }
+
+
+
 };
 
 

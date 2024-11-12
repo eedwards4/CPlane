@@ -9,7 +9,7 @@
 
 bool RecursiveDescentParser::check_syntax(exec_node* head) {
 	if (!isProgram(head, 1)) { // error in program
-		//std::cout << error_message << std::endl;
+		RST_errors.RDP_SYNTAX_ERRORS();
 		return false;
 	} else if (head != nullptr) { // more program after expected end of program
 		//std::cout << "Syntax error on line " + std::to_string(head->get_line()) + ": Expected EOF but got '" + head->get_value() + "' instead." << std::endl;
@@ -785,12 +785,14 @@ bool RecursiveDescentParser::isGetcharFunction(exec_node*& token, int d) {
 		return true;
 	}
 	// NOT SUREEEEE
+	/*
 	if (isValue(token, "read", d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isIdentifier(token, d + 3) && isType(token, tokens::CLOSE_PAREN, d + 4)) {
 		return true;
 	}
 	if (isValue(token, "buffer", d + 1) && isType(token, tokens::OPEN_PAREN, d + 2) && isIdentifier(token, d + 3) && isType(token, tokens::CLOSE_PAREN, d + 4)) {
 		return true;
 	}
+	*/
 	// END NOT SURRE
 
 

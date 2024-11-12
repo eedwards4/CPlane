@@ -28,7 +28,6 @@ class ERROR {
     int column; // column
     std::string filename;
     std::string print_statement;
-
     // TODO need to retrive token that is fked
     //symbol_node symbol; //??
 };
@@ -40,9 +39,10 @@ class ERRORS {
     bool exists; // Does an error exist?
     void ENC_ERROR(std::string filename, int code, int line, int column, std::string error_msg);
     void STOP_SYNTAX_ERRORS();
-    
+    void RDP_SYNTAX_ERRORS(); // FOR RDP
 
     private:
+    bool FOR_RST;
     std::vector<ERROR> VERRORS; // vector of errors for printing once STOP_SYNTAX_ERRORS added from ENC_ERROR
     void printHelper(ERROR error);
 };
