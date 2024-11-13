@@ -4,6 +4,7 @@
 
 #include "symbol_table.h"
 
+
 // Destructor
 /*
 symbol_table::~symbol_table() {
@@ -40,9 +41,10 @@ void symbol_table::build_table(exec_path &path) {
             if (current->get_value() == "function"){
                 if (curr_scope != 0){
                     //errors::E_NESTED_FUNCTION_NOT_ALLOWED(current->get_line(), current->get_column(), current->get_next()->get_next()->get_value());
-                    //TODO
-                    
+                    //TODO. did it not test it yet
+                    error_message = "nested function or procedure '" + current->get_next()->get_next()->get_value() + "' instaid.";
                     errors.ENC_ERROR(filename, 1, current->get_line(), current->get_column(), error_message);
+
                 }
                 auto new_symbol = new symbol_node();
                 // Set identifier type
@@ -73,7 +75,8 @@ void symbol_table::build_table(exec_path &path) {
             else if (current->get_value() == "procedure"){
                 if (curr_scope != 0){
                     //errors::E_NESTED_FUNCTION_NOT_ALLOWED(current->get_line(), current->get_column(), current->get_next()->get_next()->get_value());
-                    //TODO
+                    //TODO. did it not test it yet
+                    error_message = "nested function or procedure '" + current->get_next()->get_next()->get_value() + "' instaid.";
                     errors.ENC_ERROR(filename, 1, current->get_line(), current->get_column(), error_message);
                 }
                 auto new_symbol = new symbol_node();
@@ -231,7 +234,9 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
             if (new_symbol->IDENT_TYPE == symbols::identifiers::DATATYPE){
                 // Non functions/procedures cannot be declared in a unique scope (THIS SHOULD NEVER HAPPEN)
                 //errors::E_NON_FUNCTION_SCOPE_DECLARATION(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
-                //TODO
+                //TODO. did it not test it yet
+                //error_message = "nested function or procedure '" + current->get_next()->get_next()->get_value() + "' instaid.";
+                error_message = "'" + new_symbol->IDENT_NAME + "'" + " functions/procedures cannot be declared in a unique scope";
                 errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
             }
             scopes.push_back(new_symbol);
@@ -249,7 +254,7 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
                 if (current->IDENT_NAME == new_symbol->IDENT_NAME){
                     // Handle duplicate symbol error
                     //errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
-                    //TODO
+                    error_message = "'" + new_symbol->IDENT_NAME + "'" + " is already defined locally";
                     errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
                 }
                 if (current->get_next() == nullptr){ break; } // Ensure the last symbol is checked
@@ -263,7 +268,7 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
                     if (param_current->IDENT_NAME == new_symbol->IDENT_NAME){
                         // Handle duplicate symbol error
                         //errors::E_ALREADY_DEFINED_VARIABLE_LOCAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
-                        //TODO
+                        error_message = "'" + new_symbol->IDENT_NAME + "'" + " is already defined locally";
                         errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
                     }
                     param_current = param_current->get_next();
@@ -277,8 +282,11 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
                     if (g_current->IDENT_NAME == new_symbol->IDENT_NAME){
                         // Handle duplicate symbol error
                         //errors::E_ALREADY_DEFINED_VARIABLE_GLOBAL(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
-                        //TODO
+
+                        error_message = "'" + new_symbol->IDENT_NAME + "'" + " is already defined globally";
                         errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
+
+
                     }
                     g_current = g_current->get_next();
                 }
