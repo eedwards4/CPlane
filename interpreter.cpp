@@ -51,15 +51,37 @@ int Interpreter::Exit(){
 
 
 // Takes the current stack and evaluates it and updates symbol table
-void Interpreter::EvaluateStack(){
+void Interpreter::EvaluateStack(std::stack<ast_node*> runtime_stack){
+    ast_node* current = nullptr;
     if ( runtime_stack.empty() ){
         return;
     }
-    // While there are elements in the stack
+
+    // Reverse the stack
+    // TODO: CHANGE STACK TO ANOTHER DATATYPE SO WE AREN'T ACCESSING IN REVERSE, THIS IS GONNA CAUSE RUNTIME SLOWDOWN
+    std::stack<ast_node*> eval_stack;
     while ( ! runtime_stack.empty() ){
+        eval_stack.push(runtime_stack.top());
+        runtime_stack.pop();
+    }
+    runtime_stack = eval_stack;
+    eval_stack = std::stack<ast_node*>(); // Clearing eval stack
+
+    // While there are elements in the stack
+    while ( !runtime_stack.empty() ){
         //TODO: need to go through elements, order them correctly
         //TODO: need to parse ordered list of elements and "execute them"
-        runtime_stack.pop(); 
+        // Get the first element of the stack
+        current = runtime_stack.top();
+        runtime_stack.pop();
+        switch ( current->type ){
+            case ast_types::ASSIGNMENT:
+                break;
+            case ast_types::DECLARATION:
+                break;
+            case ast_types::CALL:
+                break;
+        }
     }
     //TODO: update symbol table
 
@@ -90,7 +112,7 @@ void Interpreter::Begin(){
     is_running = true;
     ast_node* current = ast_head;
 
-    // Check if the ast is not uninitilized
+    // Check if the ast is not initialized
     if ( &ast_head == &ast_tail ) {
         std::cout << "ERROR in Interpreter::Begin: the ast_head and ast_tail are the same!" << std::endl;
     }

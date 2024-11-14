@@ -32,7 +32,7 @@ class Interpreter {
 private:
     void clearStack();
     void printStack(std::stack<ast_node*> runtime_stack);
-    void EvaluateStack();
+    void EvaluateStack(std::stack<ast_node*> runtime_stack);
 
     // Functions for eval
     // TODO: GO THROUGH THIS PILE OF GARBAGE AND ADD ALL VALID DATATYPE COMBOS :vomit:

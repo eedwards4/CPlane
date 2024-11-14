@@ -6,11 +6,12 @@ set(CMAKE_CXX_STANDARD 14)
 add_executable(CPlane
         main.cpp
         tokenizer.cpp tokenizer.h
-        tokens.h
+        tokens.h symbols.h
         errors.h errors.cpp
+        errors_new.h errors_new.cpp
         exec_path.h exec_path.cpp
-        symbols.h
         symbol_table.h symbol_table.cpp
-        ast.cpp
-        ast.h
+        ast.h ast.cpp
+        recursive_descent_parser.h recursive_descent_parser.cpp
+        interpreter.h interpreter.cpp
 )
