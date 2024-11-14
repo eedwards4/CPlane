@@ -144,7 +144,124 @@ void Interpreter::Begin(){
             is_running = false;
             break;
         }
-    }   
+        /* PLEASE DON'T DELETE, THIS CODE IS UNFORTUNATELY STILL IN USE, JUST COMMENTED SO IT DOESN'T BREAK SHIT
+        std::string s1 = "1";
+        std::string s2 = "2";
+        char c1 = '1';
+        char c2 = '2';
+        int i1 = 1;
+        int i2 = 2;
+        i1 += i2; // Int and int ----------------------------
+        i1 += s1; // Int and string
+        i1 += c1; // Int and char
+        s1 += s2; // String and string ----------------------------
+        s1 += c1; // String and char
+        s1 += i1; // String and int
+        c1 += c2; // Char and char ----------------------------
+        c1 += i1; // Char and int
+        c1 += s1; // Char and string
+        /*
+         * Operators
+         * Single operators
+         * + - * / % !
+         * Bitwise
+         * & | ^ ~ << >>
+         * Compound operators
+         * ++ -- += -= *= /= %= &= |= ^= <<= >>=
+         * Comparison
+         * == != > < >= <=
+         * Logical
+         * && ||
+         * Ternary
+         * ? :
+         * Assignment
+         * PLEASE DON'T DELETE, THIS CODE IS UNFORTUNATELY STILL IN USE, JUST COMMENTED SO IT DOESN'T BREAK SHIT
+         */
+    }
+}
 
-
+// Functions for eval
+template <typename T, typename U> // +
+auto Interpreter::add(T a, U b) -> typename std::enable_if<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value), decltype(a + b)>::type {
+    return a + b;
+}
+template <typename T, typename U> // -
+auto Interpreter::sub(T a, U b) -> typename std::enable_if<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value), decltype(a - b)>::type {
+    return a - b;
+}
+template <typename T, typename U> // *
+auto Interpreter::mul(T a, U b) -> typename std::enable_if<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value), decltype(a * b)>::type {
+    return a * b;
+}
+template <typename T, typename U> // /
+auto Interpreter::div(T a, U b) -> typename std::enable_if<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value), decltype(a / b)>::type {
+    return a / b;
+}
+template <typename T, typename U> // %
+auto Interpreter::mod(T a, U b) -> typename std::enable_if<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value), decltype(a % b)>::type {
+    return a % b;
+}
+template <typename T, typename U> // >
+auto Interpreter::grt(T a, U b) -> typename std::enable_if<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value), decltype(a > b)>::type {
+    return a > b;
+}
+template <typename T, typename U> // <
+auto Interpreter::lst(T a, U b) -> typename std::enable_if<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value), decltype(a < b)>::type {
+    return a < b;
+}
+template<typename T> // !
+auto Interpreter::op_not(T a) -> typename std::enable_if<std::is_same<T, bool>::value, decltype(!a)>::type {
+    return !a;
+}
+template<typename T> // ++
+auto Interpreter::inc(T a) -> typename std::enable_if<std::is_arithmetic<T>::value, decltype(a + 1)>::type {
+    return a + 1;
+}
+template<typename T> // --
+auto Interpreter::dec(T a) -> typename std::enable_if<std::is_arithmetic<T>::value, decltype(a - 1)>::type {
+    return a - 1;
+}
+template<typename T, typename U> // +=
+auto Interpreter::add_equ(T a, U b) -> typename std::enable_if<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value, decltype(a + b)>::type {
+    return a + b;
+}
+template<typename T, typename U> // -=
+auto Interpreter::sub_equ(T a, U b) -> typename std::enable_if<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value, decltype(a - b)>::type {
+    return a - b;
+}
+template<typename T, typename U> // *=
+auto Interpreter::mul_equ(T a, U b) -> typename std::enable_if<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value, decltype(a * b)>::type {
+    return a * b;
+}
+template<typename T, typename U> // /=
+auto Interpreter::div_equ(T a, U b) -> typename std::enable_if<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value, decltype(a / b)>::type {
+    return a / b;
+}
+template<typename T, typename U> // %=
+auto Interpreter::mod_equ(T a, U b) -> typename std::enable_if<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value, decltype(a % b)>::type {
+    return a % b;
+}
+template<typename T, typename U> // ==
+auto Interpreter::equ(T a, U b) -> typename std::enable_if<std::is_same<T, U>::value, decltype(a == b)>::type {
+    return a == b;
+}
+template<typename T, typename U> // !=
+auto Interpreter::not_equ(T a, U b) -> typename std::enable_if<std::is_same<T, U>::value, decltype(a != b)>::type {
+    return a != b;
+}
+template<typename T, typename U> // >=
+auto Interpreter::grt_equ(T a, U b) -> typename std::enable_if<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value, decltype(a >= b)>::type {
+    return a >= b;
+}
+template<typename T, typename U> // <=
+auto Interpreter::lst_equ(T a, U b) -> typename std::enable_if<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value, decltype(a <= b)>::type {
+    return a <= b;
+}
+template<typename T, typename U> // &&
+auto Interpreter::and_op(T a, U b) -> typename std::enable_if<(std::is_same<T, bool>::value && std::is_same<U, bool>::value), decltype(a && b)>::type {
+    return a && b;
+}
+template<typename T, typename U> // ||
+auto Interpreter::or_op(T a, U b) -> typename std::enable_if<(std::is_same<T, bool>::value && std::is_same<U, bool>::value), decltype(a || b)>::type {
+    return a || b;
 }
