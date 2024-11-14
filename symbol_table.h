@@ -13,6 +13,7 @@
 #include "symbols.h"
 #include "exec_path.h"
 
+
 class symbol_node {
 public:
     // Constructor
@@ -35,18 +36,37 @@ public:
     symbol_node* get_params() { return params; }
     int get_line() const { return line; }
     int get_column() const { return column; }
+    int get_val_int() const { return val_int; }
+    float get_val_float() const { return val_float; }
+    char get_val_char() const { return val_char; }
+    std::string get_val_string() const { return val_string; }
+    bool get_val_bool() const { return val_bool; }
 
     // Setters
     void set_next(symbol_node* nextSymbol) { next = nextSymbol; }
     void set_params(symbol_node* paramList) { params = paramList; }
     void set_line(int lineNum) { line = lineNum; }
     void set_column(int columnNum) { column = columnNum; }
+    void set_val_int(int value) { val_int = value; }
+    void set_val_float(float value) { val_float = value; }
+    void set_val_char(char value) { val_char = value; }
+    void set_val_string(std::string value) { val_string = value; }
+    void set_val_bool(bool value) { val_bool = value; }
 
 private:
     // Protected
     // Navigation
     symbol_node* next = nullptr;
     symbol_node* params = nullptr;
+    symbol_node* array_children = nullptr;
+
+    // Datatypes
+    int val_int;
+    float val_float;
+    char val_char;
+    std::string val_string;
+    bool val_bool;
+    // Missing: double, long, long long, unsigned int, unsigned long, unsigned long long, unsigned char, unsigned short, unsigned long long, long double
 
     // Error tracking
     int line = -1;
