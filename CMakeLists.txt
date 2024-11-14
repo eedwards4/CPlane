@@ -14,4 +14,5 @@ add_executable(CPlane
         ast.h ast.cpp
         recursive_descent_parser.h recursive_descent_parser.cpp
         interpreter.h interpreter.cpp
+        eval.h eval.cpp
 )
