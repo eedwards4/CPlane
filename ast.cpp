@@ -32,6 +32,12 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
             if (cst_head->get_value() == "function" || cst_head->get_value() == "procedure"){
                 new_node->type = ast_types::DECLARATION;
                 new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                new_node->value = cst_head->get_value();
+                if (new_node->value == "function"){ // Skip the return type
+                    new_node->func_name = cst_head->get_next()->get_next()->get_value();
+                } else{
+                    new_node->func_name = cst_head->get_next()->get_value();
+                }
                 add_node(new_node);
                 // Consume declaration
                 while (cst_head->get_next()->get_type() != tokens::OPEN_BRACE){

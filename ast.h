@@ -70,6 +70,7 @@ public:
     int for_expr_num = 0;
 
     std::string value;
+    std::string func_name; // Only set for functions/procedures
 
     void set_next(ast_node* n){ this->next = n; }
     void set_chld(ast_node* c){ this->chld = c; }
