@@ -23,9 +23,9 @@ Interpreter::Interpreter(ast tree, symbol_table& table){
 
 // Helper functions for stack
 void Interpreter::clearStack(){
-    while (!runtime_stack.empty()) { 
-        runtime_stack.pop(); 
-    } 
+    while (!expression_stack.empty()) { 
+        expression_stack.pop(); 
+    }
 }
 void Interpreter::printStack(std::stack<ast_node*> stack){
     // If stack is empty then return
@@ -49,8 +49,7 @@ int Interpreter::Exit(){
     return exit_code;
 }
 
-
-// Takes the current stack and evaluates it and updates symbol table
+/* //Takes the current stack and evaluates it and updates symbol table
 void Interpreter::EvaluateStack(){
     ast_node* current = nullptr;
     if ( expression_stack.empty() ){
@@ -86,7 +85,7 @@ void Interpreter::EvaluateStack(){
     //TODO: update symbol table
 
 }
-
+*/
 
 // Not necessary but would be ez and cool, can step through program manually.
 void Interpreter::BeginDebug(){
@@ -107,11 +106,9 @@ void Interpreter::Begin(){
         std::cout << "The abstract syntax tree is currently empty!" << std::endl;
         exit(1);
     }
-
     // Setting up variables
     is_running = true;
     ast_node* current = ast_head;
-
     // Check if the ast is not initialized
     if ( &ast_head == &ast_tail ) {
         std::cout << "ERROR in Interpreter::Begin: the ast_head and ast_tail are the same!" << std::endl;
@@ -124,8 +121,25 @@ void Interpreter::Begin(){
     // This loop doesnt stop until the program completes by failing or completing
     // As of now goes through all elements of the AST
     while ( is_running ) {
-        // CHECKS AND BALANCES
-        program_counter++; // Inc program counter prolly needs to change
+        
+        std::cout << "type: " << ast_types::what_is(current->type) << std::endl;
+        switch ( current->type ){
+            case ast_types::TOKEN:
+            break;
+
+            case ast_types::ASSIGNMENT:
+            //HandleAssignment();
+            case ast_types::EXPRESSION_FOR:
+
+            case ast_types::EXPRESSION_WHILE:
+
+            case ast_types::DECLARATION:
+
+            
+        }
+        
+
+       
 
         // TRAVERSAL
         // At end of abstract syntax tree
@@ -136,22 +150,18 @@ void Interpreter::Begin(){
         }
         // Grabbing next child of the AST
         else if (current->get_next() == nullptr && current->get_chld() != nullptr){
-            //USE STACK AND CLEAR IT
             if ( ! expression_stack.empty() ){
                 std::cout << "Stack: ";
                 printStack(expression_stack);
                 std::cout << std::endl;
             }
 
-            EvaluateStack();
+            //EvaluateStack();
             clearStack();
-            
             current = current->get_chld();
         }
         // Grabbing the next node of AST
         else{
-            std::cout << "type: " << ast_types::what_is(current->type) << std::endl;
-
             current = current->get_next();
             expression_stack.push(current);
         }
@@ -165,38 +175,12 @@ void Interpreter::Begin(){
             is_running = false;
             break;
         }
-        /* PLEASE DON'T DELETE, THIS CODE IS UNFORTUNATELY STILL IN USE, JUST COMMENTED SO IT DOESN'T BREAK SHIT
-        std::string s1 = "1";
-        std::string s2 = "2";
-        char c1 = '1';
-        char c2 = '2';
-        int i1 = 1;
-        int i2 = 2;
-        i1 += i2; // Int and int ----------------------------
-        i1 += s1; // Int and string
-        i1 += c1; // Int and char
-        s1 += s2; // String and string ----------------------------
-        s1 += c1; // String and char
-        s1 += i1; // String and int
-        c1 += c2; // Char and char ----------------------------
-        c1 += i1; // Char and int
-        c1 += s1; // Char and string
         
-         * Operators
-         * Single operators
-         * + - * / % !
-         * Bitwise
-         * & | ^ ~ << >>
-         * Compound operators
-         * ++ -- += -= *= /= %= &= |= ^= <<= >>=
-         * Comparison
-         * == != > < >= <=
-         * Logical
-         * && ||
-         * Ternary
-         * ? :
-         * Assignment
-         * PLEASE DON'T DELETE, THIS CODE IS UNFORTUNATELY STILL IN USE, JUST COMMENTED SO IT DOESN'T BREAK SHIT
-         */
     }
+
+
+
+
+
+    std::cout << "end Interpreter::Begin()" << std::endl;
 }
