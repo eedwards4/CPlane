@@ -117,7 +117,6 @@ void Interpreter::Begin(){
         std::cout << "ERROR in Interpreter::Begin: the runtime stack is not empty!" << std::endl;
     }
 
-
     // This loop doesnt stop until the program completes by failing or completing
     // As of now goes through all elements of the AST
     while ( is_running ) {
@@ -129,13 +128,14 @@ void Interpreter::Begin(){
 
             case ast_types::ASSIGNMENT:
             //HandleAssignment();
+            break;
+            case ast_types::DECLARATION:
+            break;
             case ast_types::EXPRESSION_FOR:
-
+            break;
             case ast_types::EXPRESSION_WHILE:
 
-            case ast_types::DECLARATION:
-
-            
+            break;
         }
         
 
