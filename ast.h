@@ -26,6 +26,39 @@ public:
     static constexpr int OPERATOR = 9989;
     static constexpr int ELSE = 9988;
     static constexpr int CALL = 9987;
+
+    static std::string what_is(int type){
+        switch (type){
+            case BEG_BLOCK:
+                return "BEG_BLOCK";
+            case END_BLOCK:
+                return "END_BLOCK";
+            case RETURN:
+                return "RETURN";
+            case DECLARATION:
+                return "DECLARATION";
+            case ASSIGNMENT:
+                return "ASSIGNMENT";
+            case STATEMENT_IF:
+                return "STATEMENT_IF";
+            case EXPRESSION_FOR:
+                return "EXPRESSION_FOR";
+            case EXPRESSION_WHILE:
+                return "EXPRESSION_WHILE";
+            case STATEMENT_PRINTF:
+                return "STATEMENT_PRINTF";
+            case TOKEN:
+                return "TOKEN";
+            case OPERATOR:
+                return "OPERATOR";
+            case ELSE:
+                return "ELSE";
+            case CALL:
+                return "CALL";
+            default:
+                return "UNKNOWN";
+        }
+    }
 };
 
 class ast_node{
