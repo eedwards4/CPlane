@@ -35,6 +35,7 @@ private:
     bool is_running;
     int running_counter;
     int exit_code;
+    int level;
 
     std::stack<ast_node*> expression_stack; // stack for holding single nodes
     std::stack<std::stack<ast_node*>> execution_stack; // stack for holding stacks of single nodes
@@ -50,9 +51,8 @@ private:
     void printEStack();
     void EvaluateStack();
 
-    void HandleAssignment(ast_node *current);
-    void HandleDeclaration(ast_node *current);
 
+    void HandleType(ast_node *current);
 };  
 
 
