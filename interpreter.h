@@ -21,10 +21,12 @@ class Interpreter {
     public:
     Interpreter();
     //Interpreter(ast_node *head, ast_node *tail, symbol_table& table);
-    Interpreter(ast tree, symbol_table& table);
+    Interpreter(ast tree, symbol_table& table, ERRORS& errors);
 
     // Runs the program internally
     void Begin();
+
+    void Start();
     // Not sure yet but maybe step through the program incrementally with keyboard
     void BeginDebug();
     int Exit();
@@ -34,17 +36,20 @@ private:
     bool is_building;
     bool is_running;
     int running_counter;
-    int exit_code;
     int level;
+    bool in_main;
+    int exit_code;
 
     std::stack<ast_node*> expression_stack; // stack for holding single nodes
     std::stack<std::stack<ast_node*>> execution_stack; // stack for holding stacks of single nodes
-    ast_node* pc;
+    ast_node* pc; // Program counter pointer
+    std::vector<ast_node*> functions; // lists all function heads
 
     ast as_tree;
     ast_node *ast_head; // For reading from
     ast_node *ast_tail; // For reading from
     symbol_table s_table; // For reading/writing into
+    ERRORS errors;
 
     void clearStack();
     void printStack(std::stack<ast_node*>& expression_stack);
@@ -52,7 +57,7 @@ private:
     void EvaluateStack();
 
 
-    void HandleType(ast_node *current);
+    void CheckAddFunction(ast_node *current);
 };  
 
 

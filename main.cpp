@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
 
     // Interpreter time bay bee!
     //Interpreter r;
-    Interpreter r(as_tree, sym_table);
+    Interpreter r(as_tree, sym_table, errors);
 
     if ( debug_mode ){
         r.BeginDebug();

@@ -3,6 +3,7 @@
 
 // Default constructor
 Interpreter::Interpreter(){
+    in_main = false;
     running_counter = 0;
     level = 0;
     is_building = false;
@@ -11,7 +12,8 @@ Interpreter::Interpreter(){
     ast_head = nullptr;
     ast_tail = nullptr;    
 }
-Interpreter::Interpreter(ast tree, symbol_table& table){
+Interpreter::Interpreter(ast tree, symbol_table& table, ERRORS& in_errors){
+    in_main = false;
     level = 0;
     running_counter = 0;
     is_building = false;
@@ -20,6 +22,7 @@ Interpreter::Interpreter(ast tree, symbol_table& table){
     // TODO
     s_table = table; // Symbol table
     as_tree = tree; // AST
+    errors = in_errors;
     ast_head = tree.get_head();
     ast_tail = tree.get_tail();
 }
@@ -69,29 +72,35 @@ int Interpreter::Exit(){
 
 
 
-
-void Interpreter::HandleType(ast_node *current){
+// Checks for main and other functions to add the head of each function to functions vector
+void Interpreter::CheckAddFunction(ast_node *current){
+    // DECLARATION
     if ( ast_types::what_is(current->type) == "DECLARATION"){
+        // FUNCTION OR PROCEDURE
         if ( (current->value == "function" || current->value == "procedure") ){
-            expression_stack.push(current); // Simply pushing "function" or "procedure into expression stack for later use"
-            if ( current->func_name == "main" ){
+            // MAIN
+            if ( current->func_name == "main" && ! in_main){
+                // STARTING EXECUTION HERE
+                in_main = true;
+                // Setting PC to begin
                 pc = current;
-            }
-        }
-        // Start of function stuff
-        if ( ast_types::what_is(current->get_chld()->type) == "BEG_BLOCK"){
-            //balls
-            level++;
-        }
-    }
-    // End of function stuff
-    if ( ast_types::what_is(current->type) == "END_BLOCK" ){
-        level--;
-    }
+                // Putting main into functions
+                std::cout << "adding main" << std::endl;
+                functions.push_back(current);
+            } 
+            // Check symbol table for prior declaration
+            else if ( s_table.find_symbol(current->func_name) && ! in_main ){
+                // add function to function vector.
+                std::cout << "adding function " << current->func_name << std::endl;
+                functions.push_back(current);
+            } else {
+                //ERROR prior decleration of function
+            } 
 
-    if ( ast_types::what_is(current->type) == "ASSIGNMENT"){
+            // Simply pushing "function" or "procedure into expression stack for later use"
+            expression_stack.push(current); 
+        }
     }
-
 }
 
 
@@ -117,25 +126,29 @@ void Interpreter::Begin(){
         exit(1);
     }
     // Setting up variables
-    is_building = true;
+    is_running = true;
     ast_node* current = ast_head;
-    // Check if the ast is not initialized
-    if ( &ast_head == &ast_tail ) {
-        std::cout << "ERROR in Interpreter::Begin: the ast_head and ast_tail are the same!" << std::endl;
-    }
-    if ( ! expression_stack.empty() ){
-        std::cout << "ERROR in Interpreter::Begin: the runtime stack is not empty!" << std::endl;
-    }
+    
 
-    // Loops through all ast_nodes in the ast and builds everything
-    while ( is_building ) {
+    // Use this as simply a machine that can go through the ast_nodes incrementally
+    // First it looks for main and all other functions to add their head node locations to a vector
+    // Then starts executing main sequentially, bouncing to the head of each function accordingly.
+    // When the function finishes it should jump back to the PC so the program can continue.
+    // Example: in main, goHere(); then goHere() calls goThere() the pc must be copied for each function entered in case 
+    // function calls another function that will need a pc to return to. then the first function called can complete and
+    // the original pc is called bringing the machine back into main right after the function call. when you return, pc.next()
+    // find main->go through main-> finishes when mains final end block is called. (level = 0 && current = end_block)
+    // otherwise finishes when the ast is fully traversed.
+    while ( is_running ) {
         //std::cout << "type: " << ast_types::what_is(current->type) << std::endl;
         //std::cout << "value: " << (current->value) << std::endl;
+        // After traversal below we are now in main.
+    
         // TRAVERSAL
         // At end of abstract syntax tree
         if (current->get_next() == nullptr && current->get_chld() == nullptr){
-            std::cout << "AST successfully traversed during building " << running_counter << std::endl;
-            is_building = false;
+            std::cout << "AST successfully traversed during pc " << &pc << std::endl;
+            is_running = false;
             continue;
         }
         // End of expression
@@ -144,18 +157,23 @@ void Interpreter::Begin(){
             if ( ! expression_stack.empty() ){
                 execution_stack.push(expression_stack);
             }
+            // If we are in main 
+            if ( in_main ){
+                
+            }
+
             // Clearing the expression stack
             clearStack();
             // Setting pc to top of main.
-            HandleType(current);
-            //std::cout << "else if: " << ast_types::what_is(current->type)<< std::endl;
+            CheckAddFunction(current);
+            std::cout << "else if: " << ast_types::what_is(current->type)<< std::endl;
     
             // Moving forward
             current = current->get_chld();  
         } else{
             // Next line
-            //std::cout << "else: " << ast_types::what_is(current->type)<< std::endl;
-            HandleType(current);
+            std::cout << "else: " << ast_types::what_is(current->type)<< std::endl;
+            CheckAddFunction(current);
             current = current->get_next();
             // Filling expression stack
             expression_stack.push(current);
@@ -177,6 +195,6 @@ void Interpreter::Begin(){
     
 
 
-
-    printEStack();
+    errors.STOP_SYNTAX_ERRORS();
+    //printEStack();
 }
