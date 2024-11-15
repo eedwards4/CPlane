@@ -31,21 +31,27 @@ class Interpreter {
   
 private:
     // Variables
+    bool is_building;
     bool is_running;
-    int program_counter;
+    int running_counter;
     int exit_code;
 
     std::stack<ast_node*> expression_stack; // stack for holding single nodes
-    std::stack<std::stack<ast_node*>> runtime_stack; // stack for holding stacks of single nodes
-    
+    std::stack<std::stack<ast_node*>> execution_stack; // stack for holding stacks of single nodes
+    ast_node* pc;
+
     ast as_tree;
     ast_node *ast_head; // For reading from
     ast_node *ast_tail; // For reading from
     symbol_table s_table; // For reading/writing into
 
     void clearStack();
-    void printStack(std::stack<ast_node*> runtime_stack);
+    void printStack(std::stack<ast_node*>& expression_stack);
+    void printEStack();
     void EvaluateStack();
+
+    void HandleAssignment(ast_node *current);
+    void HandleDeclaration(ast_node *current);
 
 };  
 
