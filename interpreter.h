@@ -38,6 +38,7 @@ private:
     int running_counter;
     int level;
     bool in_main;
+    bool in_function;
     int exit_code;
 
     std::stack<ast_node*> expression_stack; // stack for holding single nodes
@@ -55,6 +56,8 @@ private:
     void printStack(std::stack<ast_node*>& expression_stack);
     void printEStack();
     void EvaluateStack();
+    void TopThree();
+    void beginHelper(ast_node* current);
 
 
     void CheckAddFunction(ast_node *current);
