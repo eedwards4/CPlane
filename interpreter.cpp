@@ -7,7 +7,6 @@ Interpreter::Interpreter(){
     in_function = false;
     running_counter = 0;
     level = 0;
-    is_building = false;
     is_running = false; // Sets running to true in Begin
     exit_code = 0; // By default program is successful
     ast_head = nullptr;
@@ -18,7 +17,6 @@ Interpreter::Interpreter(ast tree, symbol_table& table, ERRORS& in_errors){
     in_function = false;
     level = 0;
     running_counter = 0;
-    is_building = false;
     is_running = false; // Sets running to true in Begin
     exit_code = 0; // By default program is successful
     // TODO
@@ -62,16 +60,13 @@ void Interpreter::printEStack(){
 
 
 
+
+
 // Exit function for finishing process
 int Interpreter::Exit(){
     std::cout << "Process finished with exit code " << exit_code << std::endl; // exit code 0 by default
     return exit_code;
 }
-
-
-
-
-
 
 
 // Checks for main and other functions to add the head of each function to functions vector
@@ -97,17 +92,15 @@ void Interpreter::CheckAddFunction(ast_node *current){
                 functions.push_back(current);
             } else {
                 //ERROR prior decleration of function
+                //errors.ENC_ERROR()
             } 
-
-            // Simply pushing "function" or "procedure into expression stack for later use"
-            //expression_stack.push(current); 
         }
     }
 }
 
 
-// Get top three of stack and evaluates accordingly (this is the MEAT)
-void Interpreter::TopThree(){
+// Get top three of stack and evaluates accordingly yet another dfa
+void Interpreter::TopThree(int code){
     if ( expression_stack.size() < 3 ){
         return;
     }
@@ -118,51 +111,75 @@ void Interpreter::TopThree(){
     ast_node* three = expression_stack.top();
     expression_stack.pop();
 
-    std::cout << "TopThree(): " << one->value << two->value << three->value << std::endl;
+    if ( code == ast_types::ASSIGNMENT && one->value == "="){
 
+    }
 
     expression_stack.push(three);
     expression_stack.push(two);
     expression_stack.push(one);
 }
 
-
-// Checks and add function names, pushes tokens onto expression stack, moves pc to current line of execution, 
+/* JUST HERE FOR ME ILL DELETE
+    static constexpr int BEG_BLOCK = 9999; x
+    static constexpr int END_BLOCK = 9998; x
+    static constexpr int RETURN = 9997;
+    static constexpr int DECLARATION = 9996;
+    static constexpr int ASSIGNMENT = 9995; o
+    static constexpr int STATEMENT_IF = 9994;
+    static constexpr int EXPRESSION_FOR = 9993;
+    static constexpr int EXPRESSION_WHILE = 9992;
+    static constexpr int STATEMENT_PRINTF = 9991;
+    static constexpr int TOKEN = 9990;
+    static constexpr int OPERATOR = 9989;
+    static constexpr int ELSE = 9988;
+    static constexpr int CALL = 9987;
+    */
+// Evaluates one node of the ast 
+// Checks and adds function names, pushes tokens onto expression stack, moves pc to current line of execution, 
 // calls TopThree on expression stack and keeps track where we are in program.
-void Interpreter::beginHelper(ast_node* current){
-    //std::cout << "enc: " << ast_types::what_is(current->type)<< std::endl;
-    if ( ! in_main ){ CheckAddFunction(current); }
-    // Pushing onto expression stack
-    if ( ast_types::what_is(current->type) == "TOKEN" ){
-        expression_stack.push(current);  
-    } else {
-        // Moving pc to next line
-        pc = current;
-    }
+void Interpreter::beginHelper(ast_node* &current){
+    
+    // For levels? idk
+    if ( ast_types::what_is(current->type) != "BEG_BLOCK" ){ level++; }
+    if ( ast_types::what_is(current->type) != "END_BLOCK" ){ level--; }
 
-    if ( in_main && in_function ){
-        // check function, run that sish 
+    //HERE IS WHERE WE START GRABBING NODES AND USING TOP3 ON THE STACK FOR EVERYTHING.
+    // MAIN 
+    if ( in_main && ! in_function ){
+        // TOKEN
+        if ( ast_types::what_is(current->type) == "TOKEN" ){  
+            expression_stack.push(current);
+            std::cout << "TOKEN: " << current->value << std::endl;
+            // EVAL STACK
+            TopThree(type);
+        } else { // NOT A TOKEN
+            std::cout << "NON-TOKEN: " << ast_types::what_is(current->type) << std::endl;
+            // IMPORTANT TYPE
+            /*
+            if ( current->type == 9997 || current->type == 9996 || current->type == 9995 || current->type == 9994 || current->type == 9993 || current->type == 9992 || 
+            current->type == 9991 || current->type == 9989 || current->type == 9988 || current->type == 9997 ){  
+            }
+            */
+            
+            if ( ! expression_stack.empty() ){
+
+            }
+            // Moving pc
+            pc = current; 
+            // Setting type for next token block
+            type = current->type;
+        }
     }
-    else if ( in_main && ! in_function ){
-        //TODO HERE IS WHERE WE START GRABBING NODES AND USING TOP3 ON THE STACK FOR EVERYTHING.
-        std::cout << "here type: " << ast_types::what_is(current->type) << " value: " << current->value << std::endl;
+    // FUNCTION
+    else if ( in_main && in_function ){
+        // What function we be in. 
         
-        TopThree();
+    } else { // BEFORE MAIN
+        CheckAddFunction(current);
     }
-
 }
 
-
-
-// Not necessary but would be ez and cool, can step through program manually.
-void Interpreter::BeginDebug(){
-    std::cout << "*DEBUG MODE* n -> forward one step (not implemented)" << std::endl;
-    char a;
-    while ( std::cout << ":", std::cin >> a, a == 'n' ){
-        std::cout << "next step innit" << std::endl;
-    }
-    Begin(); // Only here cause shit aint work yet
-}
 
 
 // Maintain a stack data structure and a program counter to keep track of the flow-of-control as the function interprets and executes an input program.
@@ -177,18 +194,20 @@ void Interpreter::Begin(){
     is_running = true;
     ast_node* current = ast_head; // not program counter? idk
     
-
+    // MAIN RUNTIME ENVIROMENT
     // Use this as simply a machine that can go through the ast_nodes incrementally
-    // First it looks for main and all other functions to add their head node locations to a vector "functions"
-    // Then starts executing main sequentially, bouncing to the head of each function when called.
-    // When the function finishes it should jump back to the PC+ one node so the program can continue.
+    // First it looks for start of main and all other functions along the way to add their head node locations to a vector "functions"
+    // Then starts executing main sequentially, bouncing to the head of a selected cell/function when called such as for loops.
+    // When the function finishes it should jump back to the (PC + one node) so the program can continue.
     // Example: in main, goHere(); then goHere() calls goThere() the pc must be copied for each function entered in case 
     // function calls another function that will need the original pc to return to. then the first function called can complete and
     // the copied original pc is called bringing the machine back into main right after the function call. when you return, inc pc
-    // good(find main) -> WIP(go through main) -> todo(finishes when mains final end block is called. (level = 0 && current = end_block))
+    // good(find all function heads) -> good(find main) -> good(go through main) -> not even close(execute statements)->
+    // --> todo(finishes when mains final end block is called. (level = 0 && current = end_block))
     // otherwise finishes when the ast is fully traversed.
+    // calls beginHelper in the areas it will be needed.
     while ( is_running ) {
-        running_counter++;
+        running_counter++;// for memory leaks
         // TRAVERSAL
         // At end of abstract syntax tree FINAL NODE
         if (current->get_next() == nullptr && current->get_chld() == nullptr){
@@ -199,29 +218,19 @@ void Interpreter::Begin(){
         }
         // End of expression
         else if (current->get_next() == nullptr && current->get_chld() != nullptr ){
-            if ( ! in_main ){ CheckAddFunction(current); }
-            
-            // TODO STUFF
-            // CHECK DECLARATION/BEG_BLOCK/END_BLOCK
-
+            beginHelper(current);
             // Moving down on ast
             current = current->get_chld();  
         } else if (current->get_next() != nullptr && current->get_chld() == nullptr || current->get_next()->get_next() == nullptr && current->get_next()->get_chld() != nullptr ){
-            // Moving right on ast ( will encounter last node down)
-            // IF we are at the second to end of a left moving statement. (DO EVERYTHING TWICE)
-            // FIRST NODE
+            // Moving right on ast ( will not encounter last node down automatically)
+            // IF we are at the second to end of a left to right moving statement. (DO EVERYTHING TWICE manually move to final righthandmost node)
+            // 2nd to last node
             if ( current->get_next()->get_next() == nullptr && current->get_next()->get_chld() != nullptr ){
-
                 beginHelper(current);
+                // Move to last node
                 current = current->get_next();
             }
-            // LAST NODE IF ABOVE TRUE
-
             beginHelper(current);
-
-
-
-
             // Moving right now depending if we are on last or not
             if ( current->get_next() == nullptr && current->get_chld() != nullptr ) { 
                 //Pushing expression stack onto the execution stack
@@ -235,23 +244,29 @@ void Interpreter::Begin(){
                 current = current->get_next();
             }
         }
-        
         // If we are stuck in an infinite loop
         if ( running_counter > 9999 ){
             std::cout << "ERROR in Interpreter::Begin: Stuck in infinite building loop! Exiting..." << std::endl;
             clearStack();
             exit_code = 1;
-            is_building = false;
+            is_running = false;
             break;
         }   
-    } // FINISH SETUP
+    } 
 
     
-    
-
-    
-
-
     errors.STOP_SYNTAX_ERRORS();
-    //printEStack();
+    printEStack();
+}
+
+
+
+// Not necessary but would be ez and cool, can step through program manually.
+void Interpreter::BeginDebug(){
+    std::cout << "*DEBUG MODE* n -> forward one step (not implemented)" << std::endl;
+    char a;
+    while ( std::cout << ":", std::cin >> a, a == 'n' ){
+        std::cout << "next step innit" << std::endl;
+    }
+    Begin(); // Only here cause shit aint work yet
 }

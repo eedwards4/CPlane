@@ -4,7 +4,7 @@
 
 // USAGE
 // in main
-// Interpreter p;
+// Interpreter p(ast, table, errors);
 // p.Start();
 
 #ifndef CPLANE_INTERPRETER_H
@@ -20,29 +20,28 @@
 class Interpreter {
     public:
     Interpreter();
-    //Interpreter(ast_node *head, ast_node *tail, symbol_table& table);
     Interpreter(ast tree, symbol_table& table, ERRORS& errors);
 
     // Runs the program internally
     void Begin();
 
-    void Start();
     // Not sure yet but maybe step through the program incrementally with keyboard
     void BeginDebug();
     int Exit();
   
 private:
-    // Variables
-    bool is_building;
-    bool is_running;
+    // Moving variables
     int running_counter;
     int level;
+    int exit_code;
+    int type;
+    // Bool triggers
+    bool is_running;
     bool in_main;
     bool in_function;
-    int exit_code;
 
-    std::stack<ast_node*> expression_stack; // stack for holding single nodes
     std::stack<std::stack<ast_node*>> execution_stack; // stack for holding stacks of single nodes
+    std::stack<ast_node*> expression_stack; // stack for holding single nodes
     ast_node* pc; // Program counter pointer
     std::vector<ast_node*> functions; // lists all function heads
 
@@ -56,8 +55,8 @@ private:
     void printStack(std::stack<ast_node*>& expression_stack);
     void printEStack();
     void EvaluateStack();
-    void TopThree();
-    void beginHelper(ast_node* current);
+    void TopThree(int code);
+    void beginHelper(ast_node* &current);
 
 
     void CheckAddFunction(ast_node *current);
