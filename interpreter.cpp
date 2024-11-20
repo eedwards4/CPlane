@@ -37,7 +37,7 @@ bool Interpreter::isNumber(std::string str){
     int i = 0;
     bool is = true;
     while ( str[i] ){
-        if ( ! isNumber(std::to_string(str[i])) ){
+        if ( ! isnumber(str[i]) ){
             is = false;
             break;
         }
@@ -206,6 +206,7 @@ void Interpreter::TopThree(int code){
     if ( expression_stack.empty() ){
         return;
     }   
+    
     // Yea just a little off the top
     ast_node* one = expression_stack.top();
     expression_stack.pop();
@@ -213,6 +214,7 @@ void Interpreter::TopThree(int code){
     // ASSIGNMENT
     if ( code == ast_types::ASSIGNMENT ){
         if ( expression_stack.size() < 3 ){
+            expression_stack.push(one);
             return;
         }
         ast_node* two = expression_stack.top();
@@ -246,13 +248,16 @@ void Interpreter::TopThree(int code){
             // If three is a symbol 
             if ( s_table.find_symbol(three->value) ){
                 // If two is a number
+                std::cout << "here" << std::endl;
                 if ( isNumber(two->value) ){
+                    std::cout << "here2" << std::endl;
                     EvalOperatorUpdate(one, two, three);
                 }
                 // If two is not a number
                 else if ( ! isNumber(two->value) ){
                     //TODO STRING?
                 } 
+                
                 // Push result back into expression stack
                 if ( ! expression_stack.empty() ){
                     expression_stack.push(three);
@@ -282,6 +287,7 @@ void Interpreter::TopThree(int code){
             } else {
                 // ERROR I belive
             }
+            
         }
         // Else neither are in symbol table and both are numbers
         else if ( isNumber(three->value) && isNumber(two->value) ){
@@ -292,21 +298,26 @@ void Interpreter::TopThree(int code){
                 expression_stack.push(three);
             } 
         }
+        expression_stack.push(two);
+        expression_stack.push(one);
+        return;
         //ERROR
     } 
     // PRINTF
     else if ( code == ast_types::STATEMENT_PRINTF ){
         // First node so retrive print statement
+        
         if ( expression_stack.size() == 0 && working_print_statement == "default"){
             working_print_statement = one->value;
         }
         // Final node of printf statement
         if ( one->get_next() == nullptr && one->get_chld() != nullptr ){
+            std::cout << "here2" << std::endl;
             ast_node* temp = one;
             // Need to pop and insert values into the back of the print statement.
             // (munching on the stack)
             int substringpos;
-            while ( expression_stack.size() != 0 ){
+            while ( expression_stack.size() > 0 ){
                 // TODO NEED TO EVALUATE NON LITERAL (NOT JUST HERE) function needed
                 // 1. get datatype from st 2. set value to temp for required datatype 3. put that selected value into the replace statement.
                 // Putting temp into the lefthandmost substring in the statement
@@ -381,6 +392,7 @@ void Interpreter::beginHelper(ast_node* &current){
             // If we are done
             if ( ast_types::what_is(current->type) == "END_BLOCK" || ast_types::what_is(current->type) == "RETURN" && level == 0 && expression_stack.empty() ){
                 errors.STOP_SYNTAX_ERRORS();
+
             }
             // If we are still executing stack
             //else if ( ! expression_stack.empty() ){
