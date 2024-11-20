@@ -35,6 +35,8 @@ private:
     int level;
     int exit_code;
     int type;
+    std::string working_print_statement;
+
     // Bool triggers
     bool is_running;
     bool in_main;
@@ -46,17 +48,20 @@ private:
     std::vector<ast_node*> functions; // lists all function heads
 
     ast as_tree;
-    ast_node *ast_head; // For reading from
-    ast_node *ast_tail; // For reading from
+    //ast_node *ast_head; // For reading from
+    //ast_node *ast_tail; // For reading from
     symbol_table s_table; // For reading/writing into
     ERRORS errors;
 
     void clearStack();
     void printStack(std::stack<ast_node*>& expression_stack);
     void printEStack();
-    void EvaluateStack();
+    //void EvaluateStack();
     void TopThree(int code);
     void beginHelper(ast_node* &current);
+    void EvalOperatorUpdate(ast_node* one, ast_node* two, ast_node*& three);
+    bool isNumber(std::string str);
+    bool isOperator(std::string str);
 
 
     void CheckAddFunction(ast_node *current);

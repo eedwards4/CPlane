@@ -91,6 +91,7 @@ public:
     // Getters
     void print_symbols(const std::string& filename) const;
     bool find_symbol(const std::string name) const;
+    bool update_symbol(const std::string name, const std::string val) const;
     bool is_function(const std::string name) const;
 
     ERRORS returnErrors(){
