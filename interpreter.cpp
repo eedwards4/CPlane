@@ -11,6 +11,8 @@ Interpreter::Interpreter(){
     exit_code = 0; // By default program is successful
     //ast_head = nullptr;
     //ast_tail = nullptr;    
+
+    scope_stack.push(0); // push global scope (should never be popped)
 }
 Interpreter::Interpreter(ast tree, symbol_table& table, ERRORS& in_errors){
     in_main = false;
@@ -26,6 +28,8 @@ Interpreter::Interpreter(ast tree, symbol_table& table, ERRORS& in_errors){
     working_print_statement = "default";
     //ast_head = tree.get_head();
     //ast_tail = tree.get_tail();
+
+    scope_stack.push(0); // push global scope (should never be popped)
 }
 
 // This function simply returns if the givin string is a number.
@@ -33,7 +37,7 @@ bool Interpreter::isNumber(std::string str){
     int i = 0;
     bool is = true;
     while ( str[i] ){
-        if ( ! isnumber(str[i]) ){
+        if ( ! isNumber(std::to_string(str[i])) ){
             is = false;
             break;
         }
@@ -309,7 +313,13 @@ void Interpreter::TopThree(int code){
                 substringpos = working_print_statement.rfind("%d");
                 // Replace substring with appropiate value from stack
                 if ( substringpos != std::string::npos ) {
-                    working_print_statement.replace(substringpos, 2, temp->value);
+                    // symbol_node *temp_value = s_table.get_symbol(temp->value, scope_stack.top()); // correct for final
+                    symbol_node *temp_value = s_table.get_symbol(temp->value, 2); // testing for scope = 2 (main in test 6-1)
+                    if (temp_value) { // if symbol is in symbol table
+                        working_print_statement.replace(substringpos, 2, std::to_string(temp_value->get_val_int()));
+                    } else {
+                        working_print_statement.replace(substringpos, 2, temp->value);
+                    }
                     //std::cout << "Replacing " << substringpos << " w/ " << temp->value << " temporarily..." << std::endl;
                 }
                 // Grabbing top of stack after removing previously evaluated item.

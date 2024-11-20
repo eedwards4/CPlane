@@ -94,6 +94,8 @@ public:
     bool update_symbol(const std::string name, const std::string val) const;
     bool is_function(const std::string name) const;
 
+    symbol_node* get_symbol(const std::string name, const int scope);
+
     ERRORS returnErrors(){
         return errors;
     };

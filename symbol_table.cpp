@@ -413,3 +413,28 @@ bool symbol_table::is_function(const std::string name) const {
     }
     return false;
 }
+
+symbol_node* symbol_table::get_symbol(const std::string name, const int scope) {
+    // Check for symbol in specified scope
+    auto cur = scopes[scope];
+
+    while (cur != nullptr) {
+        if (cur->IDENT_NAME == name) {
+            return cur;
+        }
+        cur = cur->get_next();
+    }
+
+    // Check for symbol in global scope
+    cur = scopes[0];
+
+    while (cur != nullptr) {
+        if (cur->IDENT_NAME == name) {
+            return cur;
+        }
+        cur = cur->get_next();
+    }
+
+    // Symbol doesn't exist
+    return nullptr;
+}

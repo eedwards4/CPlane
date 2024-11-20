@@ -47,6 +47,8 @@ private:
     ast_node* pc; // Program counter pointer
     std::vector<ast_node*> functions; // lists all function heads
 
+    std::stack<int> scope_stack; // stack for the current scope. push on function enter, pop on function exit
+
     ast as_tree;
     //ast_node *ast_head; // For reading from
     //ast_node *ast_tail; // For reading from
