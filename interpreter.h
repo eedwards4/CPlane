@@ -27,7 +27,7 @@ class Interpreter {
 
     // Not sure yet but maybe step through the program incrementally with keyboard
     void BeginDebug();
-    void Exit();
+    int Exit();
   
 private:
     // Moving variables
