@@ -103,9 +103,10 @@ void Interpreter::printEStack(){
 
 
 // Exit function for finishing process
-int Interpreter::Exit(){
+void Interpreter::Exit(){
     std::cout << "Process finished with exit code " << exit_code << std::endl; // exit code 0 by default
-    return exit_code;
+    std::cout << std::endl;
+    exit(exit_code);
 }
 
 
@@ -122,13 +123,13 @@ void Interpreter::CheckAddFunction(ast_node *current){
                 // Setting PC to begin
                 pc = current;
                 // Putting main into functions
-                std::cout << "adding main" << std::endl;
+                //std::cout << "adding main" << std::endl;
                 functions.push_back(current);
             } 
             // Check symbol table for prior declaration
             else if ( s_table.find_symbol(current->func_name) && ! in_main ){
                 // add function to function vector.
-                std::cout << "adding function " << current->func_name << std::endl;
+                //std::cout << "adding function " << current->func_name << std::endl;
                 functions.push_back(current);
             } else {
                 //ERROR prior decleration of function
@@ -202,21 +203,25 @@ void Interpreter::TopThree(int code){
     if ( expression_stack.empty() ){
         return;
     }   
-    // Yea just a little off the top
+    //std::cout << code << std::endl;
+    std::cout << expression_stack.size() << std::endl;
+
+    // Remove one node from the expression stack
     ast_node* one = expression_stack.top();
     expression_stack.pop();
-       
-    // ASSIGNMENT
+    
+    // ASSIGNMENT (WIP) PROBABLY NEEDS UPDATE
     if ( code == ast_types::ASSIGNMENT ){
-        if ( expression_stack.size() < 3 ){
+        if ( expression_stack.size() < 2 ){
+            expression_stack.push(one);
             return;
         }
         ast_node* two = expression_stack.top();
         expression_stack.pop();
         ast_node* three = expression_stack.top();
         expression_stack.pop();
+        one = expression_stack.top();
         std::cout << "Evaluating " << three->value << " " << two->value << " " << one->value << std::endl;
-
         // Invalid operator
         if ( ! isOperator(one->value) ){
             // Resetting stack
@@ -257,7 +262,7 @@ void Interpreter::TopThree(int code){
                 //s_table.update_symbol
                 //expression_stack.push(three);
                 //expression_stack.push(two);
-                return;
+                //return;
             } 
             // TODO If two is symbol and three isnt (need to find out and do (HARD))
             else if ( s_table.find_symbol(two->value) ){
@@ -274,23 +279,33 @@ void Interpreter::TopThree(int code){
 
                 //expression_stack.push(three);
                 //expression_stack.push(two);
-                return;
+                //return;
             } else {
+                expression_stack.push(three);
                 // ERROR I belive
+                
             }
+            
+            expression_stack.push(two);
+            return;
         }
         // Else neither are in symbol table and both are numbers
         else if ( isNumber(three->value) && isNumber(two->value) ){
             // Check operator to modify values
             EvalOperatorUpdate(one, two, three);
+            
+            //if ( ! expression_stack.empty() ){
+                
+            //} 
 
-            if ( ! expression_stack.empty() ){
-                expression_stack.push(three);
-            } 
+            expression_stack.push(three);
+            expression_stack.push(two);
+            return;
+
         }
         //ERROR
     } 
-    // PRINTF
+    // PRINTF (CLOSE TO WORKING)
     else if ( code == ast_types::STATEMENT_PRINTF ){
         // First node so retrive print statement
         if ( expression_stack.size() == 0 && working_print_statement == "default"){
@@ -311,6 +326,7 @@ void Interpreter::TopThree(int code){
                 if ( substringpos != std::string::npos ) {
                     working_print_statement.replace(substringpos, 2, temp->value);
                     //std::cout << "Replacing " << substringpos << " w/ " << temp->value << " temporarily..." << std::endl;
+                    // debug mode activated here
                 }
                 // Grabbing top of stack after removing previously evaluated item.
                 temp = expression_stack.top();
@@ -323,6 +339,9 @@ void Interpreter::TopThree(int code){
             working_print_statement = "default";
             return;
         } 
+    }
+    else if ( code == ast_types::RETURN ){
+
     }
     else {
         std::cout << "ERROR in Interpreter::TopThree: code not found" << std::endl;
@@ -337,7 +356,7 @@ void Interpreter::TopThree(int code){
     static constexpr int BEG_BLOCK = 9999; x
     static constexpr int END_BLOCK = 9998; x
     static constexpr int RETURN = 9997;
-    static constexpr int DECLARATION = 9996;
+    static constexpr int DECLARATION = 9996; /
     static constexpr int ASSIGNMENT = 9995; o
     static constexpr int STATEMENT_IF = 9994;
     static constexpr int EXPRESSION_FOR = 9993;
@@ -354,8 +373,9 @@ void Interpreter::TopThree(int code){
 void Interpreter::beginHelper(ast_node* &current){
     
     // For levels? idk
-    if ( ast_types::what_is(current->type) != "BEG_BLOCK" ){ level++; }
-    if ( ast_types::what_is(current->type) != "END_BLOCK" ){ level--; }
+    if ( ast_types::what_is(current->type) == "BEG_BLOCK" ){ level++; }
+    if ( ast_types::what_is(current->type) == "END_BLOCK" ){ level--; }
+
 
     //HERE IS WHERE WE START GRABBING NODES AND USING TOP3 ON THE STACK FOR EVERYTHING.
     // MAIN 
@@ -368,10 +388,6 @@ void Interpreter::beginHelper(ast_node* &current){
         } 
         // NOT A TOKEN
         else { 
-            // If we are done
-            if ( ast_types::what_is(current->type) == "END_BLOCK" || ast_types::what_is(current->type) == "RETURN" && level == 0 && expression_stack.empty() ){
-                errors.STOP_SYNTAX_ERRORS();
-            }
             // If we are still executing stack
             //else if ( ! expression_stack.empty() ){
             std::cout << "Finished " << ast_types::what_is(pc->type) << " block" << std::endl;
@@ -393,6 +409,14 @@ void Interpreter::beginHelper(ast_node* &current){
     else { 
         CheckAddFunction(current);
     }
+
+    // Checking if finished with file
+    if ( (ast_types::what_is(current->type) == "END_BLOCK" || ast_types::what_is(current->type) == "RETURN") && level == 0 && expression_stack.empty() && in_main){
+        // Check errors
+        errors.STOP_SYNTAX_ERRORS();
+        // Finish
+        Exit();
+    }
 }
 
 
@@ -407,7 +431,7 @@ void Interpreter::Begin(){
     // Use this as simply a machine that can go through the ast_nodes incrementally but can change where in the program it incrememnts from
     // First it looks for start of main and all other functions along the way to add their head node locations to a vector "functions"
     // Then starts executing main sequentially, bouncing to the head of a selected cell/function when called such as for loops.
-    // When the function finishes it should jump back to the (PC + one node) so the program can continue.
+    // When a function finishes it should jump back to the (PC + one node) so the program can continue.
     // Example: in main, goHere(); then goHere() calls goThere() the pc must be copied for each function entered in case 
     // function calls another function that will need the original pc to return to. then the first function called can complete and
     // the copied original pc is called bringing the machine back into main right after the function call. when you return, inc pc
@@ -419,11 +443,13 @@ void Interpreter::Begin(){
         running_counter++;// for memory leaks
         // TRAVERSAL
         // At end of abstract syntax tree FINAL NODE
+        // If we are done
+        
         if (current->get_next() == nullptr && current->get_chld() == nullptr){
             beginHelper(current); // FINAL NODE
             std::cout << "AST successfully traversed with final pc: " << &pc << std::endl;
             is_running = false;
-            break;
+            continue;
         }
         // End of expression
         else if (current->get_next() == nullptr && current->get_chld() != nullptr ){
@@ -433,7 +459,7 @@ void Interpreter::Begin(){
         } 
         else if (current->get_next() != nullptr && current->get_chld() == nullptr || current->get_next()->get_next() == nullptr && current->get_next()->get_chld() != nullptr ){
             // Moving right on ast ( will not encounter last node down automatically)
-            // IF we are at the second to end of a left to right moving statement. (DO EVERYTHING TWIC, manually move to final righthandmost node)
+            // IF we are at the second to end of a left to right moving statement. (DO EVERYTHING TWICE, manually move to final righthandmost node)
             // 2nd to last node
             if ( current->get_next()->get_next() == nullptr && current->get_next()->get_chld() != nullptr ){
                 beginHelper(current);
