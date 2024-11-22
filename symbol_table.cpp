@@ -438,3 +438,14 @@ symbol_node* symbol_table::get_symbol(const std::string name, const int scope) {
     // Symbol doesn't exist
     return nullptr;
 }
+
+int symbol_table::get_function_scope(const std::string name) {
+    for (int i = 0; i < scopes.size(); i++) {
+        symbol_node* cur = scopes[i];
+        while (cur != nullptr) {
+            if (cur->IDENT_NAME == name) { return i; }
+            cur = cur->get_next();
+        }
+    }
+    return -1;
+}

@@ -37,7 +37,7 @@ bool Interpreter::isNumber(std::string str){
     int i = 0;
     bool is = true;
     while ( str[i] ){
-        if ( ! isnumber(str[i]) ){
+        if ( ! isdigit(str[i]) ){
             is = false;
             break;
         }
@@ -72,6 +72,31 @@ bool Interpreter::isOperator(std::string str){
         return false;
     }
 }
+
+bool Interpreter::isBooleanOperator(std::string str) {
+    if ( str == ">" ){
+        return true;
+    }
+    else if ( str == ">=" ){
+        return true;
+    }
+    else if ( str == "<" ){
+        return true;
+    }
+    else if ( str == "<=" ){
+        return true;
+    }
+    else if ( str == "==" ){
+        return true;
+    }
+    else if ( str == "!=" ){
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 // Helper functions for stack
 void Interpreter::clearStack(){
     while (!expression_stack.empty()) { 
@@ -128,6 +153,8 @@ void Interpreter::CheckAddFunction(ast_node *current){
                 // Putting main into functions
                 std::cout << "adding main" << std::endl;
                 functions.push_back(current);
+                // Pushing main's scope onto scope stack
+                scope_stack.push(s_table.get_function_scope(current->func_name));
             } 
             // Check symbol table for prior declaration
             else if ( s_table.find_symbol(current->func_name) && ! in_main ){
@@ -170,6 +197,7 @@ void Interpreter::EvalOperatorUpdate(ast_node* one, ast_node* two, ast_node*& th
         return;
     }
     else if ( one->value == "^" ){
+                                                 // note that ^ is the XOR operator in c++, not used to raise to a power
         three->value = std::to_string(std::stoi(three->value) ^ std::stoi(two->value));
         return;
     }//..
@@ -177,6 +205,53 @@ void Interpreter::EvalOperatorUpdate(ast_node* one, ast_node* two, ast_node*& th
         return;
     }
 
+}
+
+// Evaluate non assingment expressions
+ast_node* Interpreter::eval_top_three(std::string one, std::string two, std::string three) {
+    ast_node* sol = new ast_node();
+
+    // Integer
+    if (one == "+") {
+        sol->value = std::to_string(std::stoi(three) + std::stoi(two));
+    }
+    else if (one == "-") {
+        sol->value = std::to_string(std::stoi(three) - std::stoi(two));
+    }
+    else if (one == "*") {
+        sol->value = std::to_string(std::stoi(three) * std::stoi(two));
+    }
+    else if (one == "/") {
+        sol->value = std::to_string(std::stoi(three) / std::stoi(two));
+    }
+    else if (one == "%") {
+        sol->value = std::to_string(std::stoi(three) % std::stoi(two));
+    }
+    else if (one == "^") {
+        sol->value = std::to_string(std::pow(std::stoi(three), std::stoi(two)));
+    }
+
+    // Boolean
+    // else if (one->value == ">") {
+    //     sol->value = std::to_string(std::stoi(three->value) > std::stoi(two->value));
+    // }
+    // else if (one->value == ">=") {
+    //     sol->value = std::to_string(std::stoi(three->value) >= std::stoi(two->value));
+    // }
+    // else if (one->value == "<") {
+    //     sol->value = std::to_string(std::stoi(three->value) < std::stoi(two->value));
+    // }
+    // else if (one->value == "<=") {
+    //     sol->value = std::to_string(std::stoi(three->value) <= std::stoi(two->value));
+    // }
+    // else if (one->value == "==") {
+    //     sol->value = std::to_string(std::stoi(three->value) == std::stoi(two->value));
+    // }
+    // else if (one->value == "!=") {
+    //     sol->value = std::to_string(std::stoi(three->value) != std::stoi(two->value));
+    // }
+
+    return sol;
 }
 
 
@@ -213,7 +288,7 @@ void Interpreter::TopThree(int code){
        
     // ASSIGNMENT
     if ( code == ast_types::ASSIGNMENT ){
-        if ( expression_stack.size() < 3 ){
+        if ( expression_stack.size() < 2 ){
             expression_stack.push(one);
             return;
         }
@@ -223,14 +298,51 @@ void Interpreter::TopThree(int code){
         expression_stack.pop();
         std::cout << "Evaluating " << three->value << " " << two->value << " " << one->value << std::endl;
 
-        // Invalid operator
-        if ( ! isOperator(one->value) ){
+        // Invalid order, must be operator operand operand
+        if ( ! isOperator(one->value) || isOperator(two->value) || isOperator(three->value) ){
             // Resetting stack
             expression_stack.push(three);
             expression_stack.push(two);
             expression_stack.push(one);
             return;
         }
+        
+        // Handles assignment
+        if (one->value == "=") {
+            std::cout << "top three (123) assign: " << one->value << " " << two->value << " " << three->value << std::endl;
+            if (isNumber(two->value)) {
+                std::cout << "setting three to two\n";
+                s_table.get_symbol(three->value, scope_stack.top())->set_val_int(std::stoi(two->value));
+            }
+            else if (s_table.get_symbol(two->value, scope_stack.top()) != nullptr) {
+                std::cout << "setting three to two from symbol table\n";
+                s_table.get_symbol(three->value, scope_stack.top())->set_val_int(s_table.get_symbol(two->value, scope_stack.top())->get_val_int());
+            } else {
+                std::cout << "did nothing\n";
+            }
+            return;
+        }
+        // Handles numeric operations
+        else if (isOperator(one->value)) {
+            std::string two_val = two->value;
+            std::string three_val = three->value;
+
+            // get two value from symbol table
+            if (s_table.get_symbol(two->value, scope_stack.top()) != nullptr) {
+                two_val = std::to_string(s_table.get_symbol(two->value, scope_stack.top())->get_val_int());
+            }
+
+            // get three value from symbol table
+            if (s_table.get_symbol(three->value, scope_stack.top()) != nullptr) {
+                three_val = std::to_string(s_table.get_symbol(three->value, scope_stack.top())->get_val_int());
+            }
+
+            std::cout << "top three (123) eval: " << one->value << " " << two_val << " " << three_val << std::endl;
+            expression_stack.push(eval_top_three(one->value, two_val, three_val));
+            return;
+        }
+
+
         // If both nodes are in the symbol table (HARD)
         if ( s_table.find_symbol(two->value) && s_table.find_symbol(three->value) ){
             // TODO Do whatever is necessary for two (retrive value/call function/etc)
@@ -306,10 +418,10 @@ void Interpreter::TopThree(int code){
     // PRINTF
     else if ( code == ast_types::STATEMENT_PRINTF ){
         // First node so retrive print statement
-        
         if ( expression_stack.size() == 0 && working_print_statement == "default"){
             working_print_statement = one->value;
         }
+
         // Final node of printf statement
         if ( one->get_next() == nullptr && one->get_chld() != nullptr ){
             std::cout << "here2" << std::endl;
@@ -324,11 +436,11 @@ void Interpreter::TopThree(int code){
                 substringpos = working_print_statement.rfind("%d");
                 // Replace substring with appropiate value from stack
                 if ( substringpos != std::string::npos ) {
-                    // symbol_node *temp_value = s_table.get_symbol(temp->value, scope_stack.top()); // correct for final
-                    symbol_node *temp_value = s_table.get_symbol(temp->value, 2); // testing for scope = 2 (main in test 6-1)
-                    if (temp_value) { // if symbol is in symbol table
-                        working_print_statement.replace(substringpos, 2, std::to_string(temp_value->get_val_int()));
+                    symbol_node *temp_symbol = s_table.get_symbol(temp->value, scope_stack.top());
+                    if (temp_symbol != nullptr) { // if symbol is in symbol table
+                        working_print_statement.replace(substringpos, 2, std::to_string(temp_symbol->get_val_int()));
                     } else {
+                        // probably should error, but leaving it for now since it's not vital to program execution
                         working_print_statement.replace(substringpos, 2, temp->value);
                     }
                     //std::cout << "Replacing " << substringpos << " w/ " << temp->value << " temporarily..." << std::endl;
@@ -337,10 +449,17 @@ void Interpreter::TopThree(int code){
                 temp = expression_stack.top();
                 expression_stack.pop();
             }
+
+            // replace \n with newline
+            int new_line_pos = working_print_statement.rfind("\\n");
+            while (new_line_pos != std::string::npos) {
+                working_print_statement.replace(new_line_pos, 2, "\n");
+                new_line_pos = working_print_statement.rfind("\\n");
+            }
+
             // Actually printing what the program would print
-            std::cout << working_print_statement;
-            // ONLY HERE BECAUSE '\n' ISNT ACTUALLY MAKING NEW LINE
-            std::cout << std::endl;
+            std::cout << "printf output: " << working_print_statement;
+            
             working_print_statement = "default";
             return;
         } 
@@ -375,8 +494,8 @@ void Interpreter::TopThree(int code){
 void Interpreter::beginHelper(ast_node* &current){
     
     // For levels? idk
-    if ( ast_types::what_is(current->type) != "BEG_BLOCK" ){ level++; }
-    if ( ast_types::what_is(current->type) != "END_BLOCK" ){ level--; }
+    if ( ast_types::what_is(current->type) == "BEG_BLOCK" ) { level++; }
+    if ( ast_types::what_is(current->type) == "END_BLOCK" ) { level--; }
 
     //HERE IS WHERE WE START GRABBING NODES AND USING TOP3 ON THE STACK FOR EVERYTHING.
     // MAIN 

@@ -16,6 +16,8 @@
 
 #include <stack>
 #include <type_traits>
+#include <cctype>
+#include <cmath>
 
 class Interpreter {
     public:
@@ -46,7 +48,7 @@ private:
     std::stack<ast_node*> expression_stack; // stack for holding single nodes
     ast_node* pc; // Program counter pointer
     std::vector<ast_node*> functions; // lists all function heads
-
+    
     std::stack<int> scope_stack; // stack for the current scope. push on function enter, pop on function exit
 
     ast as_tree;
@@ -64,6 +66,9 @@ private:
     void EvalOperatorUpdate(ast_node* one, ast_node* two, ast_node*& three);
     bool isNumber(std::string str);
     bool isOperator(std::string str);
+    bool isBooleanOperator(std::string str);
+
+    ast_node* eval_top_three(std::string one, std::string two, std::string three);
 
 
     void CheckAddFunction(ast_node *current);
