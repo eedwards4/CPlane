@@ -9,9 +9,6 @@ Interpreter::Interpreter(){
     level = 0;
     is_running = false; // Sets running to true in Begin
     exit_code = 0; // By default program is successful
-    //ast_head = nullptr;
-    //ast_tail = nullptr;    
-
     scope_stack.push(0); // push global scope (should never be popped)
 }
 Interpreter::Interpreter(ast tree, symbol_table& table, ERRORS& in_errors){
@@ -26,9 +23,6 @@ Interpreter::Interpreter(ast tree, symbol_table& table, ERRORS& in_errors){
     as_tree = tree; // AST
     errors = in_errors;
     working_print_statement = "default";
-    //ast_head = tree.get_head();
-    //ast_tail = tree.get_tail();
-
     scope_stack.push(0); // push global scope (should never be popped)
 }
 
@@ -45,6 +39,7 @@ bool Interpreter::isNumber(std::string str){
     }
     return is;
 } 
+// Returns true if the givin string is an operator else returns false
 bool Interpreter::isOperator(std::string str){
     // Numerical operators
     if ( str == "+" ){
@@ -102,12 +97,13 @@ bool Interpreter::isOperator(std::string str){
     }
 }
 
-// Helper functions for stack
+// Clears the current expression_stack
 void Interpreter::clearStack(){
     while (!expression_stack.empty()) { 
         expression_stack.pop(); 
     }
 }
+// Prints the current expression stack.
 void Interpreter::printStack(std::stack<ast_node*>& stack){
     // If stack is empty then return
     if (stack.empty()) 
@@ -121,25 +117,16 @@ void Interpreter::printStack(std::stack<ast_node*>& stack){
     std::cout << curr->value << " ";
     stack.push(curr);
 }
-void Interpreter::printEStack(){
-    std::cout << "Expression stack: " << std::endl;
-    int s = execution_stack.size();
-    for ( int i = 0; i < s; i++ ){
-        std::cout << "Stack: ";
-        printStack(execution_stack.top());
-        std::cout << std::endl;
-        execution_stack.pop();
-    }
-}
+
 
 
 
 
 
 // Exit function for finishing process
-int Interpreter::Exit(){
-    std::cout << "Process finished with exit code " << exit_code << std::endl; // exit code 0 by default
-    return exit_code;
+void Interpreter::ExitQuiet(){
+    std::cout << std::endl;
+    exit(exit_code);
 }
 
 
@@ -358,28 +345,28 @@ void Interpreter::TopThree(int code){
         
         // Handles assignment
         if (one->value == "=") {
-            std::cout << "top three (123) assign: " << one->value << " " << two->value << " " << three->value << std::endl;
+            std::cout << "TopThree() Assign: " << one->value << " " << two->value << " " << three->value << std::endl;
 
             symbol_node* s_two = s_table.get_symbol(two->value, scope_stack.top());
             symbol_node* s_three = s_table.get_symbol(three->value, scope_stack.top());
 
             if (isNumber(two->value)) {
-                std::cout << "setting three to two (numerical)\n";
+                std::cout << "Setting " << three->value << " = " << two->value << " (numerical)\n";
                 s_three->set_val_int(std::stoi(two->value));
             }
             else if (two->value == "TRUE" || two->value == "FALSE") {
-                std::cout << "setting three to two (boolean)\n";
+                std::cout << "Setting " << three->value << " = " << two->value << " (boolean)\n";
                 s_three->set_val_bool(two->value == "TRUE");
             }
             else if (s_two != nullptr) {
-                std::cout << "setting three to two from symbol table\n";
+                std::cout << "Setting " << three->value << " = " << two->value << " from symbol table\n";
                 switch (s_two->DATATYPE) {
                     case symbols::data_types::INT: s_three->set_val_int(s_two->get_val_int());
                     case symbols::data_types::BOOL: s_three->set_val_bool(s_two->get_val_bool());
                     case symbols::data_types::CHAR: s_three->set_val_char(s_two->get_val_char());
                 }
             } else {
-                std::cout << "did nothing\n";
+                std::cout << "ERROR in TopThree(): Assingnment values could not be assessed\n";
             }
             return;
         }
@@ -410,7 +397,7 @@ void Interpreter::TopThree(int code){
                 }
             }
 
-            std::cout << "top three (123) eval: " << one->value << " " << two_val << " " << three_val << std::endl;
+            std::cout << "TopThree() 123 Evaluate: " << one->value << " " << two_val << " " << three_val << std::endl;
             expression_stack.push(eval_top_three(one->value, two_val, three_val));
             return;
         }
@@ -486,7 +473,7 @@ void Interpreter::TopThree(int code){
         }
         */
 
-        std::cout << "nothing happened in assingment\n";
+        std::cout << "ERROR in TopThree(): Assignment not handled\n";
 
         expression_stack.push(three);
         expression_stack.push(two);
@@ -503,7 +490,6 @@ void Interpreter::TopThree(int code){
 
         // Final node of printf statement
         if ( one->get_next() == nullptr && one->get_chld() != nullptr ){
-            std::cout << "here2" << std::endl;
             ast_node* temp = one;
             // Need to pop and insert values into the back of the print statement.
             // (munching on the stack)
@@ -537,7 +523,7 @@ void Interpreter::TopThree(int code){
             }
 
             // Actually printing what the program would print
-            std::cout << "printf output: " << working_print_statement;
+            std::cout << "PROGRAM OUTPUT: " << working_print_statement;
             
             working_print_statement = "default";
             return;
@@ -571,7 +557,6 @@ void Interpreter::TopThree(int code){
 // Checks and adds function names, pushes tokens onto expression stack, moves pc to current line of execution, 
 // calls TopThree on expression stack and keeps track where we are in program.
 void Interpreter::beginHelper(ast_node* &current){
-    
     // For levels? idk
     if ( ast_types::what_is(current->type) == "BEG_BLOCK" ) { level++; }
     if ( ast_types::what_is(current->type) == "END_BLOCK" ) { level--; }
@@ -615,18 +600,17 @@ void Interpreter::beginHelper(ast_node* &current){
         } 
         // NOT A TOKEN
         else { 
-            // If we are done
-            if ( ast_types::what_is(current->type) == "END_BLOCK" || ast_types::what_is(current->type) == "RETURN" && level == 0 && expression_stack.empty() ){
+            // PROGRAM EXECUTION FINISHED
+            if ( ast_types::what_is(current->type) == "END_BLOCK" || ast_types::what_is(current->type) == "RETURN" && level == 0 && expression_stack.empty() && ! in_function){
                 errors.STOP_SYNTAX_ERRORS();
-
+                // No errors
+                ExitQuiet();
             }
             // If we are still executing stack
-            //else if ( ! expression_stack.empty() ){
             std::cout << "Finished " << ast_types::what_is(pc->type) << " block" << std::endl;
+            std::cout << "NON-TOKEN: " << ast_types::what_is(current->type) << std::endl;
             // Next line so clear the stack
             if ( level == 1 ){ clearStack(); }
-            //}
-            std::cout << "NON-TOKEN: " << ast_types::what_is(current->type) << std::endl;
             // Moving pc
             pc = current; 
             // Setting type for next token block
@@ -635,7 +619,7 @@ void Interpreter::beginHelper(ast_node* &current){
     }
     // FUNCTION
     else if ( in_main && in_function ){
-        // TODO What function we be in. 
+        // I DONT THINK WE NEED THIS 
     } 
     // BEFORE MAIN
     else { 
@@ -669,7 +653,7 @@ void Interpreter::Begin(){
         // At end of abstract syntax tree FINAL NODE
         if (current->get_next() == nullptr && current->get_chld() == nullptr){
             beginHelper(current); // FINAL NODE
-            std::cout << "AST successfully traversed with final pc: " << &pc << std::endl;
+            std::cout << "AST successfully traversed before execution completed, with final pc: " << &pc << std::endl;
             is_running = false;
             break;
         }
@@ -691,11 +675,6 @@ void Interpreter::Begin(){
             beginHelper(current);
             // Moving right now depending if we are on last or not
             if ( current->get_next() == nullptr && current->get_chld() != nullptr ) { 
-                //Pushing expression stack onto the execution stack
-                if ( ! expression_stack.empty() ){
-                    execution_stack.push(expression_stack);
-                    //clearStack();
-                }
                 current = current->get_chld(); 
                 continue;
             } else {
@@ -711,7 +690,6 @@ void Interpreter::Begin(){
             break;
         }   
     }
-    // Error ast traversed before program finished
     // printEStack();
 }
 

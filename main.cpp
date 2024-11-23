@@ -133,7 +133,6 @@ int main(int argc, char* argv[]) {
     } else {
         r.Begin();
     }
-    exit_code = r.Exit();
-    std::cout << std::endl;
-    return exit_code;
+    // We should not get here if program executed fully
+    return 1;
 }
