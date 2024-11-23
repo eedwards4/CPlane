@@ -287,6 +287,10 @@ ast_node* Interpreter::eval_top_three(std::string one, std::string two, std::str
 }
 
 
+// Check if current node is a fucntion and executes said function returning the value that would be returned from said function
+
+
+
 // Called for each token, evaluates current stack if able
 // EX:
 // FULL EXPRESSION: counter counter 1 + =
@@ -402,76 +406,6 @@ void Interpreter::TopThree(int code){
             return;
         }
 
-        /*
-
-        // If both nodes are in the symbol table (HARD)
-        if ( s_table.find_symbol(two->value) && s_table.find_symbol(three->value) ){
-            // TODO Do whatever is necessary for two (retrive value/call function/etc)
-            // Update three
-            
-            // TODO update three in symbol table
-            //TEMPORARY
-            expression_stack.push(three);
-            expression_stack.push(two);
-            expression_stack.push(one);
-            return;
-        } 
-        // If one node is in the symbol table
-        else if ( s_table.find_symbol(two->value) || s_table.find_symbol(three->value) ){
-            // If three is a symbol 
-            if ( s_table.find_symbol(three->value) ){
-                // If two is a number
-                std::cout << "here" << std::endl;
-                if ( isNumber(two->value) ){
-                    std::cout << "here2" << std::endl;
-                    EvalOperatorUpdate(one, two, three);
-                }
-                // If two is not a number
-                else if ( ! isNumber(two->value) ){
-                    //TODO STRING?
-                } 
-                
-                // Push result back into expression stack
-                if ( ! expression_stack.empty() ){
-                    expression_stack.push(three);
-                }
-                // TODO update three in s_table
-                //s_table.update_symbol
-                //expression_stack.push(three);
-                //expression_stack.push(two);
-                return;
-            } 
-            // TODO If two is symbol and three isnt (need to find out and do (HARD))
-            else if ( s_table.find_symbol(two->value) ){
-                // If three is a number
-                if ( isNumber(three->value) ){
-                    EvalOperatorUpdate(one, two, three);
-                }
-                else if ( ! isNumber(three->value) ){
-                    //TODO STRING?
-                }
-                if ( ! expression_stack.empty() ){
-                    expression_stack.push(three);
-                }
-
-                //expression_stack.push(three);
-                //expression_stack.push(two);
-                return;
-            } else {
-                // ERROR I belive
-            }
-            
-        }
-        // Else neither are in symbol table and both are numbers
-        else if ( isNumber(three->value) && isNumber(two->value) ){
-            // Check operator to modify values
-            EvalOperatorUpdate(one, two, three);
-
-            if ( ! expression_stack.empty() ){
-                expression_stack.push(three);
-            } 
-        }
-        */
 
         std::cout << "ERROR in TopThree(): Assignment not handled\n";
 
@@ -529,6 +463,59 @@ void Interpreter::TopThree(int code){
             return;
         } 
     }
+    // DECLARATION
+    else if ( code == ast_types::DECLARATION ){
+        //not sure yet
+    }
+    // RETURN
+    else if ( code == ast_types::RETURN ){
+        if ( in_function ){
+            // TODO
+            // Check how deep we are in functions
+            // move pc to last location before this function was called
+            // update function scope stack
+            // If we are returning back to main set in_function to false
+            // Check if we are returning a value and make sure to retreive that
+            // Possibly make a function that will return the fucntions return value
+        } else {
+            // should have previously caught this in beginHelper
+            std::cout << "ERROR in Interpreter::TopThree: returning from main " << std::endl;
+        }
+    }
+    // CALL
+    else if ( code == ast_types::CALL ){
+        // not even sure brother
+        // Call function?
+    }
+    // OPERATOR
+    else if ( code == ast_types::OPERATOR ){
+        // Not even the slightest clue what this is for
+    }
+    // IF STATEMENT
+    else if ( code == ast_types::STATEMENT_IF ){
+        // Eval top three if true continue onto next boolean top three, if false move to next block
+        // if all true execute begin block to end block
+
+    }
+    // ELSE STATEMENT
+    else if ( code == ast_types::ELSE ){
+        // if past checks failed automatically exeucte this code block
+        // else move to next block
+    }
+    // FOR LOOP
+    else if ( code == ast_types::EXPRESSION_FOR ){
+        // Evaluate entire top of for loop
+        // If true execute block of code and once finished go back to top
+        // Inc variable and check again
+        // Repeat until boolean expression fails
+    }
+    // WHILE LOOP
+    else if ( code == ast_types::EXPRESSION_WHILE ){
+        // Evaluate entire top of while loop
+        // If true execute code block and once finished go back to top
+        // Re evaluate top expression
+        // Repeat until evaultating the top expression returns false
+    }
     else {
         std::cout << "ERROR in Interpreter::TopThree: code not found" << std::endl;
     }
@@ -541,17 +528,17 @@ void Interpreter::TopThree(int code){
 /* JUST HERE FOR ME ILL DELETE
     static constexpr int BEG_BLOCK = 9999; x
     static constexpr int END_BLOCK = 9998; x
-    static constexpr int RETURN = 9997;
-    static constexpr int DECLARATION = 9996;
+    static constexpr int RETURN = 9997; o
+    static constexpr int DECLARATION = 9996; o
     static constexpr int ASSIGNMENT = 9995; o
-    static constexpr int STATEMENT_IF = 9994;
-    static constexpr int EXPRESSION_FOR = 9993;
-    static constexpr int EXPRESSION_WHILE = 9992;
+    static constexpr int STATEMENT_IF = 9994; o
+    static constexpr int EXPRESSION_FOR = 9993; o
+    static constexpr int EXPRESSION_WHILE = 9992; o
     static constexpr int STATEMENT_PRINTF = 9991; o
     static constexpr int TOKEN = 9990; x
     static constexpr int OPERATOR = 9989;
-    static constexpr int ELSE = 9988;
-    static constexpr int CALL = 9987;
+    static constexpr int ELSE = 9988; o
+    static constexpr int CALL = 9987; o
     */
 // Evaluates one node of the ast 
 // Checks and adds function names, pushes tokens onto expression stack, moves pc to current line of execution, 
@@ -571,7 +558,10 @@ void Interpreter::beginHelper(ast_node* &current){
             // Check if token is function call
             for (auto f : functions) {
                 if (f->func_name == current->value) {
-                    std::cout << "I AM A FUNCTION CALL: " << current->value << " WITH PARAMETERS: ";
+                    int func_scope = s_table.get_function_scope(f->func_name);
+                    symbol_node *func_symbol = s_table.get_symbol(f->func_name, func_scope);
+                    
+                    std::cout << "I AM A FUNCTION CALL: " << current->value << ", returns: " << symbols::data_types::get_type(func_symbol->DATATYPE) << ", WITH PARAMETERS: ";
                     current = current->get_next()->get_next(); // skip open parenthesis
 
                     // Get parameters and prints them
@@ -602,6 +592,7 @@ void Interpreter::beginHelper(ast_node* &current){
         else { 
             // PROGRAM EXECUTION FINISHED
             if ( ast_types::what_is(current->type) == "END_BLOCK" || ast_types::what_is(current->type) == "RETURN" && level == 0 && expression_stack.empty() && ! in_function){
+                // Checking for errors reported
                 errors.STOP_SYNTAX_ERRORS();
                 // No errors
                 ExitQuiet();
