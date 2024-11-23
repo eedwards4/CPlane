@@ -66,7 +66,6 @@ private:
     void EvalOperatorUpdate(ast_node* one, ast_node* two, ast_node*& three);
     bool isNumber(std::string str);
     bool isOperator(std::string str);
-    bool isBooleanOperator(std::string str);
 
     ast_node* eval_top_three(std::string one, std::string two, std::string three);
 

@@ -46,6 +46,7 @@ bool Interpreter::isNumber(std::string str){
     return is;
 } 
 bool Interpreter::isOperator(std::string str){
+    // Numerical operators
     if ( str == "+" ){
         return true;
     }
@@ -67,14 +68,9 @@ bool Interpreter::isOperator(std::string str){
     else if ( str == "="){
         return true;
     }
-    //..
-    else {
-        return false;
-    }
-}
 
-bool Interpreter::isBooleanOperator(std::string str) {
-    if ( str == ">" ){
+    // Relational operators
+    else if ( str == ">" ){
         return true;
     }
     else if ( str == ">=" ){
@@ -92,6 +88,15 @@ bool Interpreter::isBooleanOperator(std::string str) {
     else if ( str == "!=" ){
         return true;
     }
+
+    // Boolean operators
+    else if ( str == "&&" ) {
+        return true;
+    }
+    else if ( str == "||" ) {
+        return true;
+    }
+
     else {
         return false;
     }
@@ -231,25 +236,65 @@ ast_node* Interpreter::eval_top_three(std::string one, std::string two, std::str
         sol->value = std::to_string(std::pow(std::stoi(three), std::stoi(two)));
     }
 
+    // Relational
+    else if (one == ">") {
+        if (std::stoi(three) > std::stoi(two)) {
+            sol->value = "TRUE";
+        } else {
+            sol->value = "FALSE";
+        }
+    }
+    else if (one == ">=") {
+        if (std::stoi(three) >= std::stoi(two)) {
+            sol->value = "TRUE";
+        } else {
+            sol->value = "FALSE";
+        }
+    }
+    else if (one == "<") {
+        if (std::stoi(three) < std::stoi(two)) {
+            sol->value = "TRUE";
+        } else {
+            sol->value = "FALSE";
+        }
+    }
+    else if (one == "<=") {
+        if (std::stoi(three) <= std::stoi(two)) {
+            sol->value = "TRUE";
+        } else {
+            sol->value = "FALSE";
+        }
+    }
+    else if (one == "==") {
+        if (std::stoi(three) == std::stoi(two)) {
+            sol->value = "TRUE";
+        } else {
+            sol->value = "FALSE";
+        }
+    }
+    else if (one == "!=") {
+        if (std::stoi(three) != std::stoi(two)) {
+            sol->value = "TRUE";
+        } else {
+            sol->value = "FALSE";
+        }
+    }
+
     // Boolean
-    // else if (one->value == ">") {
-    //     sol->value = std::to_string(std::stoi(three->value) > std::stoi(two->value));
-    // }
-    // else if (one->value == ">=") {
-    //     sol->value = std::to_string(std::stoi(three->value) >= std::stoi(two->value));
-    // }
-    // else if (one->value == "<") {
-    //     sol->value = std::to_string(std::stoi(three->value) < std::stoi(two->value));
-    // }
-    // else if (one->value == "<=") {
-    //     sol->value = std::to_string(std::stoi(three->value) <= std::stoi(two->value));
-    // }
-    // else if (one->value == "==") {
-    //     sol->value = std::to_string(std::stoi(three->value) == std::stoi(two->value));
-    // }
-    // else if (one->value == "!=") {
-    //     sol->value = std::to_string(std::stoi(three->value) != std::stoi(two->value));
-    // }
+    else if (one == "&&") {
+        if (two == "TRUE" && three == "TRUE") {
+            sol->value = "TRUE";
+        } else {
+            sol->value = "FALSE";
+        }
+    }
+    else if (one == "||") {
+        if (two == "TRUE" || three == "TRUE") {
+            sol->value = "TRUE";
+        } else {
+            sol->value = "FALSE";
+        }
+    }
 
     return sol;
 }
@@ -288,14 +333,18 @@ void Interpreter::TopThree(int code){
        
     // ASSIGNMENT
     if ( code == ast_types::ASSIGNMENT ){
+        // Ensure there are enough tokens on the stack
         if ( expression_stack.size() < 2 ){
             expression_stack.push(one);
             return;
         }
+
+        // Get tokens from stack
         ast_node* two = expression_stack.top();
         expression_stack.pop();
         ast_node* three = expression_stack.top();
         expression_stack.pop();
+
         std::cout << "Evaluating " << three->value << " " << two->value << " " << one->value << std::endl;
 
         // Invalid order, must be operator operand operand
@@ -310,31 +359,55 @@ void Interpreter::TopThree(int code){
         // Handles assignment
         if (one->value == "=") {
             std::cout << "top three (123) assign: " << one->value << " " << two->value << " " << three->value << std::endl;
+
+            symbol_node* s_two = s_table.get_symbol(two->value, scope_stack.top());
+            symbol_node* s_three = s_table.get_symbol(three->value, scope_stack.top());
+
             if (isNumber(two->value)) {
-                std::cout << "setting three to two\n";
-                s_table.get_symbol(three->value, scope_stack.top())->set_val_int(std::stoi(two->value));
+                std::cout << "setting three to two (numerical)\n";
+                s_three->set_val_int(std::stoi(two->value));
             }
-            else if (s_table.get_symbol(two->value, scope_stack.top()) != nullptr) {
+            else if (two->value == "TRUE" || two->value == "FALSE") {
+                std::cout << "setting three to two (boolean)\n";
+                s_three->set_val_bool(two->value == "TRUE");
+            }
+            else if (s_two != nullptr) {
                 std::cout << "setting three to two from symbol table\n";
-                s_table.get_symbol(three->value, scope_stack.top())->set_val_int(s_table.get_symbol(two->value, scope_stack.top())->get_val_int());
+                switch (s_two->DATATYPE) {
+                    case symbols::data_types::INT: s_three->set_val_int(s_two->get_val_int());
+                    case symbols::data_types::BOOL: s_three->set_val_bool(s_two->get_val_bool());
+                    case symbols::data_types::CHAR: s_three->set_val_char(s_two->get_val_char());
+                }
             } else {
                 std::cout << "did nothing\n";
             }
             return;
         }
-        // Handles numeric operations
+
+        // Handles operations
         else if (isOperator(one->value)) {
             std::string two_val = two->value;
             std::string three_val = three->value;
 
-            // get two value from symbol table
-            if (s_table.get_symbol(two->value, scope_stack.top()) != nullptr) {
-                two_val = std::to_string(s_table.get_symbol(two->value, scope_stack.top())->get_val_int());
+            symbol_node* s_two = s_table.get_symbol(two->value, scope_stack.top());
+            symbol_node* s_three = s_table.get_symbol(three->value, scope_stack.top());
+
+            // get value of two from symbol table
+            if (s_two != nullptr) {
+                switch (s_two->DATATYPE) {
+                    case symbols::data_types::INT: two_val = std::to_string(s_two->get_val_int()); break;
+                    case symbols::data_types::BOOL: two_val = std::to_string(s_two->get_val_bool()); break;
+                    case symbols::data_types::CHAR: two_val = std::to_string(s_two->get_val_char()); break;
+                }
             }
 
-            // get three value from symbol table
-            if (s_table.get_symbol(three->value, scope_stack.top()) != nullptr) {
-                three_val = std::to_string(s_table.get_symbol(three->value, scope_stack.top())->get_val_int());
+            // get value of three from symbol table
+            if (s_three != nullptr) {
+                switch (s_three->DATATYPE) {
+                    case symbols::data_types::INT: three_val = std::to_string(s_three->get_val_int()); break;
+                    case symbols::data_types::BOOL: three_val = std::to_string(s_three->get_val_bool()); break;
+                    case symbols::data_types::CHAR: three_val = std::to_string(s_three->get_val_char()); break;
+                }
             }
 
             std::cout << "top three (123) eval: " << one->value << " " << two_val << " " << three_val << std::endl;
@@ -342,6 +415,7 @@ void Interpreter::TopThree(int code){
             return;
         }
 
+        /*
 
         // If both nodes are in the symbol table (HARD)
         if ( s_table.find_symbol(two->value) && s_table.find_symbol(three->value) ){
@@ -410,6 +484,11 @@ void Interpreter::TopThree(int code){
                 expression_stack.push(three);
             } 
         }
+        */
+
+        std::cout << "nothing happened in assingment\n";
+
+        expression_stack.push(three);
         expression_stack.push(two);
         expression_stack.push(one);
         return;
@@ -501,9 +580,37 @@ void Interpreter::beginHelper(ast_node* &current){
     // MAIN 
     if ( in_main && ! in_function ){
         // TOKEN
-        if ( ast_types::what_is(current->type) == "TOKEN" ){  
-            expression_stack.push(current);
-            std::cout << "TOKEN: " << current->value << std::endl;
+        if ( ast_types::what_is(current->type) == "TOKEN" ){
+            ast_node* to_be_pushed = current;
+
+            // Check if token is function call
+            for (auto f : functions) {
+                if (f->func_name == current->value) {
+                    std::cout << "I AM A FUNCTION CALL: " << current->value << " WITH PARAMETERS: ";
+                    current = current->get_next()->get_next(); // skip open parenthesis
+
+                    // Get parameters and prints them
+                    while (current != nullptr && current->value != ")") {
+                        std::cout << current->value << " ";
+                        current = current->get_next();
+                    }
+                    std::cout << std::endl;
+
+                    // Todo:
+                    //  set value for parameters for function in symbol table
+                    //  run function
+                    //  set to_be_pushed to returned value (if any)
+
+                    // temporary (skip closed parenthesis)
+                    current = current->get_next();
+                    to_be_pushed = current;
+
+                    break;
+                }
+            }
+
+            expression_stack.push(to_be_pushed);
+            std::cout << "TOKEN: " << to_be_pushed->value << std::endl;
             TopThree(type);
         } 
         // NOT A TOKEN
@@ -603,7 +710,7 @@ void Interpreter::Begin(){
             is_running = false;
             break;
         }   
-    } 
+    }
     // Error ast traversed before program finished
     // printEStack();
 }
