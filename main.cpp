@@ -128,11 +128,11 @@ int main(int argc, char* argv[]) {
     //Interpreter r;
     Interpreter r(as_tree, sym_table, errors);
 
-    if ( debug_mode ){
-        r.BeginDebug();
-    } else {
-        r.Begin();
-    }
+    // if ( debug_mode ){
+        // r.BeginDebug();
+    // } else {
+        r.begin();
+    // }
     // We should not get here if program executed fully
     return 1;
 }
