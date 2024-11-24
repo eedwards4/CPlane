@@ -144,7 +144,7 @@ void Interpreter::CheckAddFunction(ast_node *current){
                 pc = current;
                 // Putting main into functions
                 std::cout << "adding main" << std::endl;
-                functions.push_back(current);
+                //functions_pc.push_back(current);
                 // Pushing main's scope onto scope stack
                 scope_stack.push(s_table.get_function_scope(current->func_name));
             } 
@@ -152,10 +152,10 @@ void Interpreter::CheckAddFunction(ast_node *current){
             else if ( s_table.find_symbol(current->func_name) && ! in_main ){
                 // add function to function vector.
                 std::cout << "adding function " << current->func_name << std::endl;
-                functions.push_back(current);
+                functions_pc.push_back(current);
             } else {
                 //ERROR prior decleration of function
-                //errors.ENC_ERROR()
+                std::cout << "ERROR in CheckAddFunction: unknown function" << std::endl;
             } 
         }
     }
@@ -285,10 +285,72 @@ ast_node* Interpreter::eval_top_three(std::string one, std::string two, std::str
 
     return sol;
 }
-
-
+/*
+static constexpr int NA = 9999;
+        static constexpr int INT = 9998;
+        static constexpr int FLOAT = 9997;
+        static constexpr int CHAR = 9996;
+        static constexpr int BOOL = 9995;
+        static constexpr int VOID = 9994;
+        */
 // Check if current node is a fucntion and executes said function returning the value that would be returned from said function
+void Interpreter::CheckCallFunction(ast_node* &current){
+    ast_node *to_be_pushed = current;
+    
 
+    // Check if token is function call
+    for (auto f : functions_pc)
+    {
+        // If this node is calling a function
+        if (f->func_name == current->value)
+        {
+            
+            //function_type = current->type;
+            in_function = true;
+            int func_scope = s_table.get_function_scope(f->func_name);
+            symbol_node *func_symbol = s_table.get_symbol(f->func_name, func_scope);
+            ast_node *fcurrent = current;
+
+            std::cout << "I AM A FUNCTION CALL: " << current->value << ", returns: " << symbols::data_types::get_type(func_symbol->DATATYPE) << ", WITH PARAMETERS: ";
+            fcurrent = fcurrent->get_next()->get_next(); // skip open parenthesis
+
+            // Get parameters and prints them
+            while (fcurrent != nullptr && fcurrent->value != ")")
+            {
+                std::cout << fcurrent->value << " ";
+                fcurrent = fcurrent->get_next();
+            }
+            std::cout << std::endl;
+
+            //std::cout << fcurrent->value << std::endl;
+            fcurrent = fcurrent->get_next(); // Moving past the final )
+            //std::cout << fcurrent->value << std::endl;
+            
+
+            // Todo:
+            //  set value for parameters for function in symbol table
+            //  run function(wip)
+            //  set to_be_pushed to returned value (if any)(wip)
+
+            // Moving current to function here
+            //TEMP JUST GRABBING LAST PUSHED FUNCTION HEAD NODE
+            current = functions_pc[functions_pc.size()-1];
+            //std::cout << "current set to " << current->value << std::endl;
+            // This is the setting main pc back to end of parenthesis
+            pc = fcurrent;
+            //std::cout << "pc set to " << pc->value << std::endl;
+            // Adding the function into the scope stack
+
+            // TODO FIX WHY THIS IS SEGFAULTING WHEN TRYING TO GET TOKENS WHEN IN FUCNTION
+            //scope_stack.push(func_scope);
+
+            break;
+        }
+    }
+
+    expression_stack.push(to_be_pushed);
+
+}
 
 
 // Called for each token, evaluates current stack if able
@@ -322,6 +384,11 @@ void Interpreter::TopThree(int code){
     ast_node* one = expression_stack.top();
     expression_stack.pop();
        
+
+    // Depending on the type of block we are in, we need to treat the stack accordingly.
+    // This giant dfa asseses how the stack will be evaluated.
+    // It might only use one node from the stack or it might need the entire stack
+
     // ASSIGNMENT
     if ( code == ast_types::ASSIGNMENT ){
         // Ensure there are enough tokens on the stack
@@ -380,6 +447,7 @@ void Interpreter::TopThree(int code){
             std::string two_val = two->value;
             std::string three_val = three->value;
 
+            
             symbol_node* s_two = s_table.get_symbol(two->value, scope_stack.top());
             symbol_node* s_three = s_table.get_symbol(three->value, scope_stack.top());
 
@@ -402,13 +470,13 @@ void Interpreter::TopThree(int code){
             }
 
             std::cout << "TopThree() 123 Evaluate: " << one->value << " " << two_val << " " << three_val << std::endl;
+            // TODO segfaulting when in function 
             expression_stack.push(eval_top_three(one->value, two_val, three_val));
+            
             return;
         }
 
-
         std::cout << "ERROR in TopThree(): Assignment not handled\n";
-
         expression_stack.push(three);
         expression_stack.push(two);
         expression_stack.push(one);
@@ -484,33 +552,41 @@ void Interpreter::TopThree(int code){
     }
     // CALL
     else if ( code == ast_types::CALL ){
+        //TODO
         // not even sure brother
         // Call function?
     }
     // OPERATOR
     else if ( code == ast_types::OPERATOR ){
+        //TODO
         // Not even the slightest clue what this is for
     }
     // IF STATEMENT
     else if ( code == ast_types::STATEMENT_IF ){
+        //TODO
         // Eval top three if true continue onto next boolean top three, if false move to next block
         // if all true execute begin block to end block
 
     }
     // ELSE STATEMENT
     else if ( code == ast_types::ELSE ){
-        // if past checks failed automatically exeucte this code block
+        //TODO
+        // if past if or else if statement failed exeucte this code block
         // else move to next block
+        // (might need to look for next STATEMENT_IF depending how the internal system is)
     }
     // FOR LOOP
     else if ( code == ast_types::EXPRESSION_FOR ){
+        //TODO
         // Evaluate entire top of for loop
         // If true execute block of code and once finished go back to top
+        // not sure why begin block isnt printing after the expression_for there is something weird with the order in which the tokens are being output
         // Inc variable and check again
         // Repeat until boolean expression fails
     }
     // WHILE LOOP
     else if ( code == ast_types::EXPRESSION_WHILE ){
+        //TODO
         // Evaluate entire top of while loop
         // If true execute code block and once finished go back to top
         // Re evaluate top expression
@@ -525,21 +601,6 @@ void Interpreter::TopThree(int code){
 }
 
 
-/* JUST HERE FOR ME ILL DELETE
-    static constexpr int BEG_BLOCK = 9999; x
-    static constexpr int END_BLOCK = 9998; x
-    static constexpr int RETURN = 9997; o
-    static constexpr int DECLARATION = 9996; o
-    static constexpr int ASSIGNMENT = 9995; o
-    static constexpr int STATEMENT_IF = 9994; o
-    static constexpr int EXPRESSION_FOR = 9993; o
-    static constexpr int EXPRESSION_WHILE = 9992; o
-    static constexpr int STATEMENT_PRINTF = 9991; o
-    static constexpr int TOKEN = 9990; x
-    static constexpr int OPERATOR = 9989;
-    static constexpr int ELSE = 9988; o
-    static constexpr int CALL = 9987; o
-    */
 // Evaluates one node of the ast 
 // Checks and adds function names, pushes tokens onto expression stack, moves pc to current line of execution, 
 // calls TopThree on expression stack and keeps track where we are in program.
@@ -552,40 +613,17 @@ void Interpreter::beginHelper(ast_node* &current){
     // MAIN 
     if ( in_main && ! in_function ){
         // TOKEN
+        //std::cout << "here" << std::endl;
+        
         if ( ast_types::what_is(current->type) == "TOKEN" ){
-            ast_node* to_be_pushed = current;
+            std::cout << "TOKEN: " << current->value << std::endl;
+            //ast_node* to_be_pushed = current;
 
             // Check if token is function call
-            for (auto f : functions) {
-                if (f->func_name == current->value) {
-                    int func_scope = s_table.get_function_scope(f->func_name);
-                    symbol_node *func_symbol = s_table.get_symbol(f->func_name, func_scope);
-                    
-                    std::cout << "I AM A FUNCTION CALL: " << current->value << ", returns: " << symbols::data_types::get_type(func_symbol->DATATYPE) << ", WITH PARAMETERS: ";
-                    current = current->get_next()->get_next(); // skip open parenthesis
+            CheckCallFunction(current);
 
-                    // Get parameters and prints them
-                    while (current != nullptr && current->value != ")") {
-                        std::cout << current->value << " ";
-                        current = current->get_next();
-                    }
-                    std::cout << std::endl;
-
-                    // Todo:
-                    //  set value for parameters for function in symbol table
-                    //  run function
-                    //  set to_be_pushed to returned value (if any)
-
-                    // temporary (skip closed parenthesis)
-                    current = current->get_next();
-                    to_be_pushed = current;
-
-                    break;
-                }
-            }
-
-            expression_stack.push(to_be_pushed);
-            std::cout << "TOKEN: " << to_be_pushed->value << std::endl;
+            //expression_stack.push(to_be_pushed);
+            
             TopThree(type);
         } 
         // NOT A TOKEN
@@ -597,6 +635,12 @@ void Interpreter::beginHelper(ast_node* &current){
                 // No errors
                 ExitQuiet();
             }
+            // If function returned
+            if ( ast_types::what_is(pc->type) == "TOKEN" ){
+                std::cout << "here" << std::endl;
+                TopThree(function_type);
+            }
+            
             // If we are still executing stack
             std::cout << "Finished " << ast_types::what_is(pc->type) << " block" << std::endl;
             std::cout << "NON-TOKEN: " << ast_types::what_is(current->type) << std::endl;
@@ -608,9 +652,61 @@ void Interpreter::beginHelper(ast_node* &current){
             type = current->type;
         }
     }
-    // FUNCTION
+    // FUNCTION (WIP)
     else if ( in_main && in_function ){
-        // I DONT THINK WE NEED THIS 
+        // TOKEN
+        if ( ast_types::what_is(current->type) == "TOKEN" ){
+            std::cout << "FUNCTION TOKEN: " << current->value << std::endl;
+
+            // Check if token is function call
+            CheckCallFunction(current);
+            
+            TopThree(function_type);
+        } 
+        // NOT A TOKEN
+        else { 
+            // Moving the function head along with the program.
+            functions_pc[functions_pc.size()-1] = current; 
+            // FUNCTION EXECUTION FINISHED
+            if ( ast_types::what_is(current->type) == "END_BLOCK" || ast_types::what_is(current->type) == "RETURN" && function_expression_stack.empty() && in_function){
+                // check function scope
+                // RETURN BACK TO THE specific PCma
+                //std::cout << scope_stack.size() << std::endl;
+                //std::cout << functions_pc.size() << std::endl;
+                //std::cout << function_expression_stack.size() << std::endl;
+                //std::cout << ast_types::what_is(functions_pc[functions_pc.size()-1]->type) << std::endl;
+                // TEMPORARY ONE FUNCTION ONLY
+                // 2 becuase not pushing fuctions on the scope stack
+                if ( scope_stack.size() == 2 ){
+                    TopThree(function_type);
+                    in_function = false;
+                    // pushing the final value from function into the expression stack
+                    //expression_stack.push(functions_pc[functions_pc.size()-1]); // needs to figure out what function first
+                    expression_stack.push(pc);//temp
+                    //Popping current exiting function from scope stack?
+                    scope_stack.pop();
+                    // moving back into where we were before.
+                    current = pc;
+                    std::cout << "about to return to " << current->value << " : " << ast_types::what_is(current->type) << std::endl;
+                    return;
+                } else {
+                    std::cout << "NOT HANDLED exit in function in function " << std::endl;
+                }
+                
+                
+            }
+            // If we are still executing stack
+            std::cout << "Finished " << ast_types::what_is(current->type) << " block in function" << std::endl;
+            std::cout << "FUNCTION NON-TOKEN: " << ast_types::what_is(current->type) << std::endl;
+
+            function_type = current->type;
+            // Next line so clear the stack
+            //if ( level == 1 ){ clearStack(); }
+            // Moving pc
+            //functions_pc[functions_pc.size()-1] = current; 
+            // Setting type for next token block
+            //
+        }
     } 
     // BEFORE MAIN
     else { 
@@ -634,8 +730,6 @@ void Interpreter::Begin(){
     // Example: in main, goHere(); then goHere() calls goThere() the pc must be copied for each function entered in case 
     // function calls another function that will need the original pc to return to. then the first function called can complete and
     // the copied original pc is called bringing the machine back into main right after the function call. when you return, inc pc
-    // good(find all function heads) -> good(find main) -> good(go through main) -> not even close(execute statements)->
-    // --> todo(finishes when mains final end block is called. (level = 0 && current = end_block))
     // otherwise finishes when the ast is fully traversed.
     // calls beginHelper in the areas it will be needed.
     while ( is_running ) {
