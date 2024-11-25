@@ -12,6 +12,7 @@ Interpreter::Interpreter(ast tree, symbol_table& table, ERRORS& in_errors) {
     scope_stack.push(0); // push global scope (should never be popped)
 }
 
+// Puts functions in array, then starts processing main
 void Interpreter::begin() {
     ast_node* current = as_tree.get_head();
     while (current != nullptr) {
@@ -32,6 +33,8 @@ void Interpreter::begin() {
             current = current->get_chld();
         }
     }
+
+    std::cout << "Program End\n";
 }
 
 // This function simply returns if the givin string is a number.
@@ -106,6 +109,7 @@ bool Interpreter::isOperator(std::string str){
     }
 }
 
+// Retuns the ast_node for a function with name. Returned ast_node is either 'process' or 'function'
 ast_node* Interpreter::getFunction(std::string str) {
     for (auto f : functions) {
         if (f->func_name == str) {
@@ -202,15 +206,16 @@ ast_node* Interpreter::eval_top_three(std::string one, std::string two, std::str
     return sol;
 }
 
+// Processes a function
+// Returns an ast node with the value returned by the function (nullptr for no value returned)
 ast_node* Interpreter::process_function(ast_node* function) {
-    std::cout << function->value << " " << ast_types::what_is(function->type) << std::endl;
     ast_node* current = function->get_chld();
     if (current == nullptr || ast_types::what_is(current->type) != "BEG_BLOCK") {
         if (current != nullptr)
             std::cerr << "Expected BEG_BLOCK, but got '"<< ast_types::what_is(current->type) <<"' instead.\n";
         return nullptr;
     }
-    std::cout << "CURRENT: " << current->value << " " << ast_types::what_is(current->type) << std::endl;
+
     // process inside of function
     if (process_block(current)) {
         // process return statement
@@ -230,6 +235,7 @@ ast_node* Interpreter::process_function(ast_node* function) {
     }
 }
 
+// Processes a 'block' which is a pair of open and closed curly braces -> {}
 // Returnes true if it reached a return statement, false otherwise
 bool Interpreter::process_block(ast_node*& current) {
     std::cout << "ENTERING BLOCK\n";
@@ -244,11 +250,33 @@ bool Interpreter::process_block(ast_node*& current) {
         }
 
         else if (ast_types::what_is(current->type) == "ASSIGNMENT") {
+            current = current->get_next(); // Skip 'ASSIGNMENT' node
             process_assignment(current);
         }
 
         else if (ast_types::what_is(current->type) == "STATEMENT_PRINTF") {
+            current = current->get_next(); // Skip 'STATEMENT_PRINTF' node
             process_printf(current);
+        }
+
+        else if (ast_types::what_is(current->type) == "STATEMENT_IF") {
+            current = current->get_next(); // Skip 'STATEMENT_IF' node
+            process_if(current);
+        }
+
+        else if (ast_types::what_is(current->type) == "EXPRESSION_WHILE") {
+            current = current->get_next(); // Skip 'EXPRESSION_WHILE' node
+            process_while(current);
+        }
+
+        else if (ast_types::what_is(current->type) == "EXPRESSION_FOR") {
+            current = current->get_next(); // Skip 'EXPRESSION_FOR' node
+            process_for(current);
+        }
+
+        else if (ast_types::what_is(current->type) == "CALL") {
+            current = current->get_next(); // Skip 'CALL' node
+            process_call(current);
         }
 
         else if (ast_types::what_is(current->type) == "RETURN") {
@@ -267,41 +295,49 @@ bool Interpreter::process_block(ast_node*& current) {
     return false;
 }
 
+// Processes a function call (to then call process_function)
+// Returns an ast node with the value returned by the function (nullptr for no value returned)
+ast_node* Interpreter::process_call(ast_node*& current) {
+    std::string func_name = current->value; // get function name
+    int func_scope = s_table.get_function_scope(current->value); // get function scope
+    symbol_node* func_symbol = s_table.get_symbol(func_name, func_scope);
+
+    symbol_node* cur_param = func_symbol->get_params();
+
+    std::cout << "FUNCTION CALL FOR " << func_name << " AT SCOPE " << func_scope << " WITH PARAMETERS ";
+    
+    current = current->get_next()->get_next(); // skip function name and '('
+
+    while (current->value != ")") {
+        if (current->value != ",") {
+            std::cout << current->value << " ";
+            symbol_node *temp_symbol = s_table.get_symbol(current->value, scope_stack.top());
+            cur_param->set_val_int(temp_symbol->get_val_int());
+        }
+        current = current->get_next();
+        cur_param = cur_param->get_next();
+    }
+    std::cout << std::endl;
+
+    std::cout << "ENTERING FUNCTION\n";
+    scope_stack.push(func_scope);
+    ast_node* ret_value = process_function(getFunction(func_name));
+    scope_stack.pop();
+    std::cout << "EXITING FUNCTION\n";
+
+    return ret_value;
+}
+
+// Processes assignment expression
 void Interpreter::process_assignment(ast_node*& current) {
     std::cout << "ASSIGNMENT BEGIN\n";
     std::stack<ast_node*> expression_stack;
-    current = current->get_next();
+    // current = current->get_next();
 
     while (current != nullptr) {
+        // Handle function call in expression
         if (getFunction(current->value) != nullptr) {
-            std::string func_name = current->value; // get function name
-            int func_scope = s_table.get_function_scope(current->value); // get function scope
-            symbol_node* func_symbol = s_table.get_symbol(func_name, func_scope);
-
-            symbol_node* cur_param = func_symbol->get_params();
-
-            std::cout << "FUNCTION CALL FOR " << func_name << " AT SCOPE " << func_scope << " WITH PARAMETERS ";
-            
-            current = current->get_next()->get_next(); // skip function name and '('
-
-            while (current->value != ")") {
-                if (current->value != ",") {
-                    std::cout << current->value << " ";
-                    symbol_node *temp_symbol = s_table.get_symbol(current->value, scope_stack.top());
-                    cur_param->set_val_int(temp_symbol->get_val_int());
-                }
-                current = current->get_next();
-                cur_param = cur_param->get_next();
-            }
-            std::cout << std::endl;
-
-            std::cout << "ENTERING FUNCTION\n";
-            scope_stack.push(func_scope);
-            ast_node* ret_value = process_function(getFunction(func_name));
-            scope_stack.pop();
-            std::cout << "EXITING FUNCTION\n";
-
-            expression_stack.push(ret_value);
+            expression_stack.push(process_call(current));
         }
         else {
             expression_stack.push(current);
@@ -328,7 +364,7 @@ void Interpreter::process_assignment(ast_node*& current) {
 
             // Handles assignment
             else if (one->value == "=") {
-                std::cout << "TopThree() Assign: " << one->value << " " << two->value << " " << three->value << std::endl;
+                std::cout << "process_assignment() Assign: " << one->value << " " << two->value << " " << three->value << std::endl;
 
                 symbol_node* s_two = s_table.get_symbol(two->value, scope_stack.top());
                 symbol_node* s_three = s_table.get_symbol(three->value, scope_stack.top());
@@ -350,7 +386,7 @@ void Interpreter::process_assignment(ast_node*& current) {
                     }
                 }
                 else {
-                    std::cout << "ERROR in TopThree(): Assingnment values could not be assessed\n";
+                    std::cout << "ERROR in process_assignment(): Assingnment values could not be assessed\n";
                     exit(1);
                 }
             }
@@ -392,13 +428,56 @@ void Interpreter::process_assignment(ast_node*& current) {
     std::cout << "ASSIGNMENT END\n";
 }
 
+// Processes if statement
+void Interpreter::process_if(ast_node*& current) {
+    std::cout << "IF STATEMENT\n";
+    // Evaluate boolean expression
+    // If true:
+    //     call process_block on first block
+    //     if there's an 'else' then skip the else block
+    // If false:
+    //     skip first block
+    //     if there's an 'else' call process_block on the else block
+    //
+    // current should end on an end_block ast_node
+}
+
+// Processes while loop
+void Interpreter::process_while(ast_node*& current) {
+    std::cout << "WHILE STATEMENT\n";
+    // Evaluate boolean expression               <---
+    // If true:                                     |
+    //     call process_block on following block    |
+    //     go to beginning of function (eval bool) --
+    // If false:
+    //     skip following block
+    //
+    // current should end on an end_block ast_node
+}
+
+// Processes for loop
+void Interpreter::process_for(ast_node*& current) {
+    std::cout << "FOR STATEMENT\n";
+    // For Expression 1:
+    //     process assignment
+    // For Expression 2:                         <---
+    //     evaluate boolean expression               |
+    //     if true, run block                       |
+    //     else skip block                          |
+    // For Expression 3:                            |
+    //     if block was run, process assignment     |
+    //     start again from For Expression 2 --------
+    //
+    // current should end on an end_block ast_node
+}
+
+// processes printf statement
 void Interpreter::process_printf(ast_node*& current) {
     std::cout << "printf: ";
-    current = current->get_next();
     std::string to_print = current->value;
-    current = current->get_next();
 
-    while (current != nullptr) {
+    while (current->get_next() != nullptr) {
+        current = current->get_next();
         int var_pos = to_print.find_first_of('%');
 
         symbol_node *temp_symbol = s_table.get_symbol(current->value, scope_stack.top());
@@ -411,9 +490,6 @@ void Interpreter::process_printf(ast_node*& current) {
                 to_print.replace(var_pos, 2, current->value); // temporary
             }
         }
-
-        if (current->get_next() == nullptr) { break; }
-        current = current->get_next();
     }
 
     // replace \n with newline
@@ -424,4 +500,11 @@ void Interpreter::process_printf(ast_node*& current) {
     }
 
     std::cout << to_print;
+}
+
+// Skips 'block' which is a pair of open and closed curly braces -> {}
+void Interpreter::skip_block(ast_node*& current) {
+    // current should be open block (open curly brace '{')
+    // moves current to corresponding end block (closed curly brace '}')
+    // current should end on an end_block ast_node
 }

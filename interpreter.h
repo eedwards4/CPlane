@@ -28,13 +28,21 @@ class Interpreter {
         ast_node* process_function(ast_node* function);
         bool process_block(ast_node*& current);
 
+        ast_node* process_call(ast_node*& current);
+
         void process_assignment(ast_node*& current);
+        void process_if(ast_node*& current);
+        void process_while(ast_node*& current);
+        void process_for(ast_node*& current);
         void process_printf(ast_node*& current);
+
+        void skip_block(ast_node*& current);
 
         ast_node* eval_top_three(std::string one, std::string two, std::string three);
         bool isOperator(std::string str);
         bool isNumber(std::string str);
         ast_node* getFunction(std::string str);
+
 };  
 
 
