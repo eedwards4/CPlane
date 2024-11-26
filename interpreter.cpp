@@ -507,4 +507,24 @@ void Interpreter::skip_block(ast_node*& current) {
     // current should be open block (open curly brace '{')
     // moves current to corresponding end block (closed curly brace '}')
     // current should end on an end_block ast_node
+    int counter = 0;
+    while (current != nullptr) {
+        if (ast_types::what_is(current->type) == "BEG_BLOCK") {
+            counter++;
+        }
+        if (ast_types::what_is(current->type) == "END_BLOCK") {
+            counter--;
+
+        }
+        if (counter == 0){
+            return;
+        }
+
+        if (current->get_next() != nullptr) {
+            current = current->get_next();
+        } else {
+            current = current->get_chld();
+        }
+
+    }
 }
