@@ -97,6 +97,11 @@ void ast::build_tree(exec_node *cst_head, symbol_table& table) {
                     cst_head = shunting_yard_wrapper(cst_head, new_node, table);
                     for_tracker++;
                 }
+                // Adds node for open brace / begin block. This mode is not present for the test files, but is needed for processing
+                auto new_node = new ast_node;
+                new_node->type = ast_types::BEG_BLOCK;
+                new_node->set_err(cst_head->get_line(), cst_head->get_column());
+                add_node(new_node);
             }
             else if (cst_head->get_value() == "while"){
                 new_node->type = ast_types::EXPRESSION_WHILE;
