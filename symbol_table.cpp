@@ -422,6 +422,15 @@ symbol_node* symbol_table::get_symbol(const std::string name, const int scope) {
         if (cur->IDENT_NAME == name) {
             return cur;
         }
+        if (cur->get_params() != nullptr) {
+            auto cur_param = cur->get_params();
+            while (cur_param != nullptr) {
+                if (cur_param->IDENT_NAME == name) {
+                    return cur_param;
+                }
+                cur_param = cur_param->get_next();
+            }
+        }
         cur = cur->get_next();
     }
 

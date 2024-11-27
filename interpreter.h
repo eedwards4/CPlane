@@ -1,12 +1,3 @@
-//
-// Created by Logan Puntous on 11/8/2024.
-//
-
-// USAGE
-// in main
-// Interpreter p(ast, table, errors);
-// p.Start();
-
 #ifndef CPLANE_INTERPRETER_H
 #define CPLANE_INTERPRETER_H
 
@@ -18,56 +9,40 @@
 #include <type_traits>
 #include <cctype>
 #include <cmath>
-#include <variant>
 
 class Interpreter {
     public:
-    Interpreter();
-    Interpreter(ast tree, symbol_table& table, ERRORS& errors);
+        Interpreter();
+        Interpreter(ast tree, symbol_table& table, ERRORS& errors);
 
-    // Runs the program internally
-    void Begin();
-    // Not sure yet but maybe step through the program incrementally with keyboard
-    void BeginDebug();
+        void begin();
     
-private:
-    // Moving variables
-    ast_node* pc; // Program counter pointer
-    int running_counter;
-    int level;
-    int exit_code;
-    int type;
-    int function_type;
-    std::string working_print_statement;
+    private:
+        ast as_tree;
+        symbol_table s_table; // For reading/writing into
+        ERRORS errors;
 
-    // Bool triggers
-    bool is_running;
-    bool in_main;
-    bool in_function;
+        std::vector<ast_node*> functions;
+        std::stack<int> scope_stack;
 
-    // Internal dataframes
-    std::stack<ast_node*> expression_stack; // stack for holding single nodes
-    std::stack<ast_node*> function_expression_stack;
-    std::vector<ast_node*> functions_pc; // lists all function heads
-    std::stack<int> scope_stack; // stack for the current scope. push on function enter, pop on function exit
-    ast as_tree;
-    symbol_table s_table; // For reading/writing into
-    ERRORS errors;
+        ast_node* process_function(ast_node* function);
+        bool process_block(ast_node*& current);
 
-    // Internal functions
-    void ExitQuiet();
-    void clearStack();
-    void printStack(std::stack<ast_node*>& expression_stack);
-    void TopThree(int code);
-    void beginHelper(ast_node* &current);
-    void EvalOperatorUpdate(ast_node* one, ast_node* two, ast_node*& three);
-    ast_node* eval_top_three(std::string one, std::string two, std::string three);
-    void CheckAddFunction(ast_node *current);
+        ast_node* process_call(ast_node*& current);
 
-    void CheckCallFunction(ast_node* &current);
+        void process_assignment(ast_node*& current);
+        void process_if(ast_node*& current);
+        void process_while(ast_node*& current);
+        void process_for(ast_node*& current);
+        void process_printf(ast_node*& current);
 
-    bool isNumber(std::string str);
-    bool isOperator(std::string str);
+        void skip_block(ast_node*& current);
+
+        ast_node* eval_top_three(std::string one, std::string two, std::string three);
+        bool isOperator(std::string str);
+        bool isNumber(std::string str);
+        ast_node* getFunction(std::string str);
+
 };  
 
 
