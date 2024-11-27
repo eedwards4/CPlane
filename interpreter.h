@@ -15,12 +15,14 @@ class Interpreter {
         Interpreter();
         Interpreter(ast tree, symbol_table& table, ERRORS& errors);
 
-        void begin();
+        void begin(bool debug_mode = false);
     
     private:
         ast as_tree;
         symbol_table s_table; // For reading/writing into
         ERRORS errors;
+
+        bool debug;
 
         std::vector<ast_node*> functions;
         std::stack<int> scope_stack;
@@ -39,8 +41,11 @@ class Interpreter {
         void skip_block(ast_node*& current);
 
         ast_node* eval_top_three(std::string one, std::string two, std::string three);
+        bool eval_bool_expression(ast_node*& current);
+
         bool isOperator(std::string str);
         bool isNumber(std::string str);
+
         ast_node* getFunction(std::string str);
 
 };  
