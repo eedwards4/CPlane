@@ -7,8 +7,8 @@
 #include <vector>
 #include <cstring>
 
-//#include "errors.h"
-#include "errors_new.h"
+
+#include "errors.h"
 #include "ast.h"
 #include "tokenizer.h"
 #include "exec_path.h"
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     if ( debug_mode ){ std::cout << "NOW CHECKING RDP ERRORS..." << std::endl;}
 	if(!rdp.check_syntax(path.get_head())) {}
     // TODO THIS IS ERRORING A BUNCH SO NEED TO CATCH WHY
-    //rdp.returnErrors();
+    rdp.returnErrors();
 
     // Remove newlines from the path as they are now unnecessary
     path.remove_newlines();
@@ -125,10 +125,9 @@ int main(int argc, char* argv[]) {
     
 
     // Interpreter time bay bee!
-    //Interpreter r;
     Interpreter r(as_tree, sym_table, errors);
-
     r.begin(debug_mode);
+    
     // We should not get here if program executed fully
     return 1;
 }

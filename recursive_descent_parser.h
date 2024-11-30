@@ -5,7 +5,7 @@
 #include <string>
 
 #include "exec_path.h"
-#include "errors_new.h"
+#include "errors.h"
 
 
 class RecursiveDescentParser {
@@ -22,12 +22,8 @@ class RecursiveDescentParser {
 
 	private:
 		tokens tokenz;
-		//void ENC_ERROR(std::string filename, int code, exec_node*& token, std::string error_msg);
 		void setErrorNew(int d, exec_node*& token, std::string message) {
 			if ( d >= depth ){
-				//message = "DEFAULT RDP ERROR";
-				//error_message = message;
-				// ERROR CODE 1 default
 				if ( token == nullptr ){
 					RST_errors.ENC_ERROR(filename, 1, 0, 0, message);
 				}
@@ -39,12 +35,10 @@ class RecursiveDescentParser {
 		bool isType(exec_node*& token, int type, int d) {
 			if (token == nullptr) { return false; }
 			if (token->get_type() == type) {
-				// token = token->next();
 				to_next(token);
 				return true;
 			}
-			//setError(d, "Error on line " + std::to_string(token->get_line()) + ": Expected '" + std::to_string(type) + "' but got '" + std::to_string(token->get_type()) + "' instead.\n");
-			// TODO
+			
 			error_message = "expected " + tokens::what_is(type) + " but found '" + tokens::what_is(token->get_type()) + "' instead.";
 			setErrorNew(d, token, error_message);
 			return false;
@@ -53,12 +47,9 @@ class RecursiveDescentParser {
 		bool isValue(exec_node*& token, std::string value, int d) {
 			if (token == nullptr) { return false; }
 			if (token->get_value() == value) {
-				// token = token->next();
 				to_next(token);
 				return true;
 			}
-			//setError(d, "Error on line " + std::to_string(token->get_line()) + ": Expected '" + value + "' but got '" + token->get_value() + "' instead.\n");
-			// TODO
 			
 			error_message = "expected " + value + " but found '" + token->get_value() + "' instead.";
 			setErrorNew(d, token, error_message);
@@ -66,7 +57,6 @@ class RecursiveDescentParser {
 		}
 
 		void to_next(exec_node*& token) {
-			// std::cout << token->get_value() << " (" << token->get_type() << ") ";
 			if (token->get_next() != nullptr) {
 				token = token->get_next();
 			} else {
@@ -81,8 +71,6 @@ class RecursiveDescentParser {
 
 
 		// Functions for recursive descent parser (35 - 2, 33 total)
-		// bool isCharacter(exec_node*& token, int d);
-		// bool isEscapedCharacter(exec_node*& token, int d);
 		bool isWholeNumber(exec_node*& token, int d);
 		bool isDoubleQuotedString(exec_node*& token, int d);
 		bool isSingleQuotedString(exec_node*& token, int d);
@@ -119,21 +107,3 @@ class RecursiveDescentParser {
 };
 
 #endif //RECURSIVE_DESCENT_PARSER_H
-
-/*
-Reserved Identifiers:
-TRUE
-FALSE
-char
-bool
-int
-if
-for
-printf
-getchar
-return
-function
-procedure
-main
-void
-*/

@@ -4,29 +4,6 @@
 
 #include "exec_path.h"
 
-// Destructor
-/*
-exec_path::~exec_path() {
-    exec_node* current = head;
-
-    while (current != nullptr) {
-        exec_node* next;
-        if (current->get_next() == nullptr){
-            if (current->get_fold() != nullptr){
-                next = current->get_fold();
-            }
-            else{ // Reached the end of the path
-                break;
-            }
-        }
-        else{
-            next = current->get_next();
-        }
-        delete current;
-        current = next;
-    }
-}
-*/
 
 // Add a node to the path
 void exec_path::add_node(int type, int line, int col, std::string value) {

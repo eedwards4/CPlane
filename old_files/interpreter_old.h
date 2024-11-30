@@ -12,7 +12,7 @@
 
 #include "symbol_table.h"
 #include "ast.h"
-#include "errors_new.h"
+#include ".h"
 
 #include <stack>
 #include <type_traits>

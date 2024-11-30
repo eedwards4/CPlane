@@ -2,7 +2,7 @@
 // Created by Logan Puntous on 11/8/2024.
 //
 
-#include "errors_new.h"
+#include "errors.h"
 #include <set>
 
 // Default constructors
@@ -18,15 +18,6 @@ ERROR::ERROR(){
 ERRORS::ERRORS(){
     exists = false;
 }
-
-// ERROR PRINT STATEMENTS HERE??
-// PASS THE SYMBOL_NODE into this?
-// std::string ERRORS::UNEXPECTED_THING
-
-
-
-
-
 
 
 // Only exists to print the actual statement. Builds message using info
@@ -48,7 +39,6 @@ void ERRORS::ENC_ERROR(std::string filename, int code, int line, int column, std
     terror.filename = filename;
     terror.code = code;
     terror.print_statement = error_msg;
-    //terror.print_statement = "DEFAULT RST ERROR";
     terror.line = line;
     terror.column = column;
 
@@ -99,8 +89,6 @@ void ERRORS::RDP_SYNTAX_ERRORS(){
     }
     // Errors exist so print that john
     std::cerr << std::endl << "Compilation failed due to following error(s)" << std::endl;
-    //ERROR terror = VERRORS[(sizeof(VERRORS) / sizeof(VERRORS[0]))-1];
-    //std::cout << VERRORS.size() << std::endl;
     ERROR terror = VERRORS[VERRORS.size()-1];
     printHelper(terror);
     if ( terror.line > 9 ){

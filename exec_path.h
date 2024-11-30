@@ -6,7 +6,6 @@
 #define CPLANE_EXEC_PATH_H
 
 #include "tokens.h"
-//#include "errors_new.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -32,7 +31,6 @@ public:
     // Errors
     int get_line(){ return line; }
     int get_column(){ return column; }
-    // std::string get_filename(){ return filename; } // Unused for now, placeholder for multi-file support
     // Navigation
     exec_node* get_next(){ return next; }
     exec_node* get_fold(){ return fold; }
@@ -44,7 +42,6 @@ private:
     // Errors
     int line;
     int column;
-    // std::string filename; // Unused for now, placeholder for multi-file support
     // Navigation
     exec_node* next;
     exec_node* fold;
@@ -59,7 +56,6 @@ public:
         tail = nullptr;
         current = nullptr;
     }
-    //m~exec_path();
 
     void add_node(int type, int line, int col, std::string value="");
 

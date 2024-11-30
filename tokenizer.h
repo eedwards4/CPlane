@@ -6,8 +6,7 @@
 #define CPLANE_TOKENIZER_H
 
 // Internal
-//#include "errors.h"
-#include "errors_new.h"
+#include "errors.h"
 #include "exec_path.h"
 #include "tokens.h"
 // Standard
@@ -23,7 +22,6 @@ public:
         this->path = path;
         error_message = "DEFAULT TOKENIZER ERROR";
     };
-    //~tokenizer() = default;
 
     void tokenize(std::string filename, ERRORS &errors);
 

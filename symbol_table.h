@@ -9,7 +9,7 @@
 #include <vector>
 #include <typeinfo>
 
-#include "errors_new.h"
+#include "errors.h"
 #include "tokens.h"
 #include "symbols.h"
 #include "exec_path.h"
@@ -67,8 +67,6 @@ private:
     char val_char;
     std::string val_string;
     bool val_bool;
-    // Missing: double, long, long long, unsigned int, unsigned long, unsigned long long, unsigned char, unsigned short, unsigned long long, long double
-
     // Error tracking
     int line = -1;
     int column = -1;
@@ -82,7 +80,6 @@ public:
         errors = in_errors;
         filename = in_filename;
     };
-    //~symbol_table();
 
     // Setters
     void build_table(exec_path& path);

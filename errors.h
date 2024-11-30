@@ -5,7 +5,6 @@
 #ifndef CPLANE_ERRORZ_H
 #define CPLANE_ERRORZ_H
 
-//#include "symbol_table.cpp"
 #include "exec_path.h"
 #include <vector>
 #include <iostream>
@@ -28,8 +27,6 @@ class ERROR {
     int column; // column
     std::string filename;
     std::string print_statement;
-    // TODO need to retrive token that is fked
-    //symbol_node symbol; //??
 };
 
 
