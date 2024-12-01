@@ -1,25 +1,30 @@
 # CPlane
 A C interpreter
 
-<h2>Contributers: Ethan, Logan, Sean, Felix, Martin</h2>
+<h4>Contributors: Ethan, Logan, Sean, Felix, Martin</h4>
 
 <h2>Functionality</h2>
-This program will take an input c file.
-It will remove all unnecessary code such as comments.
-It will tokenize the entire .c file.
-It will check for syntax errors.
-It will build a 
-It will generate a symbol table based on tokens.
-
-
+This program will take an input c file, then perform the following:
+<ul>
+ <li>Remove non-code objects such as comments.</li>
+ <li>Tokenize the code.</li>
+ <li>Check for syntax errors.</li>
+ <li>Build an abstract syntax tree and symbol table for the program.</li>
+ <li>Run the program.</li>
+</ul>
 
 <h2>To compile</h2>
 (in source directory) $ make
+
 <h2>To run</h2>
+
+```
 ./cplane (path/to/c_file.c)
+```
+
 <ul>
  <li>The generated files will be in /output_files</li>
 </ul>
  
-<h2>To view the outputs/assignment3 file:s</h2>
-Fullscreen and zoom out
+<h3>Note about generated outputs</h3>
+Some outputs (such as the CST and AST) are larger than will fit on any normal sized monitor. You may need to scroll to view the entire output.
