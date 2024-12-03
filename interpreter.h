@@ -42,6 +42,7 @@ class Interpreter {
 
         ast_node* eval_top_three(std::string one, std::string two, std::string three);
         bool eval_bool_expression(ast_node*& current);
+        std::string convert_escape_chars(std::string str);
 
         bool isOperator(std::string str);
         bool isNumber(std::string str);

@@ -279,6 +279,66 @@ bool Interpreter::eval_bool_expression(ast_node*& current) {
     return false;
 }
 
+std::string Interpreter::convert_escape_chars(std::string str) {
+    std::string result = str;
+    int pos = result.find_first_of('\\');
+
+    while (pos != std::string::npos) {
+        if (pos+1 >= result.length()) { // Shouldn't ever hit this
+            std::cerr << "Invalid escape character\n";
+            exit(1);
+        }
+        else if (result[pos+1] == '\a') {
+            result.replace(pos, 2, "\a");
+        }
+        else if (result[pos+1] == 'b') {
+            result.replace(pos, 2, "\b");
+        }
+        else if (result[pos+1] == 'f') {
+            result.replace(pos, 2, "\f");
+        }
+        else if (result[pos+1] == 'n') {
+            result.replace(pos, 2, "\n");
+        }
+        else if (result[pos+1] == 'r') {
+            result.replace(pos, 2, "\r");
+        }
+        else if (result[pos+1] == 't') {
+            result.replace(pos, 2, "\t");
+        }
+        else if (result[pos+1] == 'v') {
+            result.replace(pos, 2, "\v");
+        }
+        else if (result[pos+1] == '\\') {
+            result.replace(pos, 2, "\\");
+        }
+        else if (result[pos+1] == '?') {
+            result.replace(pos, 2, "\?");
+        }
+        else if (result[pos+1] == '\'') {
+            result.replace(pos, 2, "'");
+        }
+        else if (result[pos+1] == '"') {
+            result.replace(pos, 2, "\"");
+        }
+        else if (result[pos+1] == 'x') {
+            if (pos + 3 < result.length() && isxdigit(result[pos+2]) && isxdigit(result[pos+2])) {
+                result.replace(pos, 4, std::string(1, char(std::stoi(std::string(1, result[pos+2]) + std::string(1, result[pos+3]), nullptr, 16))));
+            }
+            else if (pos + 2 < result.length() && isxdigit(result[pos+2])) {
+                result.replace(pos, 3, std::string(1, char(std::stoi(std::string(1, result[pos+2]), nullptr, 16))));
+            }
+        }
+        else { // Shouldn't ever hit this
+            std::cerr << "Unknown escape character\n";
+            exit(1);
+        }
+
+        pos = result.find_first_of('\\');
+    }
+    return result;
+}
+
 // Processes a function
 // Returns an ast node with the value returned by the function (nullptr for no value returned)
 ast_node* Interpreter::process_function(ast_node* function) {
@@ -435,7 +495,7 @@ void Interpreter::process_assignment(ast_node*& current) {
             ast_node* three = expression_stack.top();
             expression_stack.pop();
 
-            // Check chars
+            // Check chars (turns into int)
             if (one->value == "'" && three->value == "'") {
                 ast_node* char_node = new ast_node();
                 char_node->value = std::to_string(int(two->value[0]));
@@ -472,17 +532,10 @@ void Interpreter::process_assignment(ast_node*& current) {
                     if (debug) { std::cout << "Setting " << three->value << " = " << two->value << " (boolean)\n"; }
                     s_three->set_val_bool(two->value == "TRUE");
                 }
-                else if (two->value[0] == '\'') { // char
-                    if (debug) { std::cout << "Setting " << three->value << " = " << two->value[0] << " (char)\n"; }
-                    if (symbols::data_types::get_type(s_three->DATATYPE) == "char") {
-                        s_three->set_val_char(two->value[0]);
-                    } else {
-                        s_three->set_val_int(two->value[0]);
-                    }
-                }
-                else if (two->value[0] == '"') { // string                                                                      2
-                    if (debug) { std::cout << "Setting " << three->value << " = " << two->value.substr(1, two->value.length() - 5) << " (string)\n"; }
-                    s_three->set_val_string(two->value.substr(1, two->value.length() - 5)); // - 2
+                else if (two->value[0] == '"') { // string
+                    std::string str = convert_escape_chars(two->value.substr(1, two->value.length() - 2)); // remove quotes before passing
+                    if (debug) { std::cout << "Setting " << three->value << " = " << str << " (string)\n"; }
+                    s_three->set_val_string(str);
                 }
                 else if (s_two != nullptr) { // variable
                     if (debug) { std::cout << "Setting " << three->value << " = " << two->value << " from symbol table\n"; }
@@ -658,17 +711,20 @@ void Interpreter::process_printf(ast_node*& current) {
                 to_print.replace(var_pos, 2, std::to_string(temp_symbol->get_val_int()));
             }
             else if (to_print[var_pos+1] == 's') {
-                to_print.replace(var_pos, 2, temp_symbol->get_val_string());
+                if (temp_symbol->get_val_string() != "") {
+                    to_print.replace(var_pos, 2, temp_symbol->get_val_string());
+                } 
+                else if (temp_symbol->get_val_char() != '\0') {
+                     to_print.replace(var_pos, 2, std::string(1, temp_symbol->get_val_char()));
+                }
+                else {
+                    to_print.replace(var_pos, 2, std::string(1, char(temp_symbol->get_val_int())));
+                }
             }
         }
     }
 
-    // replace \n with newline
-    int new_line_pos = to_print.rfind("\\n");
-    while (new_line_pos != std::string::npos) {
-        to_print.replace(new_line_pos, 2, "\n");
-        new_line_pos = to_print.rfind("\\n");
-    }
+    to_print = convert_escape_chars(to_print);
 
     std::cout << to_print;
 }
