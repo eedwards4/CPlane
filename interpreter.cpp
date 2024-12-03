@@ -322,11 +322,14 @@ std::string Interpreter::convert_escape_chars(std::string str) {
             result.replace(pos, 2, "\"");
         }
         else if (result[pos+1] == 'x') {
-            if (pos + 3 < result.length() && isxdigit(result[pos+2]) && isxdigit(result[pos+2])) {
+            if (pos + 3 < result.length() && isxdigit(result[pos+2]) && isxdigit(result[pos+3])) {
                 result.replace(pos, 4, std::string(1, char(std::stoi(std::string(1, result[pos+2]) + std::string(1, result[pos+3]), nullptr, 16))));
             }
             else if (pos + 2 < result.length() && isxdigit(result[pos+2])) {
                 result.replace(pos, 3, std::string(1, char(std::stoi(std::string(1, result[pos+2]), nullptr, 16))));
+            } else {
+                std::cerr << "Expected hex number, but there was none\n";
+                exit(1);
             }
         }
         else { // Shouldn't ever hit this
