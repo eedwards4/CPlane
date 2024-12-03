@@ -8,8 +8,10 @@
 
 
 bool RecursiveDescentParser::check_syntax(exec_node* head) {
-	if (!isProgram(head, 1)) { // error in program
-		RST_errors.RDP_SYNTAX_ERRORS();
+	// Error in program before main finishes
+	if (!isProgram(head, 1)) {
+		//DOESNT GET HERE FOR PG ASS 6
+		//RST_errors.RDP_SYNTAX_ERRORS();
 		return false;
 	} else if (head != nullptr) { // more program after expected end of program
 		error_message = "expected EOF but found '" + head->get_value() + "' instead";

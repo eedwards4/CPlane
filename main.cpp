@@ -74,9 +74,12 @@ int main(int argc, char* argv[]) {
     // Recursive descent parser
 	RecursiveDescentParser rdp(filename, errors);
     if ( debug_mode ){ std::cout << "NOW CHECKING RDP ERRORS..." << std::endl;}
-	if(!rdp.check_syntax(path.get_head())) {}
-    // TODO THIS IS ERRORING A BUNCH SO NEED TO CATCH WHY
-    rdp.returnErrors();
+	if(!rdp.check_syntax(path.get_head())) {
+        errors = rdp.returnErrors();
+        errors.RDP_SYNTAX_ERRORS();
+    }
+    
+    //rdp.returnErrors();
 
     // Remove newlines from the path as they are now unnecessary
     path.remove_newlines();

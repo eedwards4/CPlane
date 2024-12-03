@@ -234,7 +234,7 @@ void symbol_table::add_symbol(symbol_node* new_symbol) {
             if (new_symbol->IDENT_TYPE == symbols::identifiers::DATATYPE){
                 // Non functions/procedures cannot be declared in a unique scope (THIS SHOULD NEVER HAPPEN)
                 //errors::E_NON_FUNCTION_SCOPE_DECLARATION(new_symbol->get_line(), new_symbol->get_column(), new_symbol->IDENT_NAME);
-                //TODO. did it not test it yet
+                //std::cerr << ":" << line << ":" << col << ": error: symbol '" << val << "' cannot be declared as a unique scope." << std::endl;
                 //error_message = "nested function or procedure '" + current->get_next()->get_next()->get_value() + "' instaid.";
                 error_message = "'" + new_symbol->IDENT_NAME + "'" + " functions/procedures cannot be declared in a unique scope";
                 errors.ENC_ERROR(filename, 1, new_symbol->get_line(), new_symbol->get_column(), error_message);
