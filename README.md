@@ -21,10 +21,12 @@ This program will take an input c file, then perform the following:
 ```
 ./cplane (path/to/c_file.c)
 ```
+Or, to run with Debug mode enabled
+```
+./cplane (path/to/c_file.c) -d
+```
 
-<ul>
- <li>The generated files will be in /output_files</li>
-</ul>
+The generated files will be in (source dir)/output_files
  
 <h3>Note about generated outputs</h3>
 Some outputs (such as the CST and AST) are larger than will fit on any normal sized monitor. You may need to scroll to view the entire output.
